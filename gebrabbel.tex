@@ -18,7 +18,7 @@
 Each user is provided with two keys, a message and a tag that is bound to the user and does not repeat between users. The message is encrypted using the tag and two keys to generate a cythertext consisting of two parts. First part is Cdem which is the message encrypted with the nonce and the first key while the second part is Cmac that is the mac computed over Cdem, the tag and the second key. Given only one queries to Oenc per user and multiple queries to Odec which always occurs after the Oenc queries, the message should be protected against active adversaries as long as ADEM and AMAC are secure.
 
 \subsection{Sec model}
-the security is purely based on the games for the AMAC and ADEM that are visible below.
+the security is purely based on the games for the AMAC and ADEM that are visible below. All variables are elaborated in the paper
 \begin{figure}[H]
     \centering
     \includegraphics[scale = 0.5]{gebrabbel images/game mac.png}
@@ -49,87 +49,93 @@ Each user is provided with two keys, a message and a lock that does not repeat b
 
 \subsection{Sec model}
 We define the following sec games for the AMAC, the ADEM and the ADEM+AMAC (names will prob be improved later):
-\begin{pchstack}[boxed,center,space=0.5cm]
-\pseudocode[lnstart=-1,linenumbering,head={\textbf{header}}]{
-    t \leftarrow g
-}
-\pseudocode[lnstart=-1,linenumbering,head={\textbf{header}}]{
-    t \leftarrow g
-}
-\end{pchstack}
 
-\begin{table}[h!]
-\centering
-\begin{tabular}{|m{4cm}  |m{6cm} |}
-\hline
-\textbf{Game} AMAC$^b_{A,N}$                & \textbf{Oracle} Omac(j,n,m)              \\
-$used_n \leftarrow \emptyset$               & if T$_j$ $\neq \emptyset$: return $\bot$    \\
-for j $\in [1..N]:$                         & if n $\in used_n$: return $\bot$               \\
-\hspace{0.5cm} K$_j \leftarrow^\$ K$        & $used_n \leftarrow used_n \cup \{n\}$ \\
-\hspace{0.5cm} T$_j \leftarrow \emptyset$   & n$_j \leftarrow n$  \\
-b' $\leftarrow^\$ A$                        & if b=0: t $\leftarrow$ M.mac(K$_j$,n$_j$,m)     \\
-return b'                                   & if b=1: t $\leftarrow$ RO.mac(K$_j$,n$_j$,m)  \\
-                                            & T$_j\leftarrow$ T$_j \cup\{t\}$           \\
-                                            & return t                                        \\
-\hline
-\end{tabular}
-\caption{AMAC game}
-\end{table}
+\begin{figure}[H]
+    \begin{pchstack}[boxed,center,space=0.5cm]
+        \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} AMAC$^M_{A,N}$ }]{
+        L \leftarrow \emptyset\\
+        \pcfor j \in [1..N]:\\
+        \t K_j \leftarrow^\$ K\\
+        b' \leftarrow A\\
+        \pcreturn b'
+        }
+        \pseudocode[lnstart=4,linenumbering,head={\textbf{Oracle} Omac(j,l,m)}]{
+            \pcif T_j \neq \emptyset: \pcreturn \bot\\
+            \pcif l \in L: \pcreturn \bot\\
+            L \leftarrow L \cup \{l\}\\
+            l_j = l\\
+            t \leftarrow M.mac(K_j,l_j,m)\\
+            \pcreturn t
+        }
+    \end{pchstack}
+\caption{AMAC game, M is either the MAC or Random Oracle}
+\end{figure}
 
-\begin{table}[h!]
-\centering
-\begin{tabular}{|m{4cm} |m{6cm} |}
-\hline
-\textbf{Game} ADEM$^b_{A,N}$                & \textbf{Oracle} Oenc(j,n,m)              \\
-$used_n \leftarrow \emptyset$               & if C$_j$ $\neq \emptyset$: return $\bot$    \\
-for j $\in [1..N]:$                         & if n $\in used_n$: return $\bot$               \\
-\hspace{0.5cm} K$_j \leftarrow^\$ K$        & $used_n \leftarrow used_n \cup \{n\}$ \\
-\hspace{0.5cm} T$_j \leftarrow \emptyset$   & if b=0: c $\leftarrow$ E.enc(K$_j$,n,m)     \\
-b' $\leftarrow^\$ A$                        & if b=1: c $\leftarrow$ RO.enc(K$_j$,n,m)  \\
-return b'                                   & C$_j\leftarrow$ C$_j \cup\{c\}$           \\
-                                            & return c                               \\
-\hline
-\end{tabular}
-\caption{ADEM game}
-\end{table}
+\begin{figure}[H]
+    \begin{pchstack}[boxed,center,space=0.5cm]
+        \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} AMAC$^E_{A,N}$ }]{
+        L \leftarrow \emptyset\\
+        \pcfor j \in [1..N]:\\
+        \t K_j \leftarrow^\$ K\\
+        b' \leftarrow A\\
+        \pcreturn b'
+        }
+        \pseudocode[lnstart=4,linenumbering,head={\textbf{Oracle} Omac(j,l,m)}]{
+            \pcif T_j \neq \emptyset: \pcreturn \bot\\
+            \pcif l \in L: \pcreturn \bot\\
+            L \leftarrow L \cup \{l\}\\
+            l_j = l\\
+            c \leftarrow E.enc(K_j,l_j,m)\\
+            \pcreturn c
+        }
+    \end{pchstack}
+\caption{ADEM game, E is either the DEM or Random Oracle}
+\end{figure}
 
-\begin{table}[h!]
-\centering
-\begin{tabular}{|m{4cm}  |m{4cm}| m{4cm}|}
-\hline
-\textbf{Game} ADEM$^b_{A,N}$                & \textbf{Oracle} Oenc(j,n,m)                           & \textbf{Oracle} Odec(j,n,c)\\
-$used_n \leftarrow \emptyset$               & if C$_j$ $\neq \emptyset$: return $\bot$              & if (c,n) $\in$ C$_j$: return $\bot$\\
-for j $\in [1..N]:$                         & if n $\in used_n$: return $\bot$                      & if b = 0:\\
-\hspace{0.5cm} K$_j \leftarrow^\$ K$        & $used_n \leftarrow used_n \cup \{n\}$                 & \hspace{0.5cm} m $\leftarrow$A.dec'(K$_j$,n,c)\\
-\hspace{0.5cm} T$_j \leftarrow \emptyset$   & n$_j \leftarrow n$                                    & \hspace{0.5cm} return m\\
-b' $\leftarrow^\$ A$                        & if b=0:                                               & if b = 1: \\
-return b'                                   & \hspace{0.5cm}c $\leftarrow$ E.enc'(K$_j$,n$_j$,m)     & \hspace{0.5cm} m $\leftarrow$RO.dec'(K$_j$,n,c)\\
-                                            & if b=1:
-                                                & \hspace{0.5cm} return m\\
-                                            & \hspace{0.5cm} c $\leftarrow$ RO.enc'(K$_j$,n$_j$,m)    & \\
-                                            & C$_j\leftarrow$ C$_j \cup\{(c,n)\}$                   & \\
-                                            & return c                                            & \\
-\hline
-\end{tabular}
-\caption{ADEM + AMAC game}
-\end{table}
-\newpage
-where E.enc, E.dec, M.mac , RO.enc, RO.dec and RO.mac are inherited from the underlying primitives and E.enc', E.dec', RO.enc' and RO.dec' will be defined later here defined.
+\begin{figure}[H]
+    \begin{pchstack}[boxed,center,space=0.5cm]
+        \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} AE$^{AE,D}_{A,N}$ }]{
+        L \leftarrow \emptyset\\
+        \pcfor j \in [1..N]:\\
+        \t K_j \leftarrow^\$ K\\
+        \t C_j \leftarrow \emptyset\\
+        b' \leftarrow A\\
+        \pcreturn b'
+        }
+        \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Oenc(j,l,m)}]{
+            \pcif T_j \neq \emptyset: \pcreturn \bot\\
+            \pcif l \in L: \pcreturn \bot\\
+            L \leftarrow L \cup \{l\}\\
+            l_j = l\\
+            c \leftarrow EA.enc(K_j,l_j,m)\\
+            C_j \leftarrow C_j \cup c\\
+            \pcreturn t
+        }
+        \pseudocode[lnstart=12,linenumbering,head={\textbf{Oracle} Odec(j,m)}]{
+            \pcif c_j \neq \emptyset: \pcreturn \bot\\
+            \pcif c \in C_j: \pcreturn \bot\\
+            m \leftarrow D.dec(K_j,L_j,c)\\
+            \pcreturn m
+        }
+    \end{pchstack}
+\caption{AE game, where AE is either the encryption scheme having to the MAC and DEM or RO and D is either the description scheme or a function that always returns false}
+\end{figure}
+Where EA.enc and D.dec should be constructed from M.mac, E.enc and E.dec
 
 \newpage
 \section{burning questions}
 \begin{itemize}
-   \item 
-   
+   \item Q1: Is het oke om de games gebazeerd te hebben op RO\\
+   Q2:(klopt het dat RO stickt sterker is dan left-right)
+   \item in GCrec, waarom zijn er bij de n-schemes geen opties overwogen waar T op m en c gebazeerd is?
 \end{itemize}
+
 \newpage
 \section{current todo's}
 \begin{itemize}
-    \item sec model aanpassen naar context
-    \item kijken of we message of dist based games willen (zijn deze twee ubehaud fundementeel anders?)
-    \item de games opnieuw opschrijven
-    \item de games aanpassen naar context
+    \item in meer detail opschrijven wat de variables zijn van de sec games en wat de aannamens zijn
     \item crypto.bib kijken
+    \item mayhabs beginnen met schrijven in main
 \end{itemize}
 \newpage
 \section{main idea}
