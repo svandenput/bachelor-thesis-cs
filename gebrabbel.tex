@@ -120,20 +120,21 @@ We define the following sec games for the AMAC, the ADEM and the ADEM+AMAC (name
     \end{pchstack}
 \caption{AE game, where AE is either the encryption scheme having to the MAC and DEM or RO and D is either the description scheme or a function that always returns false}
 \end{figure}
-Where EA.enc and D.dec should be constructed from M.mac, E.enc and E.dec
+Where EA.enc and D.dec should be constructed from M.mac, E.enc and E.dec. Following General Composition reconsidered, three ways to construct this EA should be considered following from the N1, N2 and N3 scheme. One thing to keep in mind with this that these schemes would originally use associated data. For now we can discard this but it is not proven that the same security results would also follow form this case without associated data.
 
 \newpage
 \section{burning questions}
 \begin{itemize}
    \item Q1: Is het oke om de games gebazeerd te hebben op RO\\
    Q2:(klopt het dat RO stickt sterker is dan left-right)
-   \item in GCrec, waarom zijn er bij de n-schemes geen opties overwogen waar T op m en c gebazeerd is?
+   \item in GCrec, waarom zijn er bij de n-schemes geen N4 en N5 schemas? \\ A: die voegen niets toe Q2: klopt dat?
 \end{itemize}
 
 \newpage
 \section{current todo's}
 \begin{itemize}
     \item in meer detail opschrijven wat de variables zijn van de sec games en wat de aannamens zijn
+    \item vertaling van 3 N schemas opschrijven
     \item crypto.bib kijken
     \item mayhabs beginnen met schrijven in main
 \end{itemize}
