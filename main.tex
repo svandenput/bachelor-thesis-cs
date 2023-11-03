@@ -136,7 +136,7 @@ should consist of:
 
 \subsection{used primitives}
 \begin{itemize}
-    \item DEM: a DEM scheme is defined by tuple (E.enc,E.dec). E.enc is a deterministic encryption algorithm that takes three inputs (k,l,m) to a value c, the length of c only depends the length of k, l and m. When (k,l,m) is not in $\keyspacemathmode \times \lockspacemathmode \times \messagespacemathmode$, c will be $\bot$. E.dec is the decryption algorithm that takes three inputs (k,n,c) to a value m. E.enc and E.dec are inverse of each other implying correctness (if E.enc(k,l,m) $= c \neq \bot$, then E.dec(k,l,c) = m) and tidiness (if E.dec(k,N=l,c) $= m \neq \bot$, then E.enc(k,l,m) = c). The security is defined with the following game where \$.enc(k,l,m) calls c = E.enc(k,l,m) then outputs $\bot$ if c is $\bot$ or $\mid c \mid$ random bits otherwise and the advantage is calculated with \advantage{A,N}{DEM} = \probabilityblock{DEM}{A,N}{DEM}{\$}:
+    \item DEM: a DEM scheme is defined by tuple (E.enc,E.dec). E.enc is a deterministic encryption algorithm that takes three inputs (k,l,m) to a value c, the length of c only depends on the length of k, l and m. When (k,l,m) is not in $\keyspacemathmode \times \lockspacemathmode \times \messagespacemathmode$, c will be $\bot$. E.dec is the decryption algorithm that takes three inputs (k,n,c) to a value m. E.enc and E.dec are inverse of each other implying correctness (if E.enc(k,l,m) $= c \neq \bot$, then E.dec(k,l,c) = m) and tidiness (if E.dec(k,N=l,c) $= m \neq \bot$, then E.enc(k,l,m) = c). The security is defined with the following game where \$.enc(k,l,m) calls c = E.enc(k,l,m) then outputs $\bot$ if c is $\bot$ or $\mid c \mid$ random bits otherwise and the advantage is calculated with \advantage{A,N}{DEM} = \probabilityblock{DEM}{A,N}{DEM}{\$}:
     \begin{figure}[H]
         \begin{pchstack}[boxed,center,space=0.5cm]
             \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} DEM$^E_{A,N}$ }]{
@@ -182,7 +182,7 @@ should consist of:
 \end{itemize}
 
 \subsection{goal}
-The end goal is to build a Authenticated Encryption scheme (EA) secure against active attacks from the underlying primitives. The AE scheme is defined by tuple (AE.enc,AE.dec). AE.enc is a deterministic encryption algorithm that takes three inputs (k,l,m) to a value c, the length of c only depends the length of k, l and m. When (k,l,m) is not in $\keyspacemathmode \times \lockspacemathmode \times \messagespacemathmode$, c will be $\bot$. AE.dec is the decryption algorithm that takes three inputs (k,n,c) to a value m. AE.enc and E.dec are inverse of each other implying correctness (if AE.enc(k,l,m) $= c \neq \bot$, then AE.dec(k,l,c) = m) and tidiness (if AE.dec(k,N=l,c) $= m \neq \bot$, then AE.enc(k,l,m) = c).
+The end goal is to build a Authenticated Encryption scheme (EA) secure against active attacks from the underlying primitives. The AE scheme is defined by tuple (AE.enc,AE.dec). AE.enc is a deterministic encryption algorithm that takes three inputs (k,l,m) to a value c, the length of c only depends on the length of k, l and m. When (k,l,m) is not in $\keyspacemathmode \times \lockspacemathmode \times \messagespacemathmode$, c will be $\bot$. AE.dec is the decryption algorithm that takes three inputs (k,n,c) to a value m. AE.enc and E.dec are inverse of each other implying correctness (if AE.enc(k,l,m) $= c \neq \bot$, then AE.dec(k,l,c) = m) and tidiness (if AE.dec(k,N=l,c) $= m \neq \bot$, then AE.enc(k,l,m) = c).
 
 \subsection{Security model}
 The security is defined by the following security game where \$.enc(k,l,m) calls c = AE.enc(k,l,m) then outputs $\bot$ if c is $\bot$ or $\mid c \mid$ random bits otherwise. \$.dec(k,l,c) always returns $\bot$ and the advantage is calculated with \advantage{A,N}{AE} = \probabilityblock{AE}{A,N}{AE}{\$}:
@@ -214,9 +214,10 @@ The security is defined by the following security game where \$.enc(k,l,m) calls
     \end{pchstack}
 \caption{AE game, where AE is either the AE scheme build from the MAC and DEM or a random function \$, adversary A has access to Oenc and Odec}
 \end{figure}
+
 The scheme is considered secure when there is a tight reduction from breaking the AE-security of the scheme to breaking the defined security of the underlying primitives.
 
-\subsection(choices made)
+\subsection{choices made}
 
 \section{Constructions}
 should consist of:
