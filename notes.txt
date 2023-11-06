@@ -4,7 +4,7 @@ current todo's:
 - boek lezen beetje
 
 vragen martijn:
-- 
+- should I start rewriting pkc and gcrec definitions?
 
 vragen bart:
 - mag ik intro crypto aannemen bij de voorkennis?

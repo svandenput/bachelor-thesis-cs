@@ -65,7 +65,7 @@ should consist of:
 \section{Preliminaries}
 should consist of:
 \begin{itemize}
-    \item notation
+    \item general notation
     \item generic AE construction
 	\item generic PKE schemes
 \end{itemize}
@@ -74,6 +74,7 @@ should consist of:
 should consist of:
 \begin{itemize}
 	\item the definition of the two paper, if possible already brought more toward one notation standard
+	\item explain how both relate to the preliminaries and overall story
 \end{itemize}
 
 \subsection{Existing notation from \pkc}
@@ -84,14 +85,14 @@ should consist of:
     \item ADEM: the ADEM exists of tuple (A.enc,A.dec), A.enc take a key K \keyspace{}, a tag t in \tagspace{} and a message m in \messagespace{} and outputs a ciphertext c in \ciphertextspace{}. A.dec takes a K \keyspace{}, a tag t in \tagspace{} and a ciphertext c in \ciphertextspace{} and outputs a message m in \messagespace{} or $\bot$ to indicate rejection. The correctness requirement is that for all K in \keyspace{}  and t in \tagspace{} and m in \messagespace{} we have A.dec(K,t,A.enc(K,t,m)) = m. The security of the ADEM is defined with \advantage{ADEM,A,N}{n-moit-ind} = \probabilityblock{N-MIOT-IND}{A,N}{0}{1}, defined by the following game:
     \begin{figure}[H]
         \centering
-        \includegraphics[scale = 0.5]{images/game adem.png}
+        \includegraphics[scale = 0.7]{images/game adem.png}
     \end{figure}
     Where adversary A has access to oracles Oenc and Odec and the tags in line 9 and 14 are the same.
     
     \item AMAC: the AMAC exists of tuple (M.mac,M.vrf). M.mac takes a key K in \keyspace{}, a tag t in \tagspace{}, and a message m in \messagespace{} and outputs a ciphertext c in \ciphertextspace{}. M.vrf takes a key K in \keyspace{}, a tag t in \tagspace{}, a message m in \messagespace{} and a ciphertext c in \ciphertextspace{} and returns either true of false. The correctness requirement is that for all K in \keyspace{}, t in \tagspace{} and message in \messagespace{} and c in $[\text{M.mac(K,t,m)}]$ we have M.vrf(K,t,m,c)=true. The security of the AMAC is defined with \advantage{AMAC,A,N}{N-moit-uf} = Pr$[\text{N-MIOT-UF}_{\text{A,N}}]$, defined by the following game:
     \begin{figure}[H]
         \centering
-        \includegraphics[scale = 0.5]{images/game amac.png}
+        \includegraphics[scale = 0.7]{images/game amac.png}
     \end{figure}
     Where Adversary A can access oracles Omac and Ovrf and the tags in line 10 and 15 are the same.
 \end{itemize}
