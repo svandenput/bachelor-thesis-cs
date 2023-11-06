@@ -1,0 +1,13 @@
+current todo's:
+- to-scan scannen
+- beginnen met schrijven in main
+- boek lezen beetje
+
+vragen martijn:
+- 
+
+vragen bart:
+- mag ik intro crypto aannemen bij de voorkennis?
+
+main idea:
+The PKC paper ends with a ADEM + AMAC construction as "solution". The original paper from ENC -> MAC has been revised, so this should prob be revised as well. In general its nice to write down thing in a more "sym crypto" style as we use symmetric primitives. It would probably also be nice to revise it more in general and see what other ways there are to reach the end-goal expected in the PKC paper.

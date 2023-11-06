@@ -65,8 +65,9 @@ should consist of:
 \section{Preliminaries}
 should consist of:
 \begin{itemize}
-	\item recapping known definitions
-	\item primitive definitions
+    \item notation
+    \item generic AE construction
+	\item generic PKE schemes
 \end{itemize}
 
 \section{Existing AE/DEM notations in more detail}
@@ -75,19 +76,19 @@ should consist of:
 	\item the definition of the two paper, if possible already brought more toward one notation standard
 \end{itemize}
 
-\subsection{Existing notation from pkc}
+\subsection{Existing notation from \pkc}
 \subsubsection{notation}
-\messagespace is a message space, \keyspace is a finite key space, \tagspace is a tag space and \ciphertextspace is a ciphertext space. N is the number of users.
+\messagespace{} is a message space, \keyspace{} is a finite key space, \tagspace{} is a tag space and \ciphertextspace{} is a ciphertext space. N is the number of users.
 \subsubsection{used primitives}
 \begin{itemize}
-    \item ADEM: the ADEM exists of tuple (A.enc,A.dec), A.enc take a key K \keyspace, a tag t in \tagspace and a message m in \messagespace and outputs a ciphertext c in \ciphertextspace. A.dec takes a K \keyspace, a tag t in \tagspace and a ciphertext c in \ciphertextspace and outputs a message m in \messagespace or $\bot$ to indicate rejection. The correctness requirement is that for all K in \keyspace  and t in \tagspace and m in \messagespace we have A.dec(K,t,A.enc(K,t,m)) = m. The security of the ADEM is defined with \advantage{ADEM,A,N}{n-moit-ind} = \probabilityblock{N-MIOT-IND}{A,N}{0}{1}, defined by the following game:
+    \item ADEM: the ADEM exists of tuple (A.enc,A.dec), A.enc take a key K \keyspace{}, a tag t in \tagspace{} and a message m in \messagespace{} and outputs a ciphertext c in \ciphertextspace{}. A.dec takes a K \keyspace{}, a tag t in \tagspace{} and a ciphertext c in \ciphertextspace{} and outputs a message m in \messagespace{} or $\bot$ to indicate rejection. The correctness requirement is that for all K in \keyspace{}  and t in \tagspace{} and m in \messagespace{} we have A.dec(K,t,A.enc(K,t,m)) = m. The security of the ADEM is defined with \advantage{ADEM,A,N}{n-moit-ind} = \probabilityblock{N-MIOT-IND}{A,N}{0}{1}, defined by the following game:
     \begin{figure}[H]
         \centering
         \includegraphics[scale = 0.5]{images/game adem.png}
     \end{figure}
     Where adversary A has access to oracles Oenc and Odec and the tags in line 9 and 14 are the same.
     
-    \item AMAC: the AMAC exists of tuple (M.mac,M.vrf). M.mac takes a key K in \keyspace, a tag t in \tagspace, and a message m in \messagespace and outputs a ciphertext c in \ciphertextspace. M.vrf takes a key K in \keyspace, a tag t in \tagspace, a message m in \messagespace and a ciphertext c in \ciphertextspace and returns either true of false. The correctness requirement is that for all K in \keyspace, t in \tagspace and message in \messagespace and c in $[\text{M.mac(K,t,m)}]$ we have M.vrf(K,t,m,c)=true. The security of the AMAC is defined with \advantage{AMAC,A,N}{N-moit-uf} = Pr$[\text{N-MIOT-UF}_{\text{A,N}}]$, defined by the following game:
+    \item AMAC: the AMAC exists of tuple (M.mac,M.vrf). M.mac takes a key K in \keyspace{}, a tag t in \tagspace{}, and a message m in \messagespace{} and outputs a ciphertext c in \ciphertextspace{}. M.vrf takes a key K in \keyspace{}, a tag t in \tagspace{}, a message m in \messagespace{} and a ciphertext c in \ciphertextspace{} and returns either true of false. The correctness requirement is that for all K in \keyspace{}, t in \tagspace{} and message in \messagespace{} and c in $[\text{M.mac(K,t,m)}]$ we have M.vrf(K,t,m,c)=true. The security of the AMAC is defined with \advantage{AMAC,A,N}{N-moit-uf} = Pr$[\text{N-MIOT-UF}_{\text{A,N}}]$, defined by the following game:
     \begin{figure}[H]
         \centering
         \includegraphics[scale = 0.5]{images/game amac.png}
@@ -106,18 +107,18 @@ The security is defined by creating new A.enc' and A.dec' calls which are build 
 \end{figure}
 The new advantage is \advantage{ADEM',A,N}{n-miot} $\leq$ 2\advantage{AMAC,B,N}{n-miot-uf} + \advantage{ADAM,C,N}{n-moit-ind}. Where the running time of B is at most that of A plus the time required to run N-many ADEM encapsulations and Qd-many ADEM decapsulations and the running time of C is the same as the running time of A. Additionally, B poses at most Qd-many Ovrf queries, and C poses no Odec query.
 
-\subsection{Existing notation from generic composition reconsidered}
+\subsection{Existing notation from \gcrec}
 \subsubsection{notation}
-\keyspace is a nonempty key space, \noncespace is a non-empty nonce space, \messagespace is a message space and \associateddataspace is the associated-data space. \messagespace (and \associateddataspace ? it's a bit ambiguous in the paper but I assume this part only applies to \messagespace) contain at least two strings, and if \messagespace and \associateddataspace contain a string of length x, they must contain all strings of length x.
+\keyspace{} is a nonempty key space, \noncespace{} is a non-empty nonce space, \messagespace{} is a message space and \associateddataspace{} is the associated-data space. \messagespace{} (and \associateddataspace{} ? it's a bit ambiguous in the paper but I assume this part only applies to \messagespace{}) contain at least two strings, and if \messagespace{} and \associateddataspace{} contain a string of length x, they must contain all strings of length x.
 
 \subsubsection{used primitives}
 \begin{itemize}
-    \item nE: A nonce-based E scheme is defined by triple (\keyspace,E,D). E is a deterministic encryption algorithm that takes three inputs (K,N,M) to a value C, the length of C only depends the length of K, N and M. When (K,N,M) is not in $\keyspacemathmode \times \noncespacemathmode \times \messagespacemathmode$, C will be $\bot$. D is the decryption algorithm that takes three inputs (K,N,C) to a value M. E and D are inverse of each other implying correctness (if E(K,N,M) $= C \neq \bot$, then D(K,N,C) = M) and tidiness (if D(K,N,C) $= M \neq \bot$, then E(K,N,M) = C). The security is defined as follows:\\ \fbox{\includegraphics[scale = 0.8]{images/sec nE.png}}
-    \item MAC: The MAC is a deterministic algorithm F that takes in a K in \keyspace and a string x and outputs either a n-bit length T or $\bot$. The domain of F is the set X such that F(K,x) $\neq \bot$. The security of F is defined by \advantage{F}{pfr} =\probabilityblock{A}{}{F}{p}. the game on the left selects a random K from \keyspace and provides oracle access to F(K,.) the game on the right selects a uniformly random function p from X to \{1,0\}$^n$ and provide oracle access to it. With each oracle, queries outside X return $\bot$
+    \item nE: A nonce-based E scheme is defined by triple (\keyspace{},E,D). E is a deterministic encryption algorithm that takes three inputs (K,N,M) to a value C, the length of C only depends the length of K, N and M. When (K,N,M) is not in $\keyspacemathmode \times \noncespacemathmode \times \messagespacemathmode$, C will be $\bot$. D is the decryption algorithm that takes three inputs (K,N,C) to a value M. E and D are inverse of each other implying correctness (if E(K,N,M) $= C \neq \bot$, then D(K,N,C) = M) and tidiness (if D(K,N,C) $= M \neq \bot$, then E(K,N,M) = C). The security is defined as follows:\\ \fbox{\includegraphics[scale = 0.8]{images/sec nE.png}}
+    \item MAC: The MAC is a deterministic algorithm F that takes in a K in \keyspace{} and a string x and outputs either a n-bit length T or $\bot$. The domain of F is the set X such that F(K,x) $\neq \bot$. The security of F is defined by \advantage{F}{pfr} =\probabilityblock{A}{}{F}{p}. the game on the left selects a random K from \keyspace{} and provides oracle access to F(K,.) the game on the right selects a uniformly random function p from X to \{1,0\}$^n$ and provide oracle access to it. With each oracle, queries outside X return $\bot$
 \end{itemize}
 
 \subsubsection{goal}
-The end goal is a nonce-based authenticated encryption scheme (\keyspace,E,D). E is a deterministic encryption algorithm that takes four inputs (K,N,A,M) to a value C, the length of C value only depends the length of K, N, A and M. When (K,N,A,M) is not in $\keyspacemathmode \times \noncespacemathmode \times \associateddataspacemathmode \times \messagespacemathmode$, C will be $\bot$. D is the decryption algorithm that takes four inputs (K,N,A,C) to a value M. E and D are inverse of each other implying correctness (if E(K,N,A,M) $= C \neq \bot$, then D(K,N,A,C) = M) and tidiness (if D(K,N,A,C) $= M \neq \bot$, then E(K,N,A,M) = C)
+The end goal is a nonce-based authenticated encryption scheme (\keyspace{},E,D). E is a deterministic encryption algorithm that takes four inputs (K,N,A,M) to a value C, the length of C value only depends the length of K, N, A and M. When (K,N,A,M) is not in $\keyspacemathmode \times \noncespacemathmode \times \associateddataspacemathmode \times \messagespacemathmode$, C will be $\bot$. D is the decryption algorithm that takes four inputs (K,N,A,C) to a value M. E and D are inverse of each other implying correctness (if E(K,N,A,M) $= C \neq \bot$, then D(K,N,A,C) = M) and tidiness (if D(K,N,A,C) $= M \neq \bot$, then E(K,N,A,M) = C)
 \subsubsection{Security model}
 Security is defined as follows: \\ \fbox{\includegraphics[scale = 0.88]{images/sec nAE.png}}\\
 We define the scheme secure if there is a tight reduction from breaking the nAE-security of the scheme to breaking the nE-security and the PRF security of the underlying primitives.
@@ -132,7 +133,7 @@ should consist of:
 \end{itemize}
 
 \subsection{notation}
-\keyspace is a nonempty key space, \noncespace is a non-empty nonce space and \messagespace is a message space. \messagespace contain at least two strings, and if it contain a string of length x, it must contain all strings of length x. N is the number of users.
+\keyspace{} is a nonempty key space, \noncespace{} is a non-empty nonce space and \messagespace{} is a message space. \messagespace{} contain at least two strings, and if it contain a string of length x, it must contain all strings of length x. N is the number of users.
 
 \subsection{used primitives}
 \begin{itemize}
@@ -158,7 +159,7 @@ should consist of:
     \caption{DEM game where E is either the DEM or a random function \$, adversary A has access to Oenc}
     \end{figure} 
     
-    \item MAC: The MAC is a deterministic algorithm M.mac that takes in a fixed length k in \keyspace, a fixed length l in \lockspace and a variable length message m in \messagespace and outputs either a n-bit length tag or $\bot$. The domain of M.mac is the set X such that M.mac(k,l,m) $\neq \bot$. The security of F is defined by the following security game where \$.mac(k,l,m) calls t = M.mac(k,l,m) then outputs $\bot$ if t is $\bot$ or $\mid t \mid$ random bits otherwise and the advantage is calculated with \advantage{A,N}{MAC} = \probabilityblock{MAC}{A,N}{MAC}{\$}:
+    \item MAC: The MAC is a deterministic algorithm M.mac that takes in a fixed length k in \keyspace{}, a fixed length l in \lockspace{} and a variable length message m in \messagespace{} and outputs either a n-bit length tag or $\bot$. The domain of M.mac is the set X such that M.mac(k,l,m) $\neq \bot$. The security of F is defined by the following security game where \$.mac(k,l,m) calls t = M.mac(k,l,m) then outputs $\bot$ if t is $\bot$ or $\mid t \mid$ random bits otherwise and the advantage is calculated with \advantage{A,N}{MAC} = \probabilityblock{MAC}{A,N}{MAC}{\$}:
     \begin{figure}[H]
         \begin{pchstack}[boxed,center,space=0.5cm]
             \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} MAC$^M_{A,N}$ }]{
@@ -218,6 +219,7 @@ The security is defined by the following security game where \$.enc(k,l,m) calls
 The scheme is considered secure when there is a tight reduction from breaking the AE-security of the scheme to breaking the defined security of the underlying primitives.
 
 \subsection{choices made}
+In this security model, there are a lot of choices made, in this section I will elaborate on these. Firstly, the used MAC primitive is required to be indistinguishable from RO. This choice was made as it is required for AE constructions from \gcrec{}. I also choose to have "locks" instead of nonces. In this setting, this results in the adversary not being able to make decryption queries for any incorrect lock values. I choose this as a setting with locks will suffice the setting of hybrid encryption while probably being easier to prove. For this reason I also choose to not allow multiple encryption calls for one user, as well as not allowing decryption calls to a user which encryption call is not yet made. In my security game for the DEM, there is no decryption oracle considered. When distinguishing from a random function, this is equivalent to a situation in which a decryption oracle is considered (I am not 100\% sure about his part). Lastly, we choose to indistinguishably from a random function as a security model, instead of indistinguishably of two encrypted messages. This is a stronger security notion in the current setting as the length of the ciphertext only depends on the length of the inputs. Indistinguishably of two encrypted messages probably suffices in the current setting so I might still change to this if proving indistinguishably from a random function seems infeasible.
 
 \section{Constructions}
 should consist of:
@@ -227,11 +229,11 @@ should consist of:
 	\item comparison with existing alternatives
 \end{itemize}
 
-\noindent The AE schemes should be constructed from the DEM and the MAC. Following General Composition reconsidered, three ways to construct this AE are of interest, namely the ones following from the N1, N2 and N3 scheme. One thing to keep in mind with this that these schemes would originally use associated data. For now we can discard this but it is not proven that the same security results would also follow from this case without associated data. Down here the initial schemes can be found, followed by the AE.enc and AE.dec calls that can we construct following these schemes.
+\noindent The AE schemes should be constructed from the DEM and the MAC. Following \gcrec{}, three ways to construct this AE are of interest, namely the ones following from the N1, N2 and N3 scheme. One thing to keep in mind with this that these schemes would originally use associated data. For now we can discard this but it is not proven that the same security results would also follow from this case without associated data. Down here the initial schemes can be found, followed by the AE.enc and AE.dec calls that can we construct following these schemes.
 \begin{figure}[H]
     \centering
     \includegraphics[scale = 0.7]{images/N games.png}
-\caption{Original N schemes from Generic Composition reconsidered}
+\caption{Original N schemes from \gcrec}
 \end{figure}
 
 \begin{figure}[H]
