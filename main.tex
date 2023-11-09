@@ -187,57 +187,6 @@ should consist of:
 \subsection{notation}
 \keyspace{} is a nonempty key space, \noncespace{} is a non-empty nonce space and \messagespace{} is a message space. \messagespace{} contain at least two strings, and if it contain a string of length x, it must contain all strings of length x. \users is the number of users.
 
-\subsection{used primitives}
-\begin{itemize}
-    \item DEM: a DEM scheme is defined by tuple (E.enc,E.dec). E.enc is a deterministic encryption algorithm that takes three inputs (\keyinstance,\lockinstance,\messageinstance) to a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. When (\keyinstance,\lockinstance,\messageinstance) is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be $\bot$. E.dec is the decryption algorithm that takes three inputs (\keyinstance,\lockinstance,\ciphertextinstance) to a value \messageinstance. E.enc and E.dec are inverse of each other implying correctness (if E.enc(\keyinstance,\lockinstance,\messageinstance) $= \ciphertextinstance \neq \bot$, then E.dec(\keyinstance,\lockinstance,\ciphertextinstance) = \messageinstance) and tidiness (if E.dec(\keyinstance,\lockinstance,\ciphertextinstance) $= \messageinstance \neq \bot$, then E.enc(\keyinstance,\lockinstance,\messageinstance) = \ciphertextinstance). The advantage is calculated with \advantage{\adversary,\users}{DEM} = \probabilityblock{DEM}{\adversary,\users}{DEM}{\$}. DEM$^{\text{DEM}}_{\adversary,\users}$ is defined below, DEM$^{\$}_{\adversary,\users}$is the game DEM$^{\text{DEM}}_{\adversary,\users}$, where E.enc in line 10 is replaced with \$.enc(\keyinstance,\lockinstance,\messageinstance). \$.enc calls \ciphertextinstance{} = E.enc(\keyinstance,\lockinstance,\messageinstance) then outputs $\bot$ if \ciphertextinstance{} is $\bot$ or $\mid \ciphertextinstance \mid$ random bits otherwise.
-    \begin{figure}[H]
-        \begin{pchstack}[boxed,center,space=0.5cm]
-            \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} DEM$^{\text{DEM}}_{\adversary,\users}$ }]{
-            L = \emptyset\\
-            \pcfor \user \in [1..\users]:\\
-            \t \keyinstance{}_\user \sample \keyspace\\
-            \t C_\user = \emptyset\\
-            b' \result \adversary\\
-            \pcreturn b'
-            }
-            \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Oenc(\user,\lockinstance,\messageinstance)}]{
-                \pcif C_\user \neq \emptyset: \pcreturn \bot\\
-                \pcif \lockinstance \in L: \pcreturn \bot\\
-                L = L \cup \{\lockinstance\}\\
-                \lockinstance{}_\user = \lockinstance\\
-                \ciphertextinstance \result \text{E.enc}(\keyinstance{}_\user,\lockinstance{}_\user,\messageinstance)\\
-                C_\user = \ciphertextinstance\\
-                \pcreturn \ciphertextinstance
-            }
-        \end{pchstack}
-    \caption{DEM game}
-    \end{figure} 
-    
-    \item MAC: The MAC is a deterministic algorithm M.mac that takes in a fixed length \keyinstance in \keyspace{}, a fixed length \lockinstance{} in \lockspace{} and a variable length message \messageinstance{} in \messagespace{} and outputs either a n-bit length tag or $\bot$. The domain of M.mac is the set X such that M.mac(\keyinstance,\lockinstance,\messageinstance) $\neq \bot$. The advantage is calculated with \advantage{\adversary,\users}{MAC} = \probabilityblock{MAC}{\adversary,\users}{MAC}{\$}. MAC$^{\text{MAC}}_{\adversary,\users}$ is defined below, MAC$^{\$}_{\adversary,\users}$is the game MAC$^{\text{MAC}}_{\adversary,\users}$, where M.mac in line 10 is replaced with \$.mac. \$.mac(\keyinstance,\lockinstance,\messageinstance) computes \taginstance{} = m.mac(\keyinstance,\lockinstance,\messageinstance) then outputs $\bot$ if \taginstance{} is $\bot$ or $\mid \taginstance \mid$ random bits otherwise.
-    \begin{figure}[H]
-        \begin{pchstack}[boxed,center,space=0.5cm]
-            \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} MAC$^{\text{MAC}}_{\adversary,\users}$ }]{
-            L = \emptyset\\
-            \pcfor \user \in [1..N]:\\
-            \t \keyinstance_\user \sample \keyspace\\
-            b' \result A\\
-            T_\user = \emptyset\\
-            \pcreturn b'
-            }
-            \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Omac(\user,\lockinstance,\messageinstance)}]{
-                \pcif T_\user \neq \emptyset: \pcreturn \bot\\
-                \pcif \lockinstance \in L: \pcreturn \bot\\
-                L = L \cup \{\lockinstance\}\\
-                \lockinstance_\user = \lockinstance\\
-                \taginstance \leftarrow \text{M.mac}(\keyinstance_\user,\lockinstance_\user,\messageinstance)\\
-                T_\user = \taginstance\\
-                \pcreturn \taginstance
-            }
-        \end{pchstack}
-    \caption{MAC game}
-    \end{figure}
-\end{itemize}
-
 \subsection{goal}
 The end goal is to build a Authenticated Encryption scheme (EA). The AE scheme is defined by tuple (AE.enc,AE.dec). AE.enc is a deterministic encryption algorithm that takes three inputs (\keyinstance,\lockinstance,\messageinstance) to a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. When (\keyinstance,\lockinstance,\messageinstance) is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be $\bot$. AE.dec is the decryption algorithm that takes three inputs (\keyinstance,n,\ciphertextinstance) to a value \messageinstance. AE.enc and E.dec are inverse of each other implying correctness (if AE.enc(\keyinstance,\lockinstance,\messageinstance) $= \ciphertextinstance \neq \bot$, then AE.dec(\keyinstance,\lockinstance,\ciphertextinstance) = \messageinstance) and tidiness (if AE.dec(\keyinstance,\lockinstance,\ciphertextinstance) $= \messageinstance \neq \bot$, then AE.enc(\keyinstance,\lockinstance,\messageinstance) = \ciphertextinstance).
 
@@ -278,33 +227,87 @@ In this security model, there are a lot of choices made, in this section I will 
 \section{Constructions}
 should consist of:
 \begin{itemize}
+    \item the old primitives
 	\item how to construct the new primitive from old primitives
 	\item security bounds + proof
 	\item comparison with existing alternatives
 \end{itemize}
 
-\noindent The AE schemes should be constructed from the DEM and the MAC. Following \gcrec{}, three ways to construct this AE are of interest, namely the ones following from the N1, N2 and N3 scheme. One thing to keep in mind with this that these schemes would originally use associated data. For now we can discard this but it is not proven that the same security results would also follow from this case without associated data. Down here the initial schemes can be found, followed by the AE.enc and AE.dec calls that can we construct following these schemes.
+\subsection{used primitives}
+\keyspace{} is a nonempty key space, \noncespace{} is a non-empty nonce space and \messagespace{} is a message space. \messagespace{} contain at least two strings, and if it contain a string of length x, it must contain all strings of length x. \users is the number of users.
+\begin{itemize}
+    \item DEM: a DEM scheme is defined by tuple (E.enc,E.dec). E.enc is a deterministic encryption algorithm that takes three inputs (\keyinstance,\lockinstance,\messageinstance) to a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. When (\keyinstance,\lockinstance,\messageinstance) is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be $\bot$. E.dec is the decryption algorithm that takes three inputs (\keyinstance,\lockinstance,\ciphertextinstance) to a value \messageinstance. E.enc and E.dec are inverse of each other implying correctness (if E.enc(\keyinstance,\lockinstance,\messageinstance) $= \ciphertextinstance \neq \bot$, then E.dec(\keyinstance,\lockinstance,\ciphertextinstance) = \messageinstance) and tidiness (if E.dec(\keyinstance,\lockinstance,\ciphertextinstance) $= \messageinstance \neq \bot$, then E.enc(\keyinstance,\lockinstance,\messageinstance) = \ciphertextinstance). The advantage is calculated with \advantage{\adversary,\users}{DEM} = \probabilityblock{DEM}{\adversary,\users}{DEM}{\$}. DEM$^{\text{DEM}}_{\adversary,\users}$ is defined below, DEM$^{\$}_{\adversary,\users}$is the game DEM$^{\text{DEM}}_{\adversary,\users}$, where E.enc in line 10 is replaced with \$.enc(\keyinstance,\lockinstance,\messageinstance). \$.enc calls \ciphertextinstance{} = E.enc(\keyinstance,\lockinstance,\messageinstance) then outputs $\bot$ if \ciphertextinstance{} is $\bot$ or $\mid \ciphertextinstance \mid$ random bits otherwise.
+    \begin{figure}[H]
+        \begin{pchstack}[boxed,center,space=0.5cm]
+            \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} DEM$^{\text{DEM}}_{\adversary,\users}$ }]{
+            L = \emptyset\\
+            \pcfor \user \in [1..\users]:\\
+            \t \keyinstance{}_\user \sample \keyspace\\
+            \t C_\user = \emptyset\\
+            b' \result \adversary\\
+            \pcreturn b'
+            }
+            \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Oenc(\user,\lockinstance,\messageinstance)}]{
+                \pcif C_\user \neq \emptyset: \pcreturn \bot\\
+                \pcif \lockinstance \in L: \pcreturn \bot\\
+                L = L \cup \{\lockinstance\}\\
+                \lockinstance{}_\user = \lockinstance\\
+                \ciphertextinstance \result \text{E.enc}(\keyinstance{}_\user,\lockinstance{}_\user,\messageinstance)\\
+                C_\user = \ciphertextinstance\\
+                \pcreturn \ciphertextinstance
+            }
+        \end{pchstack}
+    \caption{DEM game}
+    \end{figure} 
+    
+    \item MAC: The MAC is a deterministic algorithm M.mac that takes in a fixed length \keyinstance in \keyspace{}, a fixed length \lockinstance{} in \lockspace{} and a variable length message \messageinstance{} in \messagespace{} and outputs either a n-bit length tag or $\bot$. The domain of M.mac is the set X such that M.mac(\keyinstance,\lockinstance,\messageinstance) $\neq \bot$. The advantage is calculated with \advantage{\adversary,\users}{MAC} = \probabilityblock{MAC}{\adversary,\users}{MAC}{\$}. MAC$^{\text{MAC}}_{\adversary,\users}$ is defined below, MAC$^{\$}_{\adversary,\users}$is the game MAC$^{\text{MAC}}_{\adversary,\users}$, where M.mac in line 10 is replaced with \$.mac. \$.mac(\keyinstance,\lockinstance,\messageinstance) computes \taginstance{} = M.mac(\keyinstance,\lockinstance,\messageinstance) then outputs $\bot$ if \taginstance{} is $\bot$ or $\mid \taginstance \mid$ random bits otherwise.
+    \begin{figure}[H]
+        \begin{pchstack}[boxed,center,space=0.5cm]
+            \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} MAC$^{\text{MAC}}_{\adversary,\users}$ }]{
+            L = \emptyset\\
+            \pcfor \user \in [1..N]:\\
+            \t \keyinstance_\user \sample \keyspace\\
+            \t T_\user = \emptyset\\
+            b' \result A\\
+            \pcreturn b'
+            }
+            \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Omac(\user,\lockinstance,\messageinstance)}]{
+                \pcif T_\user \neq \emptyset: \pcreturn \bot\\
+                \pcif \lockinstance \in L: \pcreturn \bot\\
+                L = L \cup \{\lockinstance\}\\
+                \lockinstance_\user = \lockinstance\\
+                \taginstance \leftarrow \text{M.mac}(\keyinstance_\user,\lockinstance_\user,\messageinstance)\\
+                T_\user = \taginstance\\
+                \pcreturn \taginstance
+            }
+        \end{pchstack}
+    \caption{MAC game}
+    \end{figure}
+\end{itemize}
+
+\subsection{construction}
+\noindent The AE schemes we will look at are constructed from the DEM and the MAC. Following \gcrec{}, three ways to construct this AE are of interest, namely the ones following from the N1, N2 and N3 scheme. One thing to keep in mind with this that these schemes would originally use associated data. For now we can discard this but it is not proven that the same security results would also follow from this case without associated data. Down here the schemes, adjusted to our setting, can be found, followed by the AE.enc and AE.dec calls that can we construct following these schemes. These calls can be plugged into AE$^{\text{AE}}_{\adversary,\users}$ to find their respective security games.
 \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.7]{images/N games.png}
-\caption{Original N schemes from \gcrec}
+    \includegraphics[scale = 0.4]{images/N-schemes.png}
+\caption{Adjusted N schemes from \gcrec}
 \end{figure}
 
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={AE.enc(\keyinstance,\lockinstance,\messageinstance)}]{
-            (k1,k2) \leftarrow \keyinstance \\
-            \ciphertextinstance' = E.enc(k1,\lockinstance,\messageinstance) \\
-            t = M.mac(k2,\lockinstance,\messageinstance) \\
-            \ciphertextinstance = (\ciphertextinstance',t)\\
+            (\keyinstance{}1,\keyinstance{}2) \result \keyinstance \\
+            \ciphertextinstance' \result \text{E.enc}(\keyinstance{}1,\lockinstance,\messageinstance) \\
+            \taginstance \result \text{M.mac}(\keyinstance{}2,\lockinstance,\messageinstance) \\
+            \ciphertextinstance \result (\ciphertextinstance',\taginstance)\\
             \pcreturn \ciphertextinstance
         }
         \pseudocode[lnstart=4,linenumbering,head={AE.dec(\keyinstance,\lockinstance,\ciphertextinstance)}]{
-            (k1,k2) \leftarrow \keyinstance \\
-            (\ciphertextinstance',t) \leftarrow \ciphertextinstance \\
-            \messageinstance = E.dec(k1,\lockinstance,\ciphertextinstance') \\
-            t' = M.mac(k2,\lockinstance,\messageinstance) \\
-            \pcif t = t' : \pcreturn \messageinstance \\
+            (\keyinstance{}1,\keyinstance{}2) \result \keyinstance \\
+            (\ciphertextinstance',\taginstance) \result \ciphertextinstance \\
+            \messageinstance \result \text{E.dec}(\keyinstance{}1,\lockinstance,\ciphertextinstance') \\
+            \taginstance' \result \text{M.mac}(\keyinstance{}2,\lockinstance,\messageinstance) \\
+            \pcif \taginstance = \taginstance' : \pcreturn \messageinstance \\
             \pcelse : \pcreturn \bot
         }
     \end{pchstack}
@@ -314,18 +317,18 @@ should consist of:
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={AE.enc(\keyinstance,\lockinstance,\messageinstance)}]{
-            (k1,k2) \leftarrow \keyinstance\\
-            \ciphertextinstance' = E.enc(k1,\lockinstance,\messageinstance)\\
-            t = M.mac(k2,\lockinstance,\ciphertextinstance')\\
-            \ciphertextinstance = (\ciphertextinstance',t)\\
+            (\keyinstance{}1,\keyinstance{}2) \result \keyinstance\\
+            \ciphertextinstance' \result \text{E.enc}(\keyinstance{}1,\lockinstance,\messageinstance)\\
+            \taginstance \result \text{M.mac}(\keyinstance{}2,\lockinstance,\ciphertextinstance')\\
+            \ciphertextinstance \result (\ciphertextinstance',\taginstance)\\
             \pcreturn \ciphertextinstance
         }
         \pseudocode[lnstart=4,linenumbering,head={AE.dec(\keyinstance,\lockinstance,\ciphertextinstance)}]{
-            (k1,k2) \leftarrow \keyinstance\\
-            (\ciphertextinstance',t) \leftarrow \ciphertextinstance\\
-            \messageinstance = E.dec(k1,\lockinstance,\ciphertextinstance')\\
-            t' = M.mac(k2,\lockinstance,\ciphertextinstance')\\
-            \pcif t = t' : \pcreturn \messageinstance \\
+            (\keyinstance{}1,\keyinstance{}2) \result \keyinstance\\
+            (\ciphertextinstance',\taginstance) \result \ciphertextinstance\\
+            \messageinstance \result \text{E.dec}(\keyinstance{}1,\lockinstance,\ciphertextinstance')\\
+            \taginstance' \result \text{M.mac}(\keyinstance{}2,\lockinstance,\ciphertextinstance')\\
+            \pcif \taginstance = \taginstance' : \pcreturn \messageinstance \\
             \pcelse : \pcreturn \bot
         }
     \end{pchstack}
@@ -335,18 +338,18 @@ should consist of:
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={AE.enc(\keyinstance,\lockinstance,\messageinstance)}]{
-            (k1,k2) \leftarrow \keyinstance\\
-            t = M.mac(k2,\lockinstance,\messageinstance)\\
-            \messageinstance' = \messageinstance || t\\
-            \ciphertextinstance = E.enc(k1,\lockinstance,\messageinstance')\\
+            (\keyinstance{}1,\keyinstance{}2) \result \keyinstance\\
+            \taginstance \result \text{M.mac}(\keyinstance{}2,\lockinstance,\messageinstance)\\
+            \messageinstance' \result \messageinstance \concatinate \taginstance\\
+            \ciphertextinstance \result E.enc(\keyinstance{}1,\lockinstance,\messageinstance')\\
             \pcreturn \ciphertextinstance
         }
         \pseudocode[lnstart=4,linenumbering,head={AE.dec(\keyinstance,\lockinstance,\ciphertextinstance)}]{
-            (k1,k2) \leftarrow \keyinstance\\
-            \messageinstance' = E.dec(k1,\lockinstance,\ciphertextinstance)\\
-            (\messageinstance,t) \leftarrow \messageinstance'\\
-            t' = M.mac(k2,\lockinstance,\messageinstance)\\
-            \pcif t = t' : \pcreturn \messageinstance \\
+            (\keyinstance{}1,\keyinstance{}2) \result \keyinstance\\
+            \messageinstance' \result \text{E.dec}(\keyinstance{}1,\lockinstance,\ciphertextinstance)\\
+            (\messageinstance,\taginstance) \result \messageinstance'\\
+            \taginstance' \result \text{M.mac}(\keyinstance{}2,\lockinstance,\messageinstance)\\
+            \pcif \taginstance = \taginstance' : \pcreturn \messageinstance \\
             \pcelse : \pcreturn \bot
         }
     \end{pchstack}

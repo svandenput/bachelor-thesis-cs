@@ -1,7 +1,6 @@
 current todo's:
 - citations wat duidelijker maken
 - cite de images
-- b' duidelijker opschrijven
 - kijken of er meer constraints in de text staan voor bijde papers
 - to-scan scannen
 - beginnen met schrijven in main
