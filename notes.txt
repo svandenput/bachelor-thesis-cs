@@ -1,10 +1,15 @@
 current todo's:
+- citations wat duidelijker maken
+- cite de images
+- b' duidelijker opschrijven
+- kijken of er meer constraints in de text staan voor bijde papers
 - to-scan scannen
 - beginnen met schrijven in main
 - boek lezen beetje
 
 vragen martijn:
-- should I start rewriting pkc and gcrec definitions?
+- waarom doet GCrec geen verschillende error messages
+- waarom specified GCrec message space niet
 
 vragen bart:
 - mag ik intro crypto aannemen bij de voorkennis?
