@@ -118,10 +118,10 @@ should consist of:
 
 \subsection{Existing notation from \pkc}
 \subsubsection{notation}
-\messagespace{} is a message space, \keyspace{} is a finite key space, \lockspace{} is a lock space and \ciphertextspace{} is a ciphertext space. \users is the number of users.
+\messagespace{} is a message space, \keyspace{} is a finite key space, \lockspace{} is a lock space and \ciphertextspace{} is a ciphertext space. \users{} is the number of users.
 \subsubsection{used primitives}
 \begin{itemize}
-    \item ADEM: the ADEM exists of tuple (A.enc,A.dec), A.enc take a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}. A.dec takes a \keyinstance{} in \keyspace{}, a lock \lockinstance in \lockspace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and outputs a message \messageinstance{} in \messagespace{} or $\bot$ to indicate rejection. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{} we have A.dec(\keyinstance,\lockinstance,A.enc(\keyinstance,\lockinstance,\messageinstance)) = \messageinstance. The security of the ADEM is defined with \advantage{ADEM,\adversary,\users}{n-moit-ind} = \probabilityblock{N-MIOT-IND}{\adversary,\users}{0}{1}, defined by the following game:
+    \item ADEM: the ADEM exists of tuple (A.enc,A.dec), A.enc take a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}. A.dec takes a \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and outputs a message \messageinstance{} in \messagespace{} or $\bot$ to indicate rejection. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{} we have A.dec(\keyinstance,\lockinstance,A.enc(\keyinstance,\lockinstance,\messageinstance)) = \messageinstance. The security of the ADEM is defined with \advantage{ADEM,\adversary,\users}{n-moit-ind} = \probabilityblock{N-MIOT-IND}{\adversary,\users}{0}{1}, defined by the following game:
     \begin{figure}[H]
         \centering
         \begin{pchstack}[boxed,center,space=0.5cm]
@@ -152,7 +152,7 @@ should consist of:
         \caption{N-MIOT-IND game, \adversary{} has access to oracles Oenc and Odec and the tags in line 10 and 15 are the same.}
     \end{figure}
     
-    \item AMAC: the AMAC exists of tuple (M.mac,M.vrf). M.mac takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}. M.vrf takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance in \lockspace{}, a message \messageinstance{} in \messagespace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and returns either $true$ of $false$. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{}, all corresponding \ciphertextinstance{} \result M.mac(\keyinstance,\lockinstance,\messageinstance) gives M.vrf(\keyinstance,\lockinstance,\messageinstance,\ciphertextinstance)=$true$. The security of the AMAC is defined with \advantage{AMAC,\adversary,\users}{N-MIOT-UF} = \probabilityblock{N-MIOT-UF}{\adversary,\users}{0}{1}, defined by the following game:
+    \item AMAC: the AMAC exists of tuple (M.mac,M.vrf). M.mac takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}. M.vrf takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, a message \messageinstance{} in \messagespace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and returns either $true$ of $false$. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{}, all corresponding \ciphertextinstance{} \result M.mac(\keyinstance,\lockinstance,\messageinstance) gives M.vrf(\keyinstance,\lockinstance,\messageinstance,\ciphertextinstance)=$true$. The security of the AMAC is defined with \advantage{AMAC,\adversary,\users}{N-MIOT-UF} = \probabilityblock{N-MIOT-UF}{\adversary,\users}{0}{1}, defined by the following game:
     \begin{figure}[H]
         \centering
         \begin{pchstack}[boxed,center,space=0.5cm]
@@ -215,7 +215,7 @@ The security is defined by creating new A.enc' and A.dec' calls which are build 
 
 \subsection{Existing notation from \gcrec}
 \subsubsection{notation}
-\keyspace{} is a nonempty key space, \noncespace{} is a non-empty nonce space, \messagespace{} is a message space and \associateddataspace{} is the associated-data space. \messagespace{} (and \associateddataspace{} ? it's a bit ambiguous in the paper but I assume this part only applies to \messagespace{}) contain at least two strings, and if \messagespace{} and \associateddataspace{} contain a string of length x, they must contain all strings of length x.
+\keyspace{} is a nonempty key space, \noncespace{} is a non-empty nonce space, \messagespace{} is a message space and \associateddataspace{} is the associated-data space. \messagespace{} contain at least two strings, and if \messagespace{} and \associateddataspace{} contain a string of length x, they must contain all strings of length x.
 
 \subsubsection{used primitives}
 \begin{itemize}
