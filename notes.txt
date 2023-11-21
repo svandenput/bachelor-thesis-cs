@@ -1,11 +1,13 @@
 current todo's:
+- gcrec naar game
 - kijken of er meer constraints in de text staan voor bijde papers
+- section 4.4 verplaatsen/opsplitsen
 - to-scan scannen
+- citations toevoegen
 - beginnen met schrijven in main
 - boek lezen beetje
 
 vragen martijn:
-- waarom doet GCrec geen verschillende error messages
 - waarom specified GCrec message space niet
 
 vragen bart:

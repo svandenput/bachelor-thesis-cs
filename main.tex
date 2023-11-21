@@ -16,7 +16,7 @@
 
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{Bacholer Thesis}
+\lhead{Bachelor Thesis}
 \rhead{Page \thepage}
 
 \title{research proposal}
@@ -104,9 +104,15 @@ should consist of:
     result of function   &   $\leftarrow^{\$}$   &   $\leftarrow$   &   \result & get the result of a function with given inputs \\
     \hline
     concatination   &   a$\|$b   &   a$\|$b   &   a\concatinate{}b & concatanation of two strings \\
+    \hline
+    true   &   \ensuremath{\mathit{true}}   &   -   &   \codetrue & boolean true \\
+    \hline
+    false   &   \ensuremath{\mathit{false}}   &   -   &   \codefalse & boolean false \\
+    \hline
+    invalid   &   $\bot$   &   $\bot$   &   \invalid & operation is invalid \\
+    \hline
     %Name   &   pkc   &   GCrec   &   my notation & rough meaning \\
     %\hline
-    \hline
 \end{tabular}
 
 \section{Existing AE/DEM notations in more detail}
@@ -121,67 +127,69 @@ should consist of:
 \messagespace{} is a message space, \keyspace{} is a finite key space, \lockspace{} is a lock space and \ciphertextspace{} is a ciphertext space. \users{} is the number of users.
 \subsubsection{used primitives}
 \begin{itemize}
-    \item ADEM: the ADEM exists of tuple (A.enc,A.dec), A.enc take a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}. A.dec takes a \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and outputs a message \messageinstance{} in \messagespace{} or $\bot$ to indicate rejection. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{} we have A.dec(\keyinstance,\lockinstance,A.enc(\keyinstance,\lockinstance,\messageinstance)) = \messageinstance. The security of the ADEM is defined with \advantage{ADEM,\adversary,\users}{n-moit-ind} = \probabilityblock{N-MIOT-IND}{\adversary,\users}{0}{1}, defined by the following game:
+    \item ADEM: the ADEM exists of tuple (A.enc,A.dec), A.enc take a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}. A.dec takes a \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and outputs a message \messageinstance{} in \messagespace{} or \invalid{} to indicate rejection. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{} we have A.dec(\keyinstance,\lockinstance,A.enc(\keyinstance,\lockinstance,\messageinstance)) = \messageinstance. The security of the ADEM is defined with \advantage{ADEM,\adversary,\users}{l-miot-ind} = \probabilityblock{L-MIOT-IND}{\adversary,\users}{0}{1}, defined by the following game:
     \begin{figure}[H]
         \centering
         \begin{pchstack}[boxed,center,space=0.5cm]
-            \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} N-MOIT-IND$^{b}_{\adversary,\users}$ }]{
-            L = \emptyset\\
+            \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} L-MIOT-IND$^{b}_{\adversary,\users}$ }]{
+            L \result \emptyset\\
             \pcfor \user \in [1..N]:\\
             \t \keyinstance_\user \sample \keyspace\\
-            \t C_\user = \emptyset\\
+            \t C_\user \result \emptyset\\
             b' \result \adversary\\
             \pcreturn b'
             }
             \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Oenc(\user,\lockinstance,\messageinstance$_0$,\messageinstance$_1$)}]{
-                \pcif C_\user \neq \emptyset: \pcreturn \bot\\
-                \pcif \lockinstance \in L: \pcreturn \bot\\
-                L = L \cup \{\lockinstance\}\\
-                \lockinstance_\user = \lockinstance\\
+                \pcif C_\user \neq \emptyset: \pcreturn \invalid\\
+                \pcif \lockinstance \in L: \pcreturn \invalid\\
+                L \result L \cup \{\lockinstance\}\\
+                \lockinstance_\user \result \lockinstance\\
                 \ciphertextinstance \result \text{A.enc}(\keyinstance_\user,\lockinstance_\user,\messageinstance_b)\\
-                C_\user = \ciphertextinstance\\
+                C_\user \result C_\user \cup \{\ciphertextinstance\}\\
                 \pcreturn \ciphertextinstance
             }
             \pseudocode[lnstart=12,linenumbering,head={\textbf{Oracle} Odec(\user,\ciphertextinstance)}]{
-                \pcif C_\user \neq \emptyset: \pcreturn \bot\\
-                \pcif \ciphertextinstance \in C_\user: \pcreturn \bot\\
+                \pcif C_\user = \emptyset: \pcreturn \invalid\\
+                \pcif \ciphertextinstance \in C_\user: \pcreturn \invalid\\
                 \messageinstance \result \text{A.dec}(\keyinstance_\user,\lockinstance_\user,\ciphertextinstance)\\
                 \pcreturn \messageinstance
             }
         \end{pchstack}
-        \caption{N-MIOT-IND game, \adversary{} has access to oracles Oenc and Odec and the tags in line 10 and 15 are the same.}
+        \caption{L-MIOT-IND game, \adversary{} has access to oracles Oenc and Odec and the tags in line 10 and 15 are the same.}
     \end{figure}
     
-    \item AMAC: the AMAC exists of tuple (M.mac,M.vrf). M.mac takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}. M.vrf takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, a message \messageinstance{} in \messagespace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and returns either $true$ of $false$. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{}, all corresponding \ciphertextinstance{} \result M.mac(\keyinstance,\lockinstance,\messageinstance) gives M.vrf(\keyinstance,\lockinstance,\messageinstance,\ciphertextinstance)=$true$. The security of the AMAC is defined with \advantage{AMAC,\adversary,\users}{N-MIOT-UF} = \probabilityblock{N-MIOT-UF}{\adversary,\users}{0}{1}, defined by the following game:
+    \item AMAC: the AMAC exists of tuple (M.mac,M.vrf). M.mac takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}. M.vrf takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, a message \messageinstance{} in \messagespace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and returns either \codetrue{} or \codefalse. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{}, all corresponding \ciphertextinstance{} \result M.mac(\keyinstance,\lockinstance,\messageinstance) gives M.vrf(\keyinstance,\lockinstance,\messageinstance,\ciphertextinstance) = \codetrue. The security of the AMAC is defined with \advantage{AMAC,\adversary,\users}{L-MIOT-UF} = $\text{Pr}[\text{L-MIOT-UF}_{\adversary,\users}]$, defined by the following game:
     \begin{figure}[H]
         \centering
         \begin{pchstack}[boxed,center,space=0.5cm]
-            \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} N-MIOT-UF$^{b}_{\adversary,\users}$ }]{
-            L = \emptyset\\
+            \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} L-MIOT-UF$_{\adversary,\users}$ }]{
+            \text{forged} \result 0\\
+            L \result \emptyset\\
             \pcfor \user \in [1..N]:\\
             \t \keyinstance_\user \sample \keyspace\\
-            \t T_\user = \emptyset\\
+            \t T_\user \result \emptyset\\
             b' \result \adversary\\
             \pcreturn b'
             }
-            \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Omac(\user,\lockinstance,\messageinstance$_0$,\messageinstance$_1$)}]{
-                \pcif T_\user \neq \emptyset: \pcreturn \bot\\
-                \pcif \lockinstance \in L: \pcreturn \bot\\
-                L = L \cup \{\lockinstance\}\\
-                \lockinstance_\user = \lockinstance\\
-                \taginstance \result \text{M.mac}(\keyinstance_\user,\lockinstance_\user,\messageinstance_b)\\
-                T_\user = (\messageinstance,\taginstance)\\
+            \pseudocode[lnstart=6,linenumbering,head={\textbf{Oracle} Omac(\user,\lockinstance,\messageinstance)}]{
+                \pcif T_\user \neq \emptyset: \pcreturn \invalid\\
+                \pcif \lockinstance \in L: \pcreturn \invalid\\
+                L \result L \cup \{\lockinstance\}\\
+                \lockinstance_\user \result \lockinstance\\
+                \taginstance \result \text{M.mac}(\keyinstance_\user,\lockinstance_\user,\messageinstance)\\
+                T_\user \result T_\user \cup \{(\messageinstance,\taginstance)\}\\
                 \pcreturn \taginstance
             }
-            \pseudocode[lnstart=12,linenumbering,head={\textbf{Oracle} Ovrf(\user,\messageinstance,\taginstance)}]{
-                \pcif T_\user \neq \emptyset: \pcreturn \bot\\
-                \pcif (\messageinstance,\taginstance) \in T_\user: \pcreturn \bot\\
+            \pseudocode[lnstart=13,linenumbering,head={\textbf{Oracle} Ovrf(\user,\messageinstance,\taginstance)}]{
+                \pcif T_\user = \emptyset: \pcreturn \invalid\\
+                \pcif (\messageinstance,\taginstance) \in T_\user: \pcreturn \invalid\\
                 \pcif \text{M.vrf}(\keyinstance_\user,\lockinstance_\user,\messageinstance,\taginstance): \\
-                \t \pcreturn true\\
-                \pcelse : \pcreturn false
+                \t \text{forged} \result 1\\
+                \t \pcreturn \codetrue\\
+                \pcelse : \pcreturn \codefalse
             }
         \end{pchstack}
-        \caption{N-MIOT-UF game, \adversary{} has access to oracles Omac and Ovrf and the tags in line 10 and 15 are the same.}
+        \caption{L-MIOT-UF game, \adversary{} has access to oracles Omac and Ovrf and the tags in line 11 and 16 are the same.}
     \end{figure}
 \end{itemize}
 
@@ -206,12 +214,12 @@ The security is defined by creating new A.enc' and A.dec' calls which are build 
             \pcif \text{M.mac}(\keyinstance_{mac},\lockinstance,\ciphertextinstance',\taginstance):\\
             \t \messageinstance \result \text{A.dec}(\keyinstance_{dem},\lockinstance,\ciphertextinstance')\\
             \t \pcreturn \messageinstance\\
-            \pcelse : \pcreturn \bot
+            \pcelse : \pcreturn \invalid
         }
     \end{pchstack}
     \caption{A.enc' and A.dec' calls}
 \end{figure}
-\noindent The new advantage is \advantage{ADEM',$A$,\users}{n-miot} $\leq$ 2\advantage{AMAC,$B$,\users}{n-miot-uf} + \advantage{ADAM,$C$,\users}{n-moit-ind}. Where the running time of $B$ is at most that of $A$ plus the time required to run \users-many ADEM encapsulations and Qd-many ADEM decapsulations and the running time of $C$ is the same as the running time of $A$. Additionally, $B$ poses at most Qd-many Ovrf queries, and $C$ poses no Odec query.
+\noindent The new advantage is \advantage{ADEM',$A$,\users}{l-miot} $\leq$ 2\advantage{AMAC,$B$,\users}{l-miot-uf} + \advantage{ADAM,$C$,\users}{l-miot-ind}. Where the running time of $B$ is at most that of $A$ plus the time required to run \users-many ADEM encapsulations and Qd-many ADEM decapsulations and the running time of $C$ is the same as the running time of $A$. Additionally, $B$ poses at most Qd-many Ovrf queries, and $C$ poses no Odec query.
 
 \subsection{Existing notation from \gcrec}
 \subsubsection{notation}
@@ -219,12 +227,12 @@ The security is defined by creating new A.enc' and A.dec' calls which are build 
 
 \subsubsection{used primitives}
 \begin{itemize}
-    \item nE: A nonce-based E scheme is defined by triple (\keyspace{},E,D). E is a deterministic encryption algorithm that takes three inputs (K,N,M) to a value C, the length of C only depends the length of K, N and M. When (K,N,M) is not in $\keyspace \times \noncespace \times \messagespace$, C will be $\bot$. D is the decryption algorithm that takes three inputs (K,N,C) to a value M. E and D are inverse of each other implying correctness (if E(K,N,M) $= C \neq \bot$, then D(K,N,C) = M) and tidiness (if D(K,N,C) $= M \neq \bot$, then E(K,N,M) = C). The security is defined as follows:\\ \fbox{\includegraphics[scale = 0.8]{images/sec nE.png}}
-    \item MAC: The MAC is a deterministic algorithm F that takes in a K in \keyspace{} and a string x and outputs either a n-bit length T or $\bot$. The domain of F is the set X such that F(K,x) $\neq \bot$. The security of F is defined by \advantage{F}{pfr} =\probabilityblock{A}{}{F}{p}. the game on the left selects a random K from \keyspace{} and provides oracle access to F(K,.) the game on the right selects a uniformly random function p from X to \{1,0\}$^n$ and provide oracle access to it. With each oracle, queries outside X return $\bot$
+    \item nE: A nonce-based E scheme is defined by triple (\keyspace{},E,D). E is a deterministic encryption algorithm that takes three inputs (K,N,M) to a value C, the length of C only depends the length of K, N and M. When (K,N,M) is not in $\keyspace \times \noncespace \times \messagespace$, C will be \invalid. D is the decryption algorithm that takes three inputs (K,N,C) to a value M. E and D are inverse of each other implying correctness (if E(K,N,M) $= C \neq \invalid$, then D(K,N,C) = M) and tidiness (if D(K,N,C) $= M \neq \invalid$, then E(K,N,M) = C). The security is defined as follows:\\ \fbox{\includegraphics[scale = 0.8]{images/sec nE.png}}
+    \item MAC: The MAC is a deterministic algorithm F that takes in a K in \keyspace{} and a string x and outputs either a n-bit length T or \invalid. The domain of F is the set X such that F(K,x) $\neq \invalid$. The security of F is defined by \advantage{F}{pfr} =\probabilityblock{A}{}{F}{p}. the game on the left selects a random K from \keyspace{} and provides oracle access to F(K,.) the game on the right selects a uniformly random function p from X to \{1,0\}$^n$ and provide oracle access to it. With each oracle, queries outside X return \invalid.
 \end{itemize}
 
 \subsubsection{goal}
-The end goal is a nonce-based authenticated encryption scheme (\keyspace{},E,D). E is a deterministic encryption algorithm that takes four inputs (K,N,A,M) to a value C, the length of C value only depends the length of K, N, A and M. When (K,N,A,M) is not in $\keyspace \times \noncespace \times \associateddataspace \times \messagespace$, C will be $\bot$. D is the decryption algorithm that takes four inputs (K,N,A,C) to a value M. E and D are inverse of each other implying correctness (if E(K,N,A,M) $= C \neq \bot$, then D(K,N,A,C) = M) and tidiness (if D(K,N,A,C) $= M \neq \bot$, then E(K,N,A,M) = C)
+The end goal is a nonce-based authenticated encryption scheme (\keyspace{},E,D). E is a deterministic encryption algorithm that takes four inputs (K,N,A,M) to a value C, the length of C value only depends the length of K, N, A and M. When (K,N,A,M) is not in $\keyspace \times \noncespace \times \associateddataspace \times \messagespace$, C will be \invalid. D is the decryption algorithm that takes four inputs (K,N,A,C) to a value M. E and D are inverse of each other implying correctness (if E(K,N,A,M) $= C \neq \invalid$, then D(K,N,A,C) = M) and tidiness (if D(K,N,A,C) $= M \neq \invalid$, then E(K,N,A,M) = C)
 \subsubsection{Security model}
 Security is defined as follows: \\ \fbox{\includegraphics[scale = 0.88]{images/sec nAE.png}}\\
 We define the scheme secure if there is a tight reduction from breaking the nAE-security of the scheme to breaking the nE-security and the PRF security of the underlying primitives.
@@ -239,35 +247,35 @@ should consist of:
 \end{itemize}
 
 \subsection{notation}
-\keyspace{} is a nonempty key space, \lockspace{} is a non-empty lock space and \messagespace{} is a message space. \messagespace{} contain at least two strings, and if it contain a string of length x, it must contain all strings of length x. \users is the number of users.
+\keyspace{} is a nonempty key space, \lockspace{} is a non-empty lock space and \messagespace{} is a message space. \messagespace{} contain at least two strings, and if it contain a string of length x, it must contain all strings of length x. \users{} is the number of users.
 
 \subsection{goal}
-The end goal is to build a Authenticated Encryption scheme (EA). The AE scheme is defined by tuple (AE.enc,AE.dec). AE.enc is a deterministic encryption algorithm that takes three inputs (\keyinstance,\lockinstance,\messageinstance) to a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. When (\keyinstance,\lockinstance,\messageinstance) is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be $\bot$. AE.dec is the decryption algorithm that takes three inputs (\keyinstance,n,\ciphertextinstance) to a value \messageinstance. AE.enc and E.dec are inverse of each other implying correctness (if AE.enc(\keyinstance,\lockinstance,\messageinstance) $= \ciphertextinstance \neq \bot$, then AE.dec(\keyinstance,\lockinstance,\ciphertextinstance) = \messageinstance) and tidiness (if AE.dec(\keyinstance,\lockinstance,\ciphertextinstance) $= \messageinstance \neq \bot$, then AE.enc(\keyinstance,\lockinstance,\messageinstance) = \ciphertextinstance).
+The end goal is to build a Authenticated Encryption scheme (EA). The AE scheme is defined by tuple (AE.enc,AE.dec). AE.enc is a deterministic encryption algorithm that takes three inputs (\keyinstance,\lockinstance,\messageinstance) to a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. When (\keyinstance,\lockinstance,\messageinstance) is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. AE.dec is the decryption algorithm that takes three inputs (\keyinstance,n,\ciphertextinstance) to a value \messageinstance. AE.enc and E.dec are inverse of each other implying correctness (if AE.enc(\keyinstance,\lockinstance,\messageinstance) $= \ciphertextinstance \neq \invalid$, then AE.dec(\keyinstance,\lockinstance,\ciphertextinstance) = \messageinstance) and tidiness (if AE.dec(\keyinstance,\lockinstance,\ciphertextinstance) $= \messageinstance \neq \invalid$, then AE.enc(\keyinstance,\lockinstance,\messageinstance) = \ciphertextinstance).
 
 \subsection{Security model}
-The advantage is calculated with \advantage{\adversary,\users}{AE} = \probabilityblock{AE}{\adversary,\users}{AE}{\$}. AE$^{\text{AE}}_{\adversary,\users}$ is defined below, AE$^{\$}_{\adversary,\users}$is the game AE$^{\text{AE}}_{\adversary,\users}$, where AE.enc in line 10 is replaced with \$.enc. \$.enc(\keyinstance,\lockinstance,\messageinstance) calls \ciphertextinstance{} = AE.enc(\keyinstance,\lockinstance,\messageinstance) then outputs $\bot$ if \ciphertextinstance{} is $\bot$ or $\mid \ciphertextinstance \mid$ random bits otherwise. EA.dec in line 15 is replaced with \$.dec(\keyinstance,\lockinstance,\ciphertextinstance) that always returns $\bot$
+The advantage is calculated with \advantage{\adversary,\users}{AE} = \probabilityblock{AE}{\adversary,\users}{AE}{\$}. AE$^{\text{AE}}_{\adversary,\users}$ is defined below, AE$^{\$}_{\adversary,\users}$is the game AE$^{\text{AE}}_{\adversary,\users}$, where AE.enc in line 10 is replaced with \$.enc. \$.enc(\keyinstance,\lockinstance,\messageinstance) calls \ciphertextinstance{} = AE.enc(\keyinstance,\lockinstance,\messageinstance) then outputs \invalid{} if \ciphertextinstance{} is \invalid{} or $\mid \ciphertextinstance \mid$ random bits otherwise. EA.dec in line 15 is replaced with \$.dec(\keyinstance,\lockinstance,\ciphertextinstance) that always returns \invalid.
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} AE$^{AE}_{\adversary,\users}$ }]{
-        L = \emptyset\\
+        L \result \emptyset\\
         \pcfor \user \in [1..N]:\\
         \t \keyinstance_\user \sample \keyspace\\
-        \t C_\user = \emptyset\\
+        \t C_\user \result \invalid\\
         b' \result \adversary\\
         \pcreturn b'
         }
         \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Oenc(\user,\lockinstance,\messageinstance)}]{
-            \pcif C_\user \neq \emptyset: \pcreturn \bot\\
-            \pcif \lockinstance \in L: \pcreturn \bot\\
-            L = L \cup \{\lockinstance\}\\
-            \lockinstance_\user = \lockinstance\\
+            \pcif C_\user \neq \invalid: \pcreturn \invalid\\
+            \pcif \lockinstance \in L: \pcreturn \invalid\\
+            L \result L \cup \{\lockinstance\}\\
+            \lockinstance_\user \result \lockinstance\\
             \ciphertextinstance \result \text{AE.enc}(\keyinstance_\user,\lockinstance_\user,\messageinstance)\\
-            C_\user = \ciphertextinstance\\
+            C_\user \result \ciphertextinstance\\
             \pcreturn \ciphertextinstance
         }
         \pseudocode[lnstart=12,linenumbering,head={\textbf{Oracle} Odec(\user,\ciphertextinstance)}]{
-            \pcif C_\user \neq \emptyset: \pcreturn \bot\\
-            \pcif \ciphertextinstance \in C_\user: \pcreturn \bot\\
+            \pcif C_\user = \invalid: \pcreturn \invalid\\
+            \pcif \ciphertextinstance \in C_\user: \pcreturn \invalid\\
             \messageinstance \result \text{AE.dec}(\keyinstance_\user,\lockinstance_\user,\ciphertextinstance)\\
             \pcreturn \messageinstance
         }
@@ -290,48 +298,48 @@ should consist of:
 \subsection{used primitives}
 \keyspace{} is a nonempty key space, \noncespace{} is a non-empty nonce space and \messagespace{} is a message space. \messagespace{} contain at least two strings, and if it contain a string of length x, it must contain all strings of length x. \users is the number of users.
 \begin{itemize}
-    \item DEM: a DEM scheme is defined by tuple (E.enc,E.dec). E.enc is a deterministic encryption algorithm that takes three inputs (\keyinstance,\lockinstance,\messageinstance) to a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. When (\keyinstance,\lockinstance,\messageinstance) is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be $\bot$. E.dec is the decryption algorithm that takes three inputs (\keyinstance,\lockinstance,\ciphertextinstance) to a value \messageinstance. E.enc and E.dec are inverse of each other implying correctness (if E.enc(\keyinstance,\lockinstance,\messageinstance) $= \ciphertextinstance \neq \bot$, then E.dec(\keyinstance,\lockinstance,\ciphertextinstance) = \messageinstance) and tidiness (if E.dec(\keyinstance,\lockinstance,\ciphertextinstance) $= \messageinstance \neq \bot$, then E.enc(\keyinstance,\lockinstance,\messageinstance) = \ciphertextinstance). The advantage is calculated with \advantage{\adversary,\users}{DEM} = \probabilityblock{DEM}{\adversary,\users}{DEM}{\$}. DEM$^{\text{DEM}}_{\adversary,\users}$ is defined below, DEM$^{\$}_{\adversary,\users}$is the game DEM$^{\text{DEM}}_{\adversary,\users}$, where E.enc in line 10 is replaced with \$.enc(\keyinstance,\lockinstance,\messageinstance). \$.enc calls \ciphertextinstance{} = E.enc(\keyinstance,\lockinstance,\messageinstance) then outputs $\bot$ if \ciphertextinstance{} is $\bot$ or $\mid \ciphertextinstance \mid$ random bits otherwise.
+    \item DEM: a DEM scheme is defined by tuple (E.enc,E.dec). E.enc is a deterministic encryption algorithm that takes three inputs (\keyinstance,\lockinstance,\messageinstance) to a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. When (\keyinstance,\lockinstance,\messageinstance) is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. E.dec is the decryption algorithm that takes three inputs (\keyinstance,\lockinstance,\ciphertextinstance) to a value \messageinstance. E.enc and E.dec are inverse of each other implying correctness (if E.enc(\keyinstance,\lockinstance,\messageinstance) $= \ciphertextinstance \neq \invalid$, then E.dec(\keyinstance,\lockinstance,\ciphertextinstance) = \messageinstance) and tidiness (if E.dec(\keyinstance,\lockinstance,\ciphertextinstance) $= \messageinstance \neq \invalid$, then E.enc(\keyinstance,\lockinstance,\messageinstance) = \ciphertextinstance). The advantage is calculated with \advantage{\adversary,\users}{DEM} = \probabilityblock{DEM}{\adversary,\users}{DEM}{\$}. DEM$^{\text{DEM}}_{\adversary,\users}$ is defined below, DEM$^{\$}_{\adversary,\users}$is the game DEM$^{\text{DEM}}_{\adversary,\users}$, where E.enc in line 10 is replaced with \$.enc(\keyinstance,\lockinstance,\messageinstance). \$.enc calls \ciphertextinstance{} = E.enc(\keyinstance,\lockinstance,\messageinstance) then outputs \invalid{} if \ciphertextinstance{} is \invalid{} or $\mid \ciphertextinstance \mid$ random bits otherwise.
     \begin{figure}[H]
         \begin{pchstack}[boxed,center,space=0.5cm]
             \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} DEM$^{\text{DEM}}_{\adversary,\users}$ }]{
-            L = \emptyset\\
+            L \result \emptyset\\
             \pcfor \user \in [1..\users]:\\
             \t \keyinstance{}_\user \sample \keyspace\\
-            \t C_\user = \emptyset\\
+            \t C_\user \result \invalid\\
             b' \result \adversary\\
             \pcreturn b'
             }
             \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Oenc(\user,\lockinstance,\messageinstance)}]{
-                \pcif C_\user \neq \emptyset: \pcreturn \bot\\
-                \pcif \lockinstance \in L: \pcreturn \bot\\
-                L = L \cup \{\lockinstance\}\\
-                \lockinstance{}_\user = \lockinstance\\
+                \pcif C_\user \neq \invalid: \pcreturn \invalid\\
+                \pcif \lockinstance \in L: \pcreturn \invalid\\
+                L \result L \cup \{\lockinstance\}\\
+                \lockinstance{}_\user \result \lockinstance\\
                 \ciphertextinstance \result \text{E.enc}(\keyinstance{}_\user,\lockinstance{}_\user,\messageinstance)\\
-                C_\user = \ciphertextinstance\\
+                C_\user \result \ciphertextinstance\\
                 \pcreturn \ciphertextinstance
             }
         \end{pchstack}
     \caption{DEM game}
     \end{figure} 
     
-    \item MAC: The MAC is a deterministic algorithm M.mac that takes in a fixed length \keyinstance in \keyspace{}, a fixed length \lockinstance{} in \lockspace{} and a variable length message \messageinstance{} in \messagespace{} and outputs either a n-bit length tag or $\bot$. The domain of M.mac is the set X such that M.mac(\keyinstance,\lockinstance,\messageinstance) $\neq \bot$. The advantage is calculated with \advantage{\adversary,\users}{MAC} = \probabilityblock{MAC}{\adversary,\users}{MAC}{\$}. MAC$^{\text{MAC}}_{\adversary,\users}$ is defined below, MAC$^{\$}_{\adversary,\users}$is the game MAC$^{\text{MAC}}_{\adversary,\users}$, where M.mac in line 10 is replaced with \$.mac. \$.mac(\keyinstance,\lockinstance,\messageinstance) computes \taginstance{} = M.mac(\keyinstance,\lockinstance,\messageinstance) then outputs $\bot$ if \taginstance{} is $\bot$ or $\mid \taginstance \mid$ random bits otherwise.
+    \item MAC: The MAC is a deterministic algorithm M.mac that takes in a fixed length \keyinstance{} in \keyspace{}, a fixed length \lockinstance{} in \lockspace{} and a variable length message \messageinstance{} in \messagespace{} and outputs either a n-bit length tag or \invalid. The domain of M.mac is the set X such that M.mac(\keyinstance,\lockinstance,\messageinstance) $\neq \invalid$. The advantage is calculated with \advantage{\adversary,\users}{MAC} = \probabilityblock{MAC}{\adversary,\users}{MAC}{\$}. MAC$^{\text{MAC}}_{\adversary,\users}$ is defined below, MAC$^{\$}_{\adversary,\users}$is the game MAC$^{\text{MAC}}_{\adversary,\users}$, where M.mac in line 10 is replaced with \$.mac. \$.mac(\keyinstance,\lockinstance,\messageinstance) computes \taginstance{} = M.mac(\keyinstance,\lockinstance,\messageinstance) then outputs \invalid{} if \taginstance{} is \invalid{} or $\mid \taginstance \mid$ random bits otherwise.
     \begin{figure}[H]
         \begin{pchstack}[boxed,center,space=0.5cm]
             \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} MAC$^{\text{MAC}}_{\adversary,\users}$ }]{
-            L = \emptyset\\
+            L \result \emptyset\\
             \pcfor \user \in [1..N]:\\
             \t \keyinstance_\user \sample \keyspace\\
-            \t T_\user = \emptyset\\
+            \t T_\user \result \invalid\\
             b' \result A\\
             \pcreturn b'
             }
             \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Omac(\user,\lockinstance,\messageinstance)}]{
-                \pcif T_\user \neq \emptyset: \pcreturn \bot\\
-                \pcif \lockinstance \in L: \pcreturn \bot\\
-                L = L \cup \{\lockinstance\}\\
-                \lockinstance_\user = \lockinstance\\
+                \pcif T_\user \neq \invalid: \pcreturn \invalid\\
+                \pcif \lockinstance \in L: \pcreturn \invalid\\
+                L \result L \cup \{\lockinstance\}\\
+                \lockinstance_\user \result \lockinstance\\
                 \taginstance \leftarrow \text{M.mac}(\keyinstance_\user,\lockinstance_\user,\messageinstance)\\
-                T_\user = \taginstance\\
+                T_\user \result \taginstance\\
                 \pcreturn \taginstance
             }
         \end{pchstack}
@@ -362,7 +370,7 @@ The AE schemes we will look at are constructed from the DEM and the MAC. Followi
             \messageinstance \result \text{E.dec}(\keyinstance{}1,\lockinstance,\ciphertextinstance') \\
             \taginstance' \result \text{M.mac}(\keyinstance{}2,\lockinstance,\messageinstance) \\
             \pcif \taginstance = \taginstance' : \pcreturn \messageinstance \\
-            \pcelse : \pcreturn \bot
+            \pcelse : \pcreturn \invalid
         }
     \end{pchstack}
 \caption{Calls based on N1}
@@ -383,7 +391,7 @@ The AE schemes we will look at are constructed from the DEM and the MAC. Followi
             \messageinstance \result \text{E.dec}(\keyinstance{}1,\lockinstance,\ciphertextinstance')\\
             \taginstance' \result \text{M.mac}(\keyinstance{}2,\lockinstance,\ciphertextinstance')\\
             \pcif \taginstance = \taginstance' : \pcreturn \messageinstance \\
-            \pcelse : \pcreturn \bot
+            \pcelse : \pcreturn \invalid
         }
     \end{pchstack}
 \caption{Calls based on N2}
@@ -404,13 +412,13 @@ The AE schemes we will look at are constructed from the DEM and the MAC. Followi
             (\messageinstance,\taginstance) \result \messageinstance'\\
             \taginstance' \result \text{M.mac}(\keyinstance{}2,\lockinstance,\messageinstance)\\
             \pcif \taginstance = \taginstance' : \pcreturn \messageinstance \\
-            \pcelse : \pcreturn \bot
+            \pcelse : \pcreturn \invalid
         }
     \end{pchstack}
 \caption{Calls based on N3}
 \end{figure}
 
-The scheme is considered secure when there is a tight reduction from breaking the AE-security of the scheme to breaking the defined security of the underlying primitives.
+\noindent The scheme is considered secure when there is a tight reduction from breaking the AE-security of the scheme to breaking the defined security of the underlying primitives.
 
 \section{Use cases}
 should consist of:
