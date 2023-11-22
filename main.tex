@@ -9,7 +9,7 @@
 \usepackage{rutitlepage}
 \usepackage{fancyhdr}
 \usepackage[style=ieee]{biblatex}
-\usepackage{cryptocode}
+\usepackage[operators]{cryptocode}
 \usepackage{amssymb}
 \addbibresource{cryptobib/crypto.bib}
 \GetFileInfo{rutitlepage.dtx}
@@ -155,7 +155,7 @@ should consist of:
                 \pcreturn \messageinstance
             }
         \end{pchstack}
-        \caption{L-MIOT-IND game, \adversary{} has access to oracles Oenc and Odec and the tags in line 10 and 15 are the same.}
+        \caption{L-MIOT-IND game, \adversary{} has access to oracles Oenc and Odec and the locks in line 10 and 15 are the same.}
     \end{figure}
     
     \item AMAC: the AMAC exists of tuple (M.mac,M.vrf). M.mac takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}. M.vrf takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, a message \messageinstance{} in \messagespace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and returns either \codetrue{} or \codefalse. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{}, all corresponding \ciphertextinstance{} \result M.mac(\keyinstance,\lockinstance,\messageinstance) gives M.vrf(\keyinstance,\lockinstance,\messageinstance,\ciphertextinstance) = \codetrue. The security of the AMAC is defined with \advantage{AMAC,\adversary,\users}{L-MIOT-UF} = $\text{Pr}[\text{L-MIOT-UF}_{\adversary,\users}]$, defined by the following game:
@@ -189,7 +189,7 @@ should consist of:
                 \pcelse : \pcreturn \codefalse
             }
         \end{pchstack}
-        \caption{L-MIOT-UF game, \adversary{} has access to oracles Omac and Ovrf and the tags in line 11 and 16 are the same.}
+        \caption{L-MIOT-UF game, \adversary{} has access to oracles Omac and Ovrf and the locks in line 11 and 16 are the same.}
     \end{figure}
 \end{itemize}
 
@@ -227,14 +227,39 @@ The security is defined by creating new A.enc' and A.dec' calls which are build 
 
 \subsubsection{used primitives}
 \begin{itemize}
-    \item nE: A nonce-based E scheme is defined by triple (\keyspace{},E,D). E is a deterministic encryption algorithm that takes three inputs (K,N,M) to a value C, the length of C only depends the length of K, N and M. When (K,N,M) is not in $\keyspace \times \noncespace \times \messagespace$, C will be \invalid. D is the decryption algorithm that takes three inputs (K,N,C) to a value M. E and D are inverse of each other implying correctness (if E(K,N,M) $= C \neq \invalid$, then D(K,N,C) = M) and tidiness (if D(K,N,C) $= M \neq \invalid$, then E(K,N,M) = C). The security is defined as follows:\\ \fbox{\includegraphics[scale = 0.8]{images/sec nE.png}}
-    \item MAC: The MAC is a deterministic algorithm F that takes in a K in \keyspace{} and a string x and outputs either a n-bit length T or \invalid. The domain of F is the set X such that F(K,x) $\neq \invalid$. The security of F is defined by \advantage{F}{pfr} =\probabilityblock{A}{}{F}{p}. the game on the left selects a random K from \keyspace{} and provides oracle access to F(K,.) the game on the right selects a uniformly random function p from X to \{1,0\}$^n$ and provide oracle access to it. With each oracle, queries outside X return \invalid.
+    \item nE: A nonce-based E scheme is defined by triple $\mathit{\Pi}$ = (\keyspace{},E,D). E is a deterministic encryption algorithm that takes three inputs (\keyinstance,\nonceinstance,\messageinstance) to a value \ciphertextinstance, the length of \ciphertextinstance{} only depends the length of \keyinstance, \nonceinstance{} and \messageinstance. When (\keyinstance,\nonceinstance,\messageinstance) is not in $\keyspace \times \noncespace \times \messagespace$, \ciphertextinstance{} will be \invalid. D is the decryption algorithm that takes three inputs (\keyinstance,\nonceinstance,\ciphertextinstance) to a value \messageinstance. E and D are inverse of each other implying correctness (if E(\keyinstance,\nonceinstance,\messageinstance) $= \ciphertextinstance \neq \invalid$, then D(\keyinstance,\nonceinstance,\ciphertextinstance) = \messageinstance) and tidiness (if D(\keyinstance,\nonceinstance,\ciphertextinstance) $= \messageinstance \neq \invalid$, then E(\keyinstance,\nonceinstance,
+    \messageinstance) = \ciphertextinstance). The security is defined as \advantage{$\mathit{\Pi}$,\adversary}{nE} = \probabilityblock{nE-IND\$}{\adversary}{1}{0}, where nE-IND\$ is defined as follows:
+    \begin{figure}[H]
+        \centering
+        \begin{pchstack}[boxed,center,space=0.5cm]
+            \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} nE-IND\$$^{b}_{\adversary}$ }]{
+                U = \emptyset\\
+                \keyinstance \sample \keyspace\\
+                b' \result \adversary\\
+                \pcreturn b'
+            }
+            \pseudocode[lnstart=4,linenumbering,head={\textbf{Oracle} Oenc(\nonceinstance,\messageinstance)}]{
+                \pcif \nonceinstance \in U : \pcreturn \invalid\\
+                U = U \cup \nonceinstance\\
+                \ciphertextinstance \result \text{E}(\keyinstance,\nonceinstance,\messageinstance)\\
+                \pcif b = 1 \wedge \ciphertextinstance \neq \invalid: \\
+                \t \ciphertextinstance \sample \{0,1\}^{\abs{\ciphertextinstance}}\\
+                \pcreturn \ciphertextinstance
+            }
+        \end{pchstack}
+        \caption{nE-IND\$ game, \adversary{} has access to oracles Oenc and $U$ is the set of used nonces}
+    \end{figure}
+
+
+    \item MAC: The MAC is a deterministic algorithm F that takes in a \keyinstance{} in \keyspace{} and a string \messageinstance{} and outputs either a n-bit length \taginstance{} or \invalid. The domain of F is the set X such that F(\keyinstance,\messageinstance) $\neq \invalid$. The security of F is defined by \advantage{F}{pfr} =\probabilityblock{A}{}{F}{p}. the game on the left selects a random \keyinstance{} from \keyspace{} and provides oracle access to F(\keyinstance,.) the game on the right selects a uniformly random function p from X to \{1,0\}$^n$ and provide oracle access to it. With each oracle, queries outside X return \invalid.
 \end{itemize}
 
 \subsubsection{goal}
 The end goal is a nonce-based authenticated encryption scheme (\keyspace{},E,D). E is a deterministic encryption algorithm that takes four inputs (K,N,A,M) to a value C, the length of C value only depends the length of K, N, A and M. When (K,N,A,M) is not in $\keyspace \times \noncespace \times \associateddataspace \times \messagespace$, C will be \invalid. D is the decryption algorithm that takes four inputs (K,N,A,C) to a value M. E and D are inverse of each other implying correctness (if E(K,N,A,M) $= C \neq \invalid$, then D(K,N,A,C) = M) and tidiness (if D(K,N,A,C) $= M \neq \invalid$, then E(K,N,A,M) = C)
 \subsubsection{Security model}
-Security is defined as follows: \\ \fbox{\includegraphics[scale = 0.88]{images/sec nAE.png}}\\
+Security is defined as follows: \\ \fbox{\includegraphics[scale = 0.88]{images/sec nAE.png}}
+
+\subsubsection{construction}
 We define the scheme secure if there is a tight reduction from breaking the nAE-security of the scheme to breaking the nE-security and the PRF security of the underlying primitives.
 
 \section{New Definition}
