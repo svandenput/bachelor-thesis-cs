@@ -1,5 +1,6 @@
 current todo's:
-- gcrec naar game
+- eigen games checken
+- one time user pfr mac uitzoeken
 - kijken of er meer constraints in de text staan voor bijde papers
 - section 4.4 verplaatsen/opsplitsen
 - to-scan scannen
@@ -8,8 +9,10 @@ current todo's:
 - boek lezen beetje
 
 vragen martijn:
-- wat is CPI-xxx security in automated analises en is het belangrijk? pdf 4
-- waarom specified Gcrec de ciphertext space niet? pdf 6 en maakt dat het gebruikt van ciphertextspace in 3.2.2 scuffed?
+- wat is CPI-xxx security in automated anylises en is het belangrijk? pdf 4
+- is het oke om de check op figure 1 line 17 van automated anylises bij Odec weg te laten?
+- waarom specified Gcrec de ciphertext space niet? pdf 6
+- hebben jullie wel access tot Reconsidering Generic Composition: The Tag-then-Encrypt Case
 
 vragen bart:
 
