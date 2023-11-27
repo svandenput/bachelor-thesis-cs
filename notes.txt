@@ -1,10 +1,7 @@
 current todo's:
-- eigen games checken
-- one time user pfr mac uitzoeken
+- lables bijwerken zonero
 - kijken of er meer constraints in de text staan voor bijde papers
-- section 4.4 verplaatsen/opsplitsen
 - to-scan scannen
-- citations toevoegen
 - beginnen met schrijven in main
 - boek lezen beetje
 
