@@ -56,9 +56,10 @@ Within the field of cryptography there are a two different fields, symmetric and
 should consist of:
 \begin{itemize}
     \item general notation
-    \item generic AE construction
-	\item generic PKE schemes
+    \item AE
+	\item PKE schemes
 	\item nonces vs locks (and different iv's)
+	\item game based security notions
 \end{itemize}
 
 \subsection{notation table}
@@ -133,7 +134,7 @@ Below are the security notations from \pkc{} that are relevent for this thesis. 
 
 \subsubsection{used primitives}
 \begin{itemize}
-    \item ADEM: the ADEM exists of tuple (A.enc,A.dec), A.enc takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}. A.dec takes a \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and outputs a message \messageinstance{} in \messagespace{} or \invalid{} to indicate rejection. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{} we have A.dec(\keyinstance,\lockinstance,A.enc(\keyinstance,\lockinstance,\messageinstance)) = \messageinstance. The security of the ADEM is defined with \advantage{ADEM,\adversary,\users}{l-miot-ind} = \probabilityblock{L-MIOT-IND}{\adversary,\users}{0}{1}, defined by the following game:
+    \item ADEM: the ADEM exists of tuple $(\text{A.enc}, \text{A.dec})$, A.enc is a deterministic algorithm that takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}. A.dec is a deterministic algorithm that takes a \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and outputs a message \messageinstance{} in \messagespace{} or \invalid{} to indicate rejection. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{} we have A.dec$(\keyinstance,\lockinstance,\text{A.enc}(\keyinstance,\lockinstance,\messageinstance))$ = \messageinstance. The security of the ADEM is defined with \advantage{ADEM,\adversary,\users}{l-miot-ind} = \probabilityblock{L-MIOT-IND}{\adversary,\users}{0}{1}, defined by the following game:
     \begin{figure}[H]
         \centering
         \begin{pchstack}[boxed,center,space=0.5cm]
@@ -145,7 +146,7 @@ Below are the security notations from \pkc{} that are relevent for this thesis. 
             b' \result \adversary\\
             \pcreturn b'
             }
-            \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Oenc(\user,\lockinstance,\messageinstance$_0$,\messageinstance$_1$)}]{
+            \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Oenc$(\user,\lockinstance,\messageinstance_0,\messageinstance_1)$}]{
                 \pcif C_\user \neq \emptyset: \pcreturn \invalid\\
                 \pcif \lockinstance \in L: \pcreturn \invalid\\
                 L \result L \cup \{\lockinstance\}\\
@@ -164,7 +165,7 @@ Below are the security notations from \pkc{} that are relevent for this thesis. 
         \caption{L-MIOT-IND game, \adversary{} has access to oracles Oenc and Odec and the locks in line 10 and 15 are the same. The corresponding game can be found in \pkc{} figure 9.}
     \end{figure}
     
-    \item AMAC: the AMAC exists of tuple (M.mac,M.vrf). M.mac takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}. M.vrf takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, a message \messageinstance{} in \messagespace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and returns either \codetrue{} or \codefalse. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{}, all corresponding \ciphertextinstance{} \result M.mac(\keyinstance,\lockinstance,\messageinstance) gives M.vrf(\keyinstance,\lockinstance,\messageinstance,\ciphertextinstance) = \codetrue. The security of the AMAC is defined with \advantage{AMAC,\adversary,\users}{L-MIOT-UF} = $\text{Pr}[\text{L-MIOT-UF}_{\adversary,\users}]$, defined by the following game:
+    \item AMAC: the AMAC exists of tuple $(\text{M.mac},\text{M.vrf})$. M.mac is a deterministic algorithm that takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}. M.vrf takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, a message \messageinstance{} in \messagespace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and returns either \codetrue{} or \codefalse. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{}, all corresponding \ciphertextinstance{} \result M.mac$(\keyinstance,\lockinstance,\messageinstance)$ gives M.vrf$(\keyinstance,\lockinstance,\messageinstance,\ciphertextinstance)$ = \codetrue. The security of the AMAC is defined with \advantage{AMAC,\adversary,\users}{L-MIOT-UF} = $\text{Pr}[\text{L-MIOT-UF}_{\adversary,\users}]$, defined by the following game:
     \begin{figure}[H]
         \centering
         \begin{pchstack}[boxed,center,space=0.5cm]
@@ -174,10 +175,10 @@ Below are the security notations from \pkc{} that are relevent for this thesis. 
             \pcfor \user \in [1..N]:\\
             \t \keyinstance_\user \sample \keyspace\\
             \t T_\user \result \emptyset\\
-            b' \result \adversary\\
-            \pcreturn b'
+            \textbf{run } \adversary\\
+            \pcreturn \text{forged}
             }
-            \pseudocode[lnstart=6,linenumbering,head={\textbf{Oracle} Omac(\user,\lockinstance,\messageinstance)}]{
+            \pseudocode[lnstart=6,linenumbering,head={\textbf{Oracle} Omac$(\user,\lockinstance,\messageinstance)$}]{
                 \pcif T_\user \neq \emptyset: \pcreturn \invalid\\
                 \pcif \lockinstance \in L: \pcreturn \invalid\\
                 L \result L \cup \{\lockinstance\}\\
@@ -186,7 +187,7 @@ Below are the security notations from \pkc{} that are relevent for this thesis. 
                 T_\user \result T_\user \cup \{(\messageinstance,\taginstance)\}\\
                 \pcreturn \taginstance
             }
-            \pseudocode[lnstart=13,linenumbering,head={\textbf{Oracle} Ovrf(\user,\messageinstance,\taginstance)}]{
+            \pseudocode[lnstart=13,linenumbering,head={\textbf{Oracle} Ovrf$(\user,\messageinstance,\taginstance)$}]{
                 \pcif T_\user = \emptyset: \pcreturn \invalid\\
                 \pcif (\messageinstance,\taginstance) \in T_\user: \pcreturn \invalid\\
                 \pcif \text{M.vrf}(\keyinstance_\user,\lockinstance_\user,\messageinstance,\taginstance): \\
@@ -200,7 +201,7 @@ Below are the security notations from \pkc{} that are relevent for this thesis. 
 \end{itemize}
 
 \subsubsection{goal}
-The goal is to make a scheme ADEM' exists of tuple (A.enc',A.dec') which has the same security of the ADEM, but is also secure against active attacks.
+The goal is to make a scheme ADEM' exists of tuple $(\text{A.enc'},\text{A.dec'})$ which has the same security of the ADEM, but is also secure against active attacks.
 
 \subsubsection{Security model}
 The security of the ADEM is defined with \advantage{ADEM',\adversary,\users}{l-miot-ind} = \probabilityblock{L-MIOT-IND}{\adversary,\users}{0}{1} where game L-MIOT-IND uses newly defined (A.enc',A.dec') instead of the former (A.enc,A.dec)
@@ -210,17 +211,17 @@ The goal is met by creating new A.enc' and A.dec' calls which are build using th
 \begin{figure}[H]
     \centering
     \begin{pchstack}[boxed,center,space=0.5cm]
-        \pseudocode[lnstart=-1,linenumbering,head={\textbf{Proc} A.enc'(\keyinstance,\lockinstance,\messageinstance)}]{
+        \pseudocode[lnstart=-1,linenumbering,head={\textbf{Proc} A.enc'$(\keyinstance,\lockinstance,\messageinstance)$}]{
         (\keyinstance_{dem},\keyinstance_{mac}) \result \keyinstance\\
         \ciphertextinstance' \result \text{A.enc}(\keyinstance_{dem},\lockinstance,\messageinstance)\\
         \taginstance \result \text{M.mac}(\keyinstance_{mac},\lockinstance,\ciphertextinstance')\\
         \ciphertextinstance \result (\ciphertextinstance',\taginstance)\\
         \pcreturn \ciphertextinstance
         }
-        \pseudocode[lnstart=5,linenumbering,head={\textbf{Proc} A.dec'(\keyinstance,\lockinstance,\ciphertextinstance)}]{
+        \pseudocode[lnstart=4,linenumbering,head={\textbf{Proc} A.dec'$(\keyinstance,\lockinstance,\ciphertextinstance)$}]{
             (\keyinstance_{dem},\keyinstance_{mac}) \result \keyinstance\\
             (\ciphertextinstance',\taginstance) \result \ciphertextinstance\\
-            \pcif \text{M.mac}(\keyinstance_{mac},\lockinstance,\ciphertextinstance',\taginstance):\\
+            \pcif \text{M.vrf}(\keyinstance_{mac},\lockinstance,\ciphertextinstance',\taginstance):\\
             \t \messageinstance \result \text{A.dec}(\keyinstance_{dem},\lockinstance,\ciphertextinstance')\\
             \t \pcreturn \messageinstance\\
             \pcelse : \pcreturn \invalid
@@ -228,7 +229,7 @@ The goal is met by creating new A.enc' and A.dec' calls which are build using th
     \end{pchstack}
     \caption{A.enc' and A.dec' calls, The corresponding calls can be found in \pkc{} figure 16.}
 \end{figure}
-\noindent The advantage is \advantage{ADEM',$A$,\users}{l-miot-ind} $\leq$ 2\advantage{AMAC,$B$,\users}{l-miot-uf} + \advantage{ADAM,$C$,\users}{l-miot-ind}. Where the running time of $B$ is at most that of $A$ plus the time required to run \users-many ADEM encapsulations and Qd-many ADEM decapsulations and the running time of $C$ is the same as the running time of $A$. Additionally, $B$ poses at most Qd-many Ovrf queries, and $C$ poses no Odec query.
+\noindent The construction is deemed secure as for any \users{} and a \adversary{} that makes $Q_d$ many Odec queries, the exist $B$ and $C$ such that \advantage{ADEM',$A$,\users}{l-miot-ind} $\leq$ 2\advantage{AMAC,$B$,\users}{l-miot-uf} + \advantage{ADAM,$C$,\users}{l-miot-ind} holds. Where the running time of $B$ is at most that of $A$ plus the time required to run \users-many ADEM encapsulations and $Q_d$-many ADEM decapsulations and the running time of $C$ is the same as the running time of $A$. Additionally, $B$ poses at most $Q_d$-many Ovrf queries, and $C$ poses no Odec query.
 
 \subsection{Existing notation from \gcrec}
 Below are the security notations from \gcrec{} that are relevent for this thesis. Some of the variable names are rewritten towards a common notation with \pkc.
@@ -237,8 +238,8 @@ Below are the security notations from \gcrec{} that are relevent for this thesis
 
 \subsubsection{used primitives}
     \begin{itemize}
-        \item nE: A nonce-based encryption scheme is defined by triple $\mathit{\Pi}$ = (\keyspace{},E,D). E is a deterministic encryption algorithm that takes three inputs (\keyinstance,\nonceinstance,\messageinstance) to a value \ciphertextinstance, the length of \ciphertextinstance{} only depends the length of \keyinstance, \nonceinstance{} and \messageinstance. When (\keyinstance,\nonceinstance,\messageinstance) is not in $\keyspace \times \noncespace \times \messagespace$, \ciphertextinstance{} will be \invalid. D is the decryption algorithm that takes three inputs (\keyinstance,\nonceinstance,\ciphertextinstance) to a value \messageinstance. E and D are inverse of each other implying correctness (if E(\keyinstance,\nonceinstance,\messageinstance) $= \ciphertextinstance \neq \invalid$, then D(\keyinstance,\nonceinstance,\ciphertextinstance) = \messageinstance) and tidiness (if D(\keyinstance,\nonceinstance,\ciphertextinstance) $= \messageinstance \neq \invalid$, then E(\keyinstance,\nonceinstance,
-        \messageinstance) = \ciphertextinstance). The security is defined as \advantage{$\mathit{\Pi}$,\adversary}{nE} = \probabilityblock{nE-IND\$}{\adversary}{0}{1}, where nE-IND\$ is defined as follows:
+        \item nE: A nonce-based encryption scheme is defined by triple $\mathit{\Pi}$ = $(\keyspace{},\text{E},\text{D})$. E is a deterministic encryption algorithm that takes three inputs $(\keyinstance,\nonceinstance,\messageinstance)$ to a value \ciphertextinstance, the length of \ciphertextinstance{} only depends the length of \keyinstance, \nonceinstance{} and \messageinstance. When $(\keyinstance,\nonceinstance,\messageinstance)$ is not in $\keyspace \times \noncespace \times \messagespace$, \ciphertextinstance{} will be \invalid. D is the decryption algorithm that takes three inputs $(\keyinstance,\nonceinstance,\ciphertextinstance)$ to a value \messageinstance. E and D are inverse of each other implying correctness (if E$(\keyinstance,\nonceinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then D$(\keyinstance,\nonceinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if D$(\keyinstance,\nonceinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then E$(\keyinstance,\nonceinstance,
+        \messageinstance)$ = \ciphertextinstance). The security is defined as \advantage{$\mathit{\Pi}$,\adversary}{nE} = \probabilityblock{nE-IND\$}{\adversary}{0}{1}, where nE-IND\$ is defined as follows:
         \begin{figure}[H]
             \centering
             \begin{pchstack}[boxed,center,space=0.5cm]
@@ -248,7 +249,7 @@ Below are the security notations from \gcrec{} that are relevent for this thesis
                     b' \result \adversary\\
                     \pcreturn b'
                 }
-                \pseudocode[lnstart=4,linenumbering,head={\textbf{Oracle} Oenc(\nonceinstance,\messageinstance)}]{
+                \pseudocode[lnstart=4,linenumbering,head={\textbf{Oracle} Oenc$(\nonceinstance,\messageinstance)$}]{
                     \pcif \nonceinstance \in U : \pcreturn \invalid\\
                     U = U \cup \nonceinstance\\
                     \ciphertextinstance \result \text{E}(\keyinstance,\nonceinstance,\messageinstance)\\
@@ -261,7 +262,7 @@ Below are the security notations from \gcrec{} that are relevent for this thesis
         \end{figure}
     
     
-        \item MAC: The MAC is a deterministic algorithm F that takes in a \keyinstance{} in \keyspace{} and a string \messageinstance{} and outputs either a n-bit length \taginstance{} or \invalid. The domain of F is the set X such that F(\keyinstance,\messageinstance) $\neq \invalid$. The security is defined as \advantage{F,\adversary}{MAC} = \probabilityblock{MAC-PRF}{\adversary}{0}{1}, where MAC-PRF is defined as follows:
+        \item MAC: The MAC is a deterministic algorithm F that takes in a \keyinstance{} in \keyspace{} and a string \messageinstance{} and outputs either a n-bit length \taginstance{} or \invalid. The domain of F is the set X such that F$(\keyinstance,\messageinstance)\neq \invalid$. The security is defined as \advantage{F,\adversary}{MAC} = \probabilityblock{MAC-PRF}{\adversary}{0}{1}, where MAC-PRF is defined as follows:
         \begin{figure}[H]
             \centering
             \begin{pchstack}[boxed,center,space=0.5cm]
@@ -285,7 +286,7 @@ Below are the security notations from \gcrec{} that are relevent for this thesis
     \end{itemize}
 
 \subsubsection{goal}
-The goal is a nonce-based authenticated encryption scheme defined by triple $\mathit{\Pi}$ = (\keyspace{},E,D). E is a deterministic encryption algorithm that takes four inputs (\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance) to a value \ciphertextinstance, the length of \ciphertextinstance{} only depends the length of \keyinstance, \nonceinstance, \associateddatainstance{} and \messageinstance. When (\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance) is not in $\keyspace \times \noncespace \times \associateddataspace \times \messagespace$, \ciphertextinstance{} will be \invalid. D is the decryption algorithm that takes four inputs (\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance) to a value \messageinstance. E and D are inverse of each other implying correctness (if E(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance) $= \ciphertextinstance \neq \invalid$, then D(\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance) = \messageinstance) and tidiness (if D(\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance) $= \messageinstance \neq \invalid$, then E(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance) = \ciphertextinstance)
+The goal is a nonce-based authenticated encryption scheme defined by triple $\mathit{\Pi}$ = $(\keyspace{},\text{E},\text{D})$. E is a deterministic encryption algorithm that takes four inputs $(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ to a value \ciphertextinstance, the length of \ciphertextinstance{} only depends the length of \keyinstance, \nonceinstance, \associateddatainstance{} and \messageinstance. When $(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ is not in $\keyspace \times \noncespace \times \associateddataspace \times \messagespace$, \ciphertextinstance{} will be \invalid. D is the decryption algorithm that takes four inputs $(\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance)$ to a value \messageinstance. E and D are inverse of each other implying correctness (if E$(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then D$(\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if D$(\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then E$(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ = \ciphertextinstance)
 
 \subsubsection{Security model}
 The security is defined as \advantage{$\mathit{\Pi}$,\adversary}{nAE} = \probabilityblock{nAE-IND\$}{\adversary}{0}{1}, where nAE-IND\$ is defined as follows:
@@ -299,7 +300,7 @@ The security is defined as \advantage{$\mathit{\Pi}$,\adversary}{nAE} = \probabi
                 b' \result \adversary\\
                 \pcreturn b'
             }
-            \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Oenc(\nonceinstance,\associateddatainstance,\messageinstance)}]{
+            \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Oenc$(\nonceinstance,\associateddatainstance,\messageinstance)$}]{
                 \pcif \nonceinstance \in U : \pcreturn \invalid\\
                 U = U \cup \nonceinstance\\
                 \pcif (\nonceinstance,\associateddatainstance,\messageinstance,\_) \in Q : \pcreturn \invalid\\
@@ -309,7 +310,7 @@ The security is defined as \advantage{$\mathit{\Pi}$,\adversary}{nAE} = \probabi
                 Q = Q \cup (\nonceinstance,\associateddatainstance,\messageinstance,\ciphertextinstance)\\
                 \pcreturn \ciphertextinstance
             }
-            \pseudocode[lnstart=13,linenumbering,head={\textbf{Oracle} Odec(\nonceinstance,\associateddatainstance,\messageinstance)}]{
+            \pseudocode[lnstart=13,linenumbering,head={\textbf{Oracle} Odec$(\nonceinstance,\associateddatainstance,\ciphertextinstance)$}]{
                 \pcif b = 1 : \pcreturn \bot\\
                 \pcif (\nonceinstance,\associateddatainstance,\_,\ciphertextinstance) \in Q : \pcreturn \invalid\\
                 \messageinstance \result \text{D} (\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance)\\
@@ -322,7 +323,7 @@ The security is defined as \advantage{$\mathit{\Pi}$,\adversary}{nAE} = \probabi
 
 \subsubsection{construction}
 The goal is met by creating different schemes that combine the mac and nE into a nAE.
-We define the constructions secure as there is a tight reduction from breaking the nAE-security of the scheme to breaking the nE-security and the PRF security of the underlying primitives. Three different schemes, named N1, N2 and N3 were proven to be secure the can be viewed in \gcrec figure 6.
+We define the constructions secure as there is a tight reduction from breaking the nAE-security of the scheme to breaking the nE-security and the PRF security of the underlying primitives. Three different schemes, named N1, N2 and N3 were proven to be secure the can be viewed in \gcrec{} figure 6.
 
 \section{New Definition}
 should consist of:
@@ -337,7 +338,7 @@ should consist of:
 \keyspace{} is a non-empty key space, \lockspace{} is a non-empty lock space and \messagespace{} is a message space. \messagespace{} contains at least two strings, and if it contains a string of length x, it must contain all strings of length x. \users{} is the number of users.
 
 \subsection{goal}
-The end goal is to build a lock-based one time use Authenticated Encryption scheme (loAE). The AE scheme is defined by tuple (AE.enc,AE.dec). AE.enc is a deterministic encryption algorithm that takes three inputs (\keyinstance,\lockinstance,\messageinstance) to a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. When (\keyinstance,\lockinstance,\messageinstance) is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. AE.dec is the decryption algorithm that takes three inputs (\keyinstance,n,\ciphertextinstance) to a value \messageinstance. AE.enc and EA.dec are inverse of each other implying correctness (if AE.enc(\keyinstance,\lockinstance,\messageinstance) $= \ciphertextinstance \neq \invalid$, then AE.dec(\keyinstance,\lockinstance,\ciphertextinstance) = \messageinstance) and tidiness (if AE.dec(\keyinstance,\lockinstance,\ciphertextinstance) $= \messageinstance \neq \invalid$, then AE.enc(\keyinstance,\lockinstance,\messageinstance) = \ciphertextinstance).
+The end goal is to build a lock-based one time use Authenticated Encryption scheme (loAE). The AE scheme is defined by tuple $(\text{AE.enc},\text{AE.dec})$. AE.enc is a deterministic encryption algorithm that takes three inputs $(\keyinstance,\lockinstance,\messageinstance)$ to a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. When $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. AE.dec is the decryption algorithm that takes three inputs $(\keyinstance,n,\ciphertextinstance)$ to a value \messageinstance. AE.enc and EA.dec are inverse of each other implying correctness (if AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ = \ciphertextinstance).
 
 \subsection{Security model}
 The security is defined as \advantage{\adversary,\users}{loAE} = \probabilityblock{loAE-IND\$}{\adversary,\users}{0}{1}, where loAE-IND\$ is defined as follows:
@@ -351,7 +352,7 @@ The security is defined as \advantage{\adversary,\users}{loAE} = \probabilityblo
         b' \result \adversary\\
         \pcreturn b'
         }
-        \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Oenc(\user,\lockinstance,\messageinstance)}]{
+        \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Oenc$(\user,\lockinstance,\messageinstance)$}]{
             \pcif C_\user \neq \invalid: \pcreturn \invalid\\
             \pcif \lockinstance \in L: \pcreturn \invalid\\
             L \result L \cup \{\lockinstance\}\\
@@ -362,7 +363,7 @@ The security is defined as \advantage{\adversary,\users}{loAE} = \probabilityblo
             C_\user \result \ciphertextinstance\\
             \pcreturn \ciphertextinstance
         }
-        \pseudocode[lnstart=14,linenumbering,head={\textbf{Oracle} Odec(\user,\ciphertextinstance)}]{
+        \pseudocode[lnstart=14,linenumbering,head={\textbf{Oracle} Odec$(\user,\ciphertextinstance)$}]{
             \pcif b = 1 : \pcreturn \bot\\
             \pcif C_\user = \invalid: \pcreturn \invalid\\
             \pcif \ciphertextinstance \in C_\user: \pcreturn \invalid\\
@@ -376,6 +377,7 @@ The security is defined as \advantage{\adversary,\users}{loAE} = \probabilityblo
 \section{Constructions}
 should consist of:
 \begin{itemize}
+    \item what old primitives to use
     \item the old primitives
 	\item how to construct the new primitive from old primitives
 	\item security bounds + proof
@@ -385,7 +387,7 @@ should consist of:
 \subsection{used primitives}
 \keyspace{} is a nonempty key space, \noncespace{} is a non-empty nonce space and \messagespace{} is a message space. \messagespace{} contain at least two strings, and if it contain a string of length x, it must contain all strings of length x. \users is the number of users.
 \begin{itemize}
-    \item loDEM: a lock-based one time use DEM scheme is defined by tuple (E.enc,E.dec). E.enc is a deterministic encryption algorithm that takes three inputs (\keyinstance,\lockinstance,\messageinstance) to a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. When (\keyinstance,\lockinstance,\messageinstance) is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. E.dec is the decryption algorithm that takes three inputs (\keyinstance,\lockinstance,\ciphertextinstance) to a value \messageinstance. E.enc and E.dec are inverse of each other implying correctness (if E.enc(\keyinstance,\lockinstance,\messageinstance) $= \ciphertextinstance \neq \invalid$, then E.dec(\keyinstance,\lockinstance,\ciphertextinstance) = \messageinstance) and tidiness (if E.dec(\keyinstance,\lockinstance,\ciphertextinstance) $= \messageinstance \neq \invalid$, then E.enc(\keyinstance,\lockinstance,\messageinstance) = \ciphertextinstance). The security is defined as \advantage{\adversary,\users}{loDEM} = \probabilityblock{loDEM-IND\$}{\adversary,\users}{0}{1}, where loDEM-IND\$ is defined as follows:
+    \item loDEM: a lock-based one time use DEM scheme is defined by tuple $(\text{E.enc},\text{E.dec})$. E.enc is a deterministic encryption algorithm that takes three inputs $(\keyinstance,\lockinstance,\messageinstance)$ to a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. When $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. E.dec is the decryption algorithm that takes three inputs $(\keyinstance,\lockinstance,\ciphertextinstance)$ to a value \messageinstance. E.enc and E.dec are inverse of each other implying correctness (if E.enc$(\keyinstance,\lockinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then E.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if E.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then E.enc$(\keyinstance,\lockinstance,\messageinstance)$ = \ciphertextinstance). The security is defined as \advantage{\adversary,\users}{loDEM} = \probabilityblock{loDEM-IND\$}{\adversary,\users}{0}{1}, where loDEM-IND\$ is defined as follows:
     \begin{figure}[H]
         \begin{pchstack}[boxed,center,space=0.5cm]
             \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} loDEM-IND\$$^{b}_{\adversary,\users}$ }]{
@@ -396,7 +398,7 @@ should consist of:
             b' \result \adversary\\
             \pcreturn b'
             }
-            \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Oenc(\user,\lockinstance,\messageinstance)}]{
+            \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Oenc$(\user,\lockinstance,\messageinstance)$}]{
                 \pcif C_\user \neq \invalid: \pcreturn \invalid\\
                 \pcif \lockinstance \in L: \pcreturn \invalid\\
                 L \result L \cup \{\lockinstance\}\\
@@ -411,7 +413,7 @@ should consist of:
     \caption{loDEM-IND\$}
     \end{figure}
     
-    \item loMAC: The lock-based one time use MAC is a deterministic algorithm M.mac that takes in a fixed length \keyinstance{} in \keyspace{}, a fixed length \lockinstance{} in \lockspace{} and a variable length message \messageinstance{} in \messagespace{} and outputs either a n-bit length tag or \invalid. The domain of M.mac is the set X such that M.mac(\keyinstance,\lockinstance,\messageinstance) $\neq \invalid$. the security is defined as \advantage{F,\adversary,\users}{loMAC} = \probabilityblock{loMAC-PRF}{\adversary,\users}{0}{1}, where loMAC-PRF is defined as follows:
+    \item loMAC: The lock-based one time use MAC is a deterministic algorithm M.mac that takes in a fixed length \keyinstance{} in \keyspace{}, a fixed length \lockinstance{} in \lockspace{} and a variable length message \messageinstance{} in \messagespace{} and outputs either a n-bit length tag or \invalid. The domain of M.mac is the set X such that M.mac$(\keyinstance,\lockinstance,\messageinstance)$ $\neq \invalid$. the security is defined as \advantage{F,\adversary,\users}{loMAC} = \probabilityblock{loMAC-PRF}{\adversary,\users}{0}{1}, where loMAC-PRF is defined as follows:
         \begin{figure}[H]
             \centering
             \begin{pchstack}[boxed,center,space=0.5cm]
@@ -423,7 +425,7 @@ should consist of:
                     b' \result A\\
                     \pcreturn b'
                 }
-                \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Omac(\user,\lockinstance,\messageinstance)}]{
+                \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Omac$(\user,\lockinstance,\messageinstance)$}]{
                     \pcif T_\user \neq \invalid: \pcreturn \invalid\\
                     \pcif \lockinstance \in L: \pcreturn \invalid\\
                     L \result L \cup \{\lockinstance\}\\
@@ -449,14 +451,14 @@ The loAE schemes we will look at are constructed from the loDEM and the loMAC. F
 
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
-        \pseudocode[lnstart=-1,linenumbering,head={AE.enc(\keyinstance,\lockinstance,\messageinstance)}]{
+        \pseudocode[lnstart=-1,linenumbering,head={AE.enc$(\keyinstance,\lockinstance,\messageinstance)$}]{
             (\keyinstance{}1,\keyinstance{}2) \result \keyinstance \\
             \ciphertextinstance' \result \text{E.enc}(\keyinstance{}1,\lockinstance,\messageinstance) \\
             \taginstance \result \text{M.mac}(\keyinstance{}2,\lockinstance,\messageinstance) \\
             \ciphertextinstance \result (\ciphertextinstance',\taginstance)\\
             \pcreturn \ciphertextinstance
         }
-        \pseudocode[lnstart=4,linenumbering,head={AE.dec(\keyinstance,\lockinstance,\ciphertextinstance)}]{
+        \pseudocode[lnstart=4,linenumbering,head={AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$}]{
             (\keyinstance{}1,\keyinstance{}2) \result \keyinstance \\
             (\ciphertextinstance',\taginstance) \result \ciphertextinstance \\
             \messageinstance \result \text{E.dec}(\keyinstance{}1,\lockinstance,\ciphertextinstance') \\
@@ -470,14 +472,14 @@ The loAE schemes we will look at are constructed from the loDEM and the loMAC. F
 
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
-        \pseudocode[lnstart=-1,linenumbering,head={AE.enc(\keyinstance,\lockinstance,\messageinstance)}]{
+        \pseudocode[lnstart=-1,linenumbering,head={AE.enc$(\keyinstance,\lockinstance,\messageinstance)$}]{
             (\keyinstance{}1,\keyinstance{}2) \result \keyinstance\\
             \ciphertextinstance' \result \text{E.enc}(\keyinstance{}1,\lockinstance,\messageinstance)\\
             \taginstance \result \text{M.mac}(\keyinstance{}2,\lockinstance,\ciphertextinstance')\\
             \ciphertextinstance \result (\ciphertextinstance',\taginstance)\\
             \pcreturn \ciphertextinstance
         }
-        \pseudocode[lnstart=4,linenumbering,head={AE.dec(\keyinstance,\lockinstance,\ciphertextinstance)}]{
+        \pseudocode[lnstart=4,linenumbering,head={AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$}]{
             (\keyinstance{}1,\keyinstance{}2) \result \keyinstance\\
             (\ciphertextinstance',\taginstance) \result \ciphertextinstance\\
             \messageinstance \result \text{E.dec}(\keyinstance{}1,\lockinstance,\ciphertextinstance')\\
@@ -491,14 +493,14 @@ The loAE schemes we will look at are constructed from the loDEM and the loMAC. F
 
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
-        \pseudocode[lnstart=-1,linenumbering,head={AE.enc(\keyinstance,\lockinstance,\messageinstance)}]{
+        \pseudocode[lnstart=-1,linenumbering,head={AE.enc$(\keyinstance,\lockinstance,\messageinstance)$}]{
             (\keyinstance{}1,\keyinstance{}2) \result \keyinstance\\
             \taginstance \result \text{M.mac}(\keyinstance{}2,\lockinstance,\messageinstance)\\
             \messageinstance' \result \messageinstance \concatinate \taginstance\\
             \ciphertextinstance \result E.enc(\keyinstance{}1,\lockinstance,\messageinstance')\\
             \pcreturn \ciphertextinstance
         }
-        \pseudocode[lnstart=4,linenumbering,head={AE.dec(\keyinstance,\lockinstance,\ciphertextinstance)}]{
+        \pseudocode[lnstart=4,linenumbering,head={AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$}]{
             (\keyinstance{}1,\keyinstance{}2) \result \keyinstance\\
             \messageinstance' \result \text{E.dec}(\keyinstance{}1,\lockinstance,\ciphertextinstance)\\
             (\messageinstance,\taginstance) \result \messageinstance'\\
@@ -510,7 +512,7 @@ The loAE schemes we will look at are constructed from the loDEM and the loMAC. F
 \caption{Calls based on N3}
 \end{figure}
 
-\noindent We define the constructions secure as there is a tight reduction from breaking the loAE-security
+\noindent We define the constructions secure if there is a tight reduction from breaking the loAE-security
 of the scheme to breaking the loDEM-security and the loMAC security of the underlying primitives.
 
 \section{Use cases}
