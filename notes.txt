@@ -1,14 +1,4 @@
 current todo's:
-- goal 3.1.3 beter uitleggen
-- if -> iff for nE
-- n -> {n} in fig 4
-- not mathematicly inverses fig 4 uitleg
-- fig 4 line 4 toevoegen
-- fig 4 invalid verplaatsen
-- fig 5 domain mag niet op k gebazeerd zijn
-- = naar <-
-- fig 7, in naar =
-- fig 9 mac-verf toevoegen
 - beginnen met schrijven in main
 - think about security bound and proves
 - kijken of er meer constraints in de text staan voor bijde papers
@@ -16,6 +6,8 @@ current todo's:
 - boek lezen beetje
 
 vragen martijn:
+- zijn changes in de loMAC-PRF prerequirements oke?
+- is fig 9 of 10 beter?
 - wat is CPI-xxx security in automated anylises en is het belangrijk? pdf 4
 - is het oke om de check op figure 1 line 17 van automated anylises bij Odec weg te laten?
 - waarom specified Gcrec de ciphertext space niet? pdf 6
