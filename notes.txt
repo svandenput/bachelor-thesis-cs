@@ -6,6 +6,7 @@ current todo's:
 - boek lezen beetje
 
 vragen martijn:
+- notation table is not final right?
 - zijn changes in de loMAC-PRF prerequirements oke?
 - is fig 9 of 10 beter?
 - wat is CPI-xxx security in automated anylises en is het belangrijk? pdf 4
@@ -14,3 +15,30 @@ vragen martijn:
 - hebben jullie wel access tot Reconsidering Generic Composition: The Tag-then-Encrypt Case
 
 vragen bart:
+
+
+schrijven progress:
+1: crude, kan update
+2: intro schrijven
+2.1: crude, kan update
+2.2: niets, kan af
+2.3: niets, miss niet nodig
+2.4: niets, kan af
+2.5: niets, kan af
+3: af?
+3.1: af?
+3.2: crude, kan af?
+4. intro schrijven
+4.1: mheee, kan af
+4.2: mheee, kan af
+4.3: crude, kan af
+5: intro schrijven
+5.1: crude, kan af?
+5.2: crude, kan af?
+6: intro schrijven
+6.1: niets, kan beginnen
+7: niets, niet sure of ik deze uberhaud wil houden
+8: niets, kan crude versie maken
+
+prio list:
+3.2
