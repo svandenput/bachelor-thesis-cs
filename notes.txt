@@ -8,7 +8,8 @@ current todo's:
 vragen martijn:
 - notation table is not final right?
 - zijn changes in de loMAC-PRF prerequirements oke?
-- is fig 9 of 10 beter?
+- is fig 10 of beter?
+- is er meer uitleg nodig bij 4
 - wat is CPI-xxx security in automated anylises en is het belangrijk? pdf 4
 - is het oke om de check op figure 1 line 17 van automated anylises bij Odec weg te laten?
 - waarom specified Gcrec de ciphertext space niet? pdf 6
@@ -25,9 +26,11 @@ schrijven progress:
 2.3: niets, miss niet nodig
 2.4: niets, kan af
 2.5: niets, kan af
+2.6: niets, kan af
+2.7: niets, kan nog niet beginnen
 3: af?
 3.1: af?
-3.2: crude, kan af?
+3.2: af?
 4. intro schrijven
 4.1: mheee, kan af
 4.2: mheee, kan af
@@ -35,10 +38,27 @@ schrijven progress:
 5: intro schrijven
 5.1: crude, kan af?
 5.2: crude, kan af?
+5.3: niets, moet papers gaan lezen
+5.4: niets, hele lage prio
 6: intro schrijven
 6.1: niets, kan beginnen
 7: niets, niet sure of ik deze uberhaud wil houden
 8: niets, kan crude versie maken
 
 prio list:
-3.2
+2: intro schrijven
+2.1: crude, kan update
+2.2: niets, kan af
+2.4: niets, kan af
+2.5: niets, kan af
+2.6: niets, kan af
+
+klaar voor laatse keer doornemen:
+4
+5
+
+klaar voor check:
+1
+3
+
+af:
