@@ -1,22 +1,13 @@
 current todo's:
-- beginnen met schrijven in main
+- schrijven in main
 - think about security bound and proves
 - kijken of er meer constraints in de text staan voor bijde papers
 - to-scan scannen
 - boek lezen beetje
 
 vragen martijn:
-- notation table is not final right?
-- zijn changes in de loMAC-PRF prerequirements oke?
-- is fig 10 of beter?
-- is er meer uitleg nodig bij 4
-- wat is CPI-xxx security in automated anylises en is het belangrijk? pdf 4
-- is het oke om de check op figure 1 line 17 van automated anylises bij Odec weg te laten?
-- waarom specified Gcrec de ciphertext space niet? pdf 6
-- hebben jullie wel access tot Reconsidering Generic Composition: The Tag-then-Encrypt Case
 
 vragen bart:
-
 
 schrijven progress:
 1: crude, kan update
@@ -33,8 +24,8 @@ schrijven progress:
 3.2: af?
 4. intro schrijven
 4.1: mheee, kan af
-4.2: mheee, kan af
-4.3: crude, kan af
+4.2: crude, kan af
+4.3: niets, kan af
 5: intro schrijven
 5.1: crude, kan af?
 5.2: crude, kan af?
@@ -44,21 +35,3 @@ schrijven progress:
 6.1: niets, kan beginnen
 7: niets, niet sure of ik deze uberhaud wil houden
 8: niets, kan crude versie maken
-
-prio list:
-2: intro schrijven
-2.1: crude, kan update
-2.2: niets, kan af
-2.4: niets, kan af
-2.5: niets, kan af
-2.6: niets, kan af
-
-klaar voor laatse keer doornemen:
-4
-5
-
-klaar voor check:
-1
-3
-
-af:
