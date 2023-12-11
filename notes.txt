@@ -1,12 +1,19 @@
+Feedback meeting:
+
 current todo's:
+- tweede bib file
 - schrijven in main
+- kijken naar wat Q precies doet in figure 3
+- 3.3 schrijven
+- ideal vs attainable uitwerken 4.3
 - think about security bound and proves
 - kijken of er meer constraints in de text staan voor bijde papers
 - to-scan scannen
 - boek lezen beetje
 
 vragen martijn:
-- bit stuck on section 3.1
+- extra reference onder fig 3 naar tocite
+- voor sec, is het nodig om alle opties te herevalueren, of is n1-3 overnemen goed genoeg
 
 vragen bart:
 
