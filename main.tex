@@ -67,15 +67,18 @@ ind-\$/ind-lor/ind-cpa/ind-cca also note active and passive attackers
 \subsection{Security Proofs}
 
 \section{\nrs{} and \gkp{} in Detail}
-In this section we explain the parts from \gkp{} and \nrs{} important to our work. Some notations will be different from the original papers for improved consistency. What are called tags in \gkp, we will call locks instead to avoid confusion with the output of mac and we call the output of the AMAC the tag instead of the ciphertext. The security notions from \nrs{} are written in a game-based format (\textbf{todo citation not yet in crypto.bib}) in order to better match the notation from \gkp{} and be more adaptable to a multi-user setting. afterwards, a comparison is made between the two.
+In this section we explain the parts from \gkp{} and \nrs{} important to our work. Afterwards, a comparison is made between the two papers. Some notations will be different from the original papers for improved consistency. What are called tags in \gkp, we will call locks instead to avoid confusion with the output of mac functions and we call the output of the AMAC the tag instead of the ciphertext. The security notions from \nrs{} are converted to a game-based format using insights from (\textbf{todo add citation for Automated Analysis of Protocols that use Authenticated Encryption: How Subtle AEAD}) in order to better match the notation from \gkp{} and be more adaptable to a multi-user setting.
 
 \subsection{\nrs}
-A paper written by Bellare and Namprempre \cite{AC:BelNam00} is reconsidered in \nrs. This paper discusses 3 generic ways to construct a authenticated encryption scheme: encrypt-then-mac, encrypt-and-mac and mac-then-encrypt. In this paper, encrypt-then-mac is considered the only secure one when using probabilistic encryption as a building block. Within \nrs{} these constructions are generalized to using nonce- or iv-based encryption as a building block to create nonce-based authenticated encryption schemes, nAEs for short. For this thesis we will look at the constructions using a nonce-based encryption, nE for short, and a PRF secure MAC function.
+Three generic ways to construct a authenticated encryption scheme are discussed in a paper written by Bellare and Namprempre \cite{AC:BelNam00}: encrypt-then-mac, encrypt-and-mac and mac-then-encrypt. In this paper, encrypt-then-mac is considered the only secure one when using probabilistic encryption as a building block. Within \nrs{} these constructions are generalized to using nonce- or iv-based encryption as a building block to create nonce-based authenticated encryption schemes, nAEs for short. We will look at the constructions using a nonce-based encryption, nE for short, and a PRF secure MAC function.
 
 \subsubsection{Used Primitives}
-\paragraph{nE:}
-A nonce-based encryption scheme is defined by triple $\mathit{\Pi}$ = $(\keyspace{},\text{E},\text{D})$. Deterministic encryption algorithm E takes three inputs $(\keyinstance,\nonceinstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends the length of \keyinstance, \nonceinstance{} and \messageinstance. If, and only if, $(\keyinstance,\nonceinstance,\messageinstance)$ is not in $\keyspace \times \noncespace \times \messagespace$, \ciphertextinstance{} will be \invalid. Decryption algorithm D takes three inputs $(\keyinstance,\nonceinstance,\ciphertextinstance)$ and outputs a value \messageinstance. Both E and D are required to satisfy correctness (if E$(\keyinstance,\nonceinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then D$(\keyinstance,\nonceinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if D$(\keyinstance,\nonceinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then E$(\keyinstance,\nonceinstance, \messageinstance)$ = \ciphertextinstance). The adversary \adversary{} is not allowed to repeat nonces. The security is defined as \advantage{$\mathit{\Pi}$,\adversary}{nE} = \probabilityblock{nE-IND\$}{\adversary}{0}{1}, where nE-IND\$ is in figure \ref{fig: nE-IND game}.
-\begin{figure}[H]
+\paragraph{nE}
+A nonce-based encryption scheme is defined by triple $\mathit{\Pi}$ = $(\keyspace{},\text{E},\text{D})$. Deterministic encryption algorithm E takes three inputs $(\keyinstance,\nonceinstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends the length of \keyinstance, \nonceinstance{} and \messageinstance. If, and only if, $(\keyinstance,\nonceinstance,\messageinstance)$ is not in $\keyspace \times \noncespace \times \messagespace$, \ciphertextinstance{} will be \invalid. Decryption algorithm D takes three inputs $(\keyinstance,\nonceinstance,\ciphertextinstance)$ and outputs a value \messageinstance. Both E and D are required to satisfy correctness (if E$(\keyinstance,\nonceinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then D$(\keyinstance,\nonceinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if D$(\keyinstance,\nonceinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then E$(\keyinstance,\nonceinstance, \messageinstance)$ = \ciphertextinstance).
+
+\paragraph{Security}
+The security of a nE is defined as \advantage{$\mathit{\Pi}$,\adversary}{nE} = \probabilityblock{nE-IND\$}{\adversary}{0}{1}, where nE-IND\$ is in figure \ref{fig: nE-IND game}. In this game, set $U$ keeps track of all used nonces as the adversary is not allowed to repeat those.
+\begin{figure}
     \centering
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} nE-IND\$$^{b}_{\adversary}$ }]{
@@ -93,13 +96,16 @@ A nonce-based encryption scheme is defined by triple $\mathit{\Pi}$ = $(\keyspac
             \pcreturn \ciphertextinstance
         }
     \end{pchstack}
-    \caption{nE-IND\$ game, \adversary{} has access to oracle Oenc and $U$ is the set of used nonces.}
+    \caption{nE-IND\$ game, \adversary{} has access to oracle Oenc.}
     \label{fig: nE-IND game}
 \end{figure}
     
-\paragraph{MAC:}
-A MAC scheme is defined by algorithm F that takes a key \keyinstance{} in \keyspace{} and a string \messageinstance{} and outputs either a n-bit length tag \taginstance{} or \invalid. The domain of F is the set X such that all x = F$(\keyinstance,\messageinstance)\neq \invalid$ is in X, this domain may not depend on \keyinstance. The security is defined as \advantage{F,\adversary}{MAC} = \probabilityblock{MAC-PRF}{\adversary}{0}{1}, where MAC-PRF is in figure \ref{fig: MAC-PRF}.
-    \begin{figure}[H]
+\paragraph{MAC}
+A MAC scheme is defined by algorithm F that takes a key \keyinstance{} in \keyspace{} and a string \messageinstance{} and outputs either a n-bit tag \taginstance{} or \invalid. The domain of F is the set X off al m such that F$(\keyinstance,\messageinstance)\neq \invalid$ is in X, this domain may not depend on \keyinstance.
+
+\paragraph{Security}
+The security of a MAC is defined as \advantage{F,\adversary}{MAC} = \probabilityblock{MAC-PRF}{\adversary}{0}{1}, where MAC-PRF is in figure \ref{fig: MAC-PRF}. In this game the set $U$ keeps track of the used messages to prevent trivial wins.
+    \begin{figure}
         \centering
         \begin{pchstack}[boxed,center,space=0.5cm]
             \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} MAC-PRF$^{b}_{\adversary}$ }]{
@@ -122,8 +128,11 @@ A MAC scheme is defined by algorithm F that takes a key \keyinstance{} in \keysp
     \end{figure}
 
 \subsubsection{Nonce-Based Authenticated Encryption}
-A nonce-based authenticated encryption scheme is defined by triple $\mathit{\Pi}$ = $(\keyspace{},\text{E},\text{D})$. Deterministic encryption algorithm E takes four inputs $(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends the length of \keyinstance, \nonceinstance, \associateddatainstance{} and \messageinstance. If, and only if, $(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ is not in $\keyspace \times \noncespace \times \associateddataspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Decryption algorithm D takes four inputs $(\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance)$ and outputs a value \messageinstance. both E and D are required to satisfy correctness (if E$(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then D$(\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if D$(\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then E$(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ = \ciphertextinstance). The adversary \adversary{} is not allowed to repeat nonces. The security is defined as \advantage{$\mathit{\Pi}$,\adversary}{nAE} = \probabilityblock{nAE-IND\$}{\adversary}{0}{1}, where nAE-IND\$ is in figure \ref{fig: nAE-IND game}.
-    \begin{figure}[H]
+A nonce-based authenticated encryption scheme is defined by triple $\mathit{\Pi}$ = $(\keyspace{},\text{E},\text{D})$. Deterministic encryption algorithm E takes four inputs $(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends the length of \keyinstance, \nonceinstance, \associateddatainstance{} and \messageinstance. If, and only if, $(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ is not in $\keyspace \times \noncespace \times \associateddataspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Decryption algorithm D takes four inputs $(\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance)$ and outputs a value \messageinstance. both E and D are required to satisfy correctness (if E$(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then D$(\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if D$(\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then E$(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ = \ciphertextinstance). 
+
+\paragraph{Security}
+The security of a nAE is defined as \advantage{$\mathit{\Pi}$,\adversary}{nAE} = \probabilityblock{nAE-IND\$}{\adversary}{0}{1}, where nAE-IND\$ is in figure \ref{fig: nAE-IND game}. In this game, set $U$ keeps track of all used nonces as the adversary is not allowed to repeat those. Following the translation of IND\$ to a security game for AE from (\textbf{todo add citation for Automated Analysis of Protocols that use Authenticated Encryption: How Subtle AEAD}), \_ denotes a variable that is irrelevant and set $Q$ keeps tack of all query results in order to prevent trivial wins.
+    \begin{figure}
         \centering
         \begin{pchstack}[boxed,center,space=0.5cm]
             \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} nAE-IND\$$^{b}_{\adversary}$ }]{
@@ -151,7 +160,7 @@ A nonce-based authenticated encryption scheme is defined by triple $\mathit{\Pi}
                 \pcreturn \messageinstance
             }
         \end{pchstack}
-        \caption{nAE-IND\$ game, \adversary{} has access to oracles Oenc and Odec, $U$ is the set of used nonces and $Q$ is the set of query results. \_ denotes a variable that is irrelevant. Decryption queries are added to Q, in contrast to \gkp, as encryption is still allowed after decryption.}
+        \caption{nAE-IND\$ game, \adversary{} has access to oracles Oenc and Odec.}
         \label{fig: nAE-IND game}
     \end{figure}
 
@@ -159,12 +168,16 @@ A nonce-based authenticated encryption scheme is defined by triple $\mathit{\Pi}
 A nAE scheme is constructed by several different schemes that combine the mac and nE into a nAE. We define the constructions secure as there is a tight reduction from breaking the nAE-security of the scheme to breaking the nE-security and the PRF security of the underlying primitives. Three different schemes, named N1, N2 and N3 were proven to be secure they can be viewed in figure 6 of \nrs{}. Noteworthy is that these relate to encrypt-and-mac, encrypt-then-mac,and mac-then-encrypt respectively, showing the general believe that encrypt-then-mac is the only safe construction does not transfer to this setting.
 
 \subsection{\gkp}
-In \gkp{}, the concept of augmentation using locks is introduced. The authors start by showing some data encapsulation mechanisms are vulnerable to a passive multi-instance distinguishing- and key recovery attack in a one time use setting. The define the augmented data encapsulation mechanisms, ADEM for short, that uses locks to negate these insecurities. They follow by discussing how a ADEM that is secure against passive attacks can be combined with a MAC that is augmented in a similar fashion, called a AMAC, to construct ADEM' that is safe against active attackers. This construction is similar to construction N2 from \nrs. In \gkp{} \messagespace{} is not required to contain at least two strings, and to contain all strings of length x if it contains a string of length x. Additionally, \keyspace{} is required to be finite but not required to be non-empty. 
+In \gkp{}, the concept of augmentation using locks is discussed. The authors start by showing some data encapsulation mechanisms are vulnerable to a passive multi-instance distinguishing- and key recovery and how this can lead to problems when used in public key encryption. They define the augmented data encapsulation mechanisms, ADEM for short, that uses locks to negate these insecurities. Additionally, they show how a ADEM that is secure against passive attacks can be combined with a MAC that is augmented in a similar fashion, called a AMAC, to construct ADEM' that is safe against active attackers. This construction is similar to construction N2 from \nrs.
 
 \subsubsection{Used Primitives}
-\paragraph{ADEM:}
-A ADEM scheme is defined by tuple $(\text{A.enc}, \text{A.dec})$. Deterministic algorithm A.enc takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}.  Deterministic algorithm A.dec takes a \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and outputs a message \messageinstance{} in \messagespace{} or \invalid{} to indicate rejection. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{} we have A.dec$(\keyinstance,\lockinstance,\text{A.enc}(\keyinstance,\lockinstance,\messageinstance))$ = \messageinstance. The user is only allowed one encryption query and locks may not repeat between users. Decryption queries are only allowed after the encryption. The security of the ADEM is defined as \advantage{ADEM,\adversary,\users}{l-ind-cpa} = \probabilityblock{L-IND-CPA}{\adversary,\users}{0}{1}, where L-IND-CPA is in figure \ref{fig: L-IND-CPA game}.
-\begin{figure}[H]
+In \gkp{}, \messagespace{} is not required to contain at least two strings, and to contain all strings of length x if it contains a string of length x. Additionally, \keyspace{} is required to be finite but not required to be non-empty. 
+\paragraph{ADEM}
+A ADEM scheme is defined by tuple $(\text{A.enc}, \text{A.dec})$. Deterministic algorithm A.enc takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}.  Deterministic algorithm A.dec takes a \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and outputs a message \messageinstance{} in \messagespace{} or \invalid{} to indicate rejection. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{} we have A.dec$(\keyinstance,\lockinstance,\text{A.enc}(\keyinstance,\lockinstance,\messageinstance))$ = \messageinstance. 
+
+\paragraph{Security}
+The security of a ADEM is defined as \advantage{ADEM,\adversary,\users}{l-ind-cpa} = \probabilityblock{L-IND-CPA}{\adversary,\users}{0}{1}, where L-IND-CPA is in figure \ref{fig: L-IND-CPA game}. Every user is only allowed one encryption query and locks may not repeat between users. Decryption queries are only allowed after the encryption. The corresponding game can be found in figure 9 from \gkp{}, note that this figure also included a decryption oracle the adversary is not allowed to use. (\textbf{Question: I do not really know if I should elaborate on how this translates to the game, as the game is based on the game of gkp})
+\begin{figure}
     \centering
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} L-IND-CPA$^{b}_{\adversary,\users}$ }]{
@@ -185,13 +198,16 @@ A ADEM scheme is defined by tuple $(\text{A.enc}, \text{A.dec})$. Deterministic 
             \pcreturn \ciphertextinstance
         }
     \end{pchstack}
-    \caption{L-IND-CPA game, \adversary{} has access to oracle Oenc. The corresponding game can be found in figure 9 from \gkp{} (note that this has a decryption oracle the ADEM is not allowed to use).}
+    \caption{L-IND-CPA game, \adversary{} has access to oracle Oenc.}
     \label{fig: L-IND-CPA game}
 \end{figure}
 
-\paragraph{AMAC:}
-A AMAC scheme is defined by tuple $(\text{M.mac},\text{M.vrf})$. Deterministic algorithm M.mac takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, and a message \messageinstance{} in \messagespace{} and outputs a tag \taginstance{} in \tagspace{}. Deterministic algorithm M.vrf takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, a message \messageinstance{} in \messagespace{} and a ciphertext \taginstance{} in \tagspace{} and returns either \codetrue{} or \codefalse. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{}, all corresponding \taginstance{} \result M.mac$(\keyinstance,\lockinstance,\messageinstance)$ gives M.vrf$(\keyinstance,\lockinstance,\messageinstance,\taginstance)$ = \codetrue. The user is only allowed one mac query and locks may not repeat between users. Verification queries are only allowed after the encryption. The security of the AMAC is defined as \advantage{AMAC,\adversary,\users}{L-MIOT-UF} = $\text{Pr}[\text{L-MIOT-UF}_{\adversary,\users} = 1]$, where L-MIOT-UF is in \ref{fig: L-MIOT-UF game}.
-\begin{figure}[H]
+\paragraph{AMAC}
+A AMAC scheme is defined by tuple $(\text{M.mac},\text{M.vrf})$. Deterministic algorithm M.mac takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, and a message \messageinstance{} in \messagespace{} and outputs a tag \taginstance{} in \tagspace{}. Deterministic algorithm M.vrf takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, a message \messageinstance{} in \messagespace{} and a ciphertext \taginstance{} in \tagspace{} and returns either \codetrue{} or \codefalse. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{}, all corresponding \taginstance{} \result M.mac$(\keyinstance,\lockinstance,\messageinstance)$ gives M.vrf$(\keyinstance,\lockinstance,\messageinstance,\taginstance)$ = \codetrue. 
+
+\paragraph{Security}
+The security of a AMAC is defined as \advantage{AMAC,\adversary,\users}{L-MIOT-UF} = $\text{Pr}[\text{L-MIOT-UF}_{\adversary,\users} = 1]$, where L-MIOT-UF is in \ref{fig: L-MIOT-UF game}. Every user is only allowed one mac query and locks may not repeat between users. Verification queries are only allowed after the encryption. The corresponding game can be found in figure 15 of \gkp{}.
+\begin{figure}
     \centering
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} L-MIOT-UF$_{\adversary,\users}$ }]{
@@ -221,13 +237,16 @@ A AMAC scheme is defined by tuple $(\text{M.mac},\text{M.vrf})$. Deterministic a
             \pcelse : \pcreturn \codefalse
         }
     \end{pchstack}
-    \caption{L-MIOT-UF game, \adversary{} has access to oracles Omac and Ovrf and the locks in line 11 and 16 are the same. The corresponding game can be found in figure 15 of \gkp{}.}
+    \caption{L-MIOT-UF game, \adversary{} has access to oracles Omac and Ovrf and the locks in line 11 and 16 are the same.}
     \label{fig: L-MIOT-UF game}
 \end{figure}
 
 \subsubsection{ADEM'}
-A ADEM' scheme is defined by tuple $(\text{A.enc'}, \text{A.dec'})$. Deterministic algorithm A.enc' takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}. Deterministic algorithm A.dec' takes a \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and outputs a message \messageinstance{} in \messagespace{} or \invalid{} to indicate rejection. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{} we have A.dec'$(\keyinstance,\lockinstance,\text{A.enc'}(\keyinstance,\lockinstance,\messageinstance))$ = \messageinstance. The user is only allowed one encryption query and locks may not repeat between users. Decryption queries are only allowed after the encryption. The security of the ADEM' is defined as \advantage{ADEM',\adversary,\users}{l-ind-cca} = \probabilityblock{L-IND-CCA}{\adversary,\users}{0}{1}, where L-IND-CCA is in \ref{fig: L-IND-CCA game}.
-\begin{figure}[H]
+A ADEM' scheme is defined by tuple $(\text{A.enc'}, \text{A.dec'})$. Deterministic algorithm A.enc' takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}. Deterministic algorithm A.dec' takes a \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and outputs a message \messageinstance{} in \messagespace{} or \invalid{} to indicate rejection. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{} we have A.dec'$(\keyinstance,\lockinstance,\text{A.enc'}(\keyinstance,\lockinstance,\messageinstance))$ = \messageinstance.
+
+\paragraph{Security}
+The security of a ADEM' is defined as \advantage{ADEM',\adversary,\users}{l-ind-cca} = \probabilityblock{L-IND-CCA}{\adversary,\users}{0}{1}, where L-IND-CCA is in \ref{fig: L-IND-CCA game}. Every user is only allowed one encryption query and locks may not repeat between users. Decryption queries are only allowed after the encryption. The corresponding game can be found in figure 9 of \gkp{}.
+\begin{figure}
     \centering
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} L-IND-CCA$^{b}_{\adversary,\users}$ }]{
@@ -254,13 +273,13 @@ A ADEM' scheme is defined by tuple $(\text{A.enc'}, \text{A.dec'})$. Determinist
             \pcreturn \messageinstance
         }
     \end{pchstack}
-    \caption{L-IND-CCA game, \adversary{} has access to oracles Oenc and Odec and the locks in line 10 and 15 are the same. The corresponding game can be found in figure 9 of \gkp{}.}
+    \caption{L-IND-CCA game, \adversary{} has access to oracles Oenc and Odec and the locks in line 10 and 15 are the same.}
     \label{fig: L-IND-CCA game}
 \end{figure}
 
 \subsubsection{Construction}
 The ADEM' scheme considered is made by creating A.enc' and A.dec' calls using the calls the primitives provide us as seen in figure \ref{fig: A.enc' and A.dec' calls}.
-\begin{figure}[H]
+\begin{figure}
     \centering
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Proc} A.enc'$(\keyinstance,\lockinstance,\messageinstance)$}]{
@@ -284,15 +303,27 @@ The ADEM' scheme considered is made by creating A.enc' and A.dec' calls using th
 \end{figure}
 \noindent The construction is deemed secure as for any \users{} and a \adversary{} that makes $Q_d$ many Odec queries, the exist $B$ and $C$ such that \advantage{ADEM',$A$,\users}{l-ind-cca} $\leq$ 2\advantage{AMAC,$B$,\users}{l-miot-uf} + \advantage{ADAM,$C$,\users}{l-ind-cpa} holds. Where the running time of $B$ is at most that of $A$ plus the time required to run \users-many ADEM encapsulations and $Q_d$-many ADEM decapsulations and the running time of $C$ is the same as the running time of $A$. Additionally, $B$ poses at most $Q_d$-many Ovrf queries, and $C$ poses no Odec query.
 
-\section{Defining the new primitive}
+\subsection{Comparison of \gkp{} and \nrs}
+In this section we will highlight the important differences between \gkp{} and \nrs{}. (\textbf{Question: I feel like this section is very factual right now, while it might also be worthwhile to elaborate on some things a bit more.})
+
+\paragraph{Setting}
+\nrs{} is written is single-user, multiple-use key setting while \gkp{} is written is a multi-user, single-use key setting. As a result, \gkp{} uses locks while \nrs{} uses nonces. (\textbf{Question: is it necessary to elaborate on how these settings lead to lock, or nonce usage, or would it suffice to explain this in section 2.4}).
+
+\paragraph{Aim}
+While \nrs{} is aimed at generalizing the AE constructions, \gkp{} is aimed aimed at finding a single construction that is safe when used in public key encryption. Most notably, this results in \nrs{} evaluating 20 possible constructions while \gkp{} evaluates one. Additionally, the constructions from \nrs{} are able to use AD while the construction form \gkp{} cannot.
+
+\paragraph{Security Notion}
+The security notions of \nrs{} are written in a IND\$ fashion while the security notions of \gkp{} are written in a lor fashion. In other words, \nrs{} requires the valid ciphertext to be indistinguishable from random strings, \gkp{} only requires them to be indistinguishable from each other. As a result, the MAC primitives of the two papers have different security requirements. In \nrs{}, the tag is required to be indistinguishable from a random string while in \gkp{} the tag is only required to be unforgeable.
+
+\section{Defining the New Primitive}
 In this section we will discuss a new security primitive, the lock-based one time use Authenticated Encryption scheme, loAE scheme for short. As the name suggests, this primitive is used in a setting where a key is used only once to encrypt and authenticate a single message. We uses locks instead of nonces, as you will never have to decrypt messages with multiple nonces for a single user. Below, we discuss the notation of the loAE.
 
 \subsection{loAE}
 A loAE scheme is defined by tuple $(\text{AE.enc},\text{AE.dec})$. Deterministic algorithm AE.enc takes three inputs $(\keyinstance,\lockinstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. If, and only if $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Deterministic algorithm AE.dec takes three inputs $(\keyinstance,n,\ciphertextinstance)$ and outputs a value \messageinstance. Both AE.enc and EA.dec are required to satisfy correctness (if AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ = \ciphertextinstance).
 
 \subsection{Security Model}
-To define the security, we use a ind\$ security notion instead of left-or-right one as, in our setting, ind\$ is the stronger security notion. (\textbf{todo: add citation}) We use a function that always returns \invalid{} on decryption calls to ensure the adversary can not guess which ciphertexts would be valid ciphertexts. To match our setting, the user is only allowed one encryption query, locks may not repeat between users and decryption queries are only allowed after the encryption.The security is defined as \advantage{\adversary,\users}{loAE} = \probabilityblock{loAE-IND\$}{\adversary,\users}{0}{1}, where loAE-IND\$ is in figure \ref{fig: nAE-IND game}.
-\begin{figure}[H]
+To define the security, we use a ind\$ security notion instead of left-or-right one as, in our setting, ind\$ is the stronger security notion. (\textbf{Question: is it necessary to elaborate on how this here, or would it suffice to explain this in section 2.6}) We use a function that always returns \invalid{} on decryption calls to ensure the adversary can not guess which ciphertexts would be valid ciphertexts. To match our setting, the user is only allowed one encryption query, locks may not repeat between users and decryption queries are only allowed after the encryption.The security is defined as \advantage{\adversary,\users}{loAE} = \probabilityblock{loAE-IND\$}{\adversary,\users}{0}{1}, where loAE-IND\$ is in figure \ref{fig: nAE-IND game}.
+\begin{figure}
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} loAE-IND\$$^{b}_{\adversary,\users}$ }]{
         L \result \emptyset\\
@@ -314,10 +345,10 @@ To define the security, we use a ind\$ security notion instead of left-or-right 
             \pcreturn \ciphertextinstance
         }
         \pseudocode[lnstart=14,linenumbering,head={\textbf{Oracle} Odec$(\user,\ciphertextinstance)$}]{
-            \pcif b = 1 : \pcreturn \bot\\
             \pcif C_\user = \invalid: \pcreturn \invalid\\
             \pcif \ciphertextinstance = C_\user: \pcreturn \invalid\\
             \messageinstance \result \text{AE.dec}(\keyinstance_\user,\lockinstance_\user,\ciphertextinstance)\\
+            \pcif b = 1 : \messageinstance = \bot\\
             \pcreturn \messageinstance
         }
     \end{pchstack}
@@ -344,10 +375,10 @@ In this subsection we will discuss the security game loAE-IND\$ line by line.\\
 \textit{line 12:} The random function samples a string with the uniformly at random from the set of all strings with the length of the ciphertext. \textbf{(todo: add part about ideal vs attainable)}
 \textit{line 13:} The computed ciphertext is bound to the user-ciphertext. \textbf{(todo: add part about the fact that this might be \invalid)}
 \textit{line 14:} Return the ciphertext.
-\textit{line 15:} The ideal world always returns \invalid{}.
-\textit{line 16:} If the user-ciphertext is not defined, decryption is not allowed and we return \invalid.
-\textit{line 17:} If the input ciphertext of Odec is allowed to be the same as the user-ciphertext, then it is trivial to distinguish as in this case the ideal words will return \invalid{} while the real world does not. For this reason the real world should return \invalid{} as well.
-\textit{line 18:} If these checks pass, we decrypt the ciphertext.
+\textit{line 15:} If the user-ciphertext is not defined, decryption is not allowed and we return \invalid.
+\textit{line 16:} If the input ciphertext of Odec is allowed to be the same as the user-ciphertext, then it is trivial to distinguish as in this case the ideal words will return \invalid{} while the real world does not. For this reason the real world should return \invalid{} as well.
+\textit{line 17:} If these checks pass, we decrypt the ciphertext.
+\textit{line 18:} The ideal world always returns \invalid{}.
 \textit{line 19:} We return the decrypted message.\\
 \hline
 \end{tabular}
@@ -356,9 +387,12 @@ In this subsection we will discuss the security game loAE-IND\$ line by line.\\
 In this section we discuss how we can construct a safe loAE. Similarly to \gkp{} and \nrs{} we will look at constructions combining a deterministic encryption primitive and mac primitive. First write down the definitions of these two primitives, then we will look at how we can combine the two and which security bounds we can expect. Lastly we compare our choices with existing alternatives.
 
 \subsection{Used Primitives}
-\paragraph{loE:}
-A lock-based one time use encryption scheme, loE for short, is defined by tuple $(\text{E.enc},\text{E.dec})$. Deterministic algorithm E.enc takes three inputs $(\keyinstance,\lockinstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. If, and only if, $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Deterministic algorithm E.dec takes three inputs $(\keyinstance,\lockinstance,\ciphertextinstance)$ and outputs a value \messageinstance. Both E.enc and E.dec are required to satisfy correctness (if E.enc$(\keyinstance,\lockinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then E.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if E.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then E.enc$(\keyinstance,\lockinstance,\messageinstance)$ = \ciphertextinstance). The user is only allowed one encryption query and locks may not repeat between users. Decryption queries are only allowed after the encryption. The security is defined as \advantage{\adversary,\users}{loE} = \probabilityblock{loE-IND\$}{\adversary,\users}{0}{1}, where loE-IND\$ is in figure \ref{fig: loE-IND game}.
-    \begin{figure}[H]
+\paragraph{loE}
+A lock-based one time use encryption scheme, loE for short, is defined by tuple $(\text{E.enc},\text{E.dec})$. Deterministic algorithm E.enc takes three inputs $(\keyinstance,\lockinstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. If, and only if, $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Deterministic algorithm E.dec takes three inputs $(\keyinstance,\lockinstance,\ciphertextinstance)$ and outputs a value \messageinstance. Both E.enc and E.dec are required to satisfy correctness (if E.enc$(\keyinstance,\lockinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then E.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if E.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then E.enc$(\keyinstance,\lockinstance,\messageinstance)$ = \ciphertextinstance). 
+
+\paragraph{Security}
+The security of a loE is defined as \advantage{\adversary,\users}{loE} = \probabilityblock{loE-IND\$}{\adversary,\users}{0}{1}, where loE-IND\$ is in figure \ref{fig: loE-IND game}. The user is only allowed one encryption query and locks may not repeat between users. Decryption queries are only allowed after the encryption.
+    \begin{figure}
         \begin{pchstack}[boxed,center,space=0.5cm]
             \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} loE-IND\$$^{b}_{\adversary,\users}$ }]{
             L \result \emptyset\\
@@ -384,9 +418,12 @@ A lock-based one time use encryption scheme, loE for short, is defined by tuple 
     \label{fig: loE-IND game}
     \end{figure}
     
-\paragraph{loMAC:}
-A lock-based one time use MAC is a deterministic algorithm M.mac that takes a fixed length \keyinstance{} in \keyspace{}, a fixed length \lockinstance{} in \lockspace{} and a variable length message \messageinstance{} in \messagespace{} and outputs either a n-bit length string we call tag \taginstance, or \invalid. If, and only if, $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \taginstance{} will be \invalid. The user is only allowed one mac query and locks may not repeat between users. Verification queries are only allowed after the encryption. the security is defined as \advantage{F,\adversary,\users}{loMAC} = \probabilityblock{loMAC-PRF}{\adversary,\users}{0}{1}, where loMAC-PRF is in figure \ref{fig: loMAC-PRF game}.
-    \begin{figure}[H]
+\paragraph{loMAC}
+A lock-based one time use MAC is a deterministic algorithm M.mac that takes a fixed length \keyinstance{} in \keyspace{}, a fixed length \lockinstance{} in \lockspace{} and a variable length message \messageinstance{} in \messagespace{} and outputs either a n-bit length string we call tag \taginstance, or \invalid. If, and only if, $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \taginstance{} will be \invalid. 
+
+\paragraph{Security}
+The security of a PRF-MAC is defined as \advantage{F,\adversary,\users}{loMAC} = \probabilityblock{loMAC-PRF}{\adversary,\users}{0}{1}, where loMAC-PRF is in figure \ref{fig: loMAC-PRF game}. The user is only allowed one mac query and locks may not repeat between users. Verification queries are only allowed after the encryption.
+    \begin{figure}
         \centering
         \begin{pchstack}[boxed,center,space=0.5cm]
             \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} loMAC-PRF$^{b}_{\adversary,\users}$ }]{
@@ -423,15 +460,15 @@ A lock-based one time use MAC is a deterministic algorithm M.mac that takes a fi
     \end{figure}
 
 \subsection{Construction}
-Following \nrs{}, three ways to construct this loAE are of interest, namely the ones following from the N1, N2 and N3 scheme (N2 also corresponding to the construction from \gkp). One thing to keep in mind with this that these schemes would originally use associated data. For now we can discard this but it is not proven that the same security results would also follow from this case without associated data. The schemes, adjusted to our setting, are in figure \ref{fig: N schemes}. The AE.enc and AE.dec calls corresponding to N1, N2 and N3 are in figure \ref{fig: N1 calls}, \ref{fig: N2 calls} and \ref{fig: N3 calls} respectively.
-\begin{figure}[H]
+Following \nrs{}, three ways to construct this loAE are of interest, namely the ones following from the N1, N2 and N3 scheme. The schemes, adjusted to our setting, are in figure \ref{fig: N schemes}. \nrs{} considers 17 more schemes but as no one of them has proven to be secure we will not consider those. The AE.enc and AE.dec calls corresponding to N1, N2 and N3 are in figure \ref{fig: N1 calls}, \ref{fig: N2 calls} and \ref{fig: N3 calls} respectively.
+\begin{figure}
     \centering
     \includegraphics[scale = 0.4]{images/N-schemes.png}
 \caption{Adjusted N schemes from \nrs}
 \label{fig: N schemes}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={AE.enc$(\keyinstance,\lockinstance,\messageinstance)$}]{
             (\keyinstance{}1,\keyinstance{}2) \result \keyinstance \\
@@ -453,7 +490,7 @@ Following \nrs{}, three ways to construct this loAE are of interest, namely the 
 \label{fig: N1 calls}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={AE.enc$(\keyinstance,\lockinstance,\messageinstance)$}]{
             (\keyinstance{}1,\keyinstance{}2) \result \keyinstance\\
@@ -475,7 +512,7 @@ Following \nrs{}, three ways to construct this loAE are of interest, namely the 
 \label{fig: N2 calls}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={AE.enc$(\keyinstance,\lockinstance,\messageinstance)$}]{
             (\keyinstance{}1,\keyinstance{}2) \result \keyinstance\\
@@ -517,6 +554,7 @@ should consist of:
 \newpage
 \printbibliography[heading=bibintoc,title={References}]
 \section{Appendix A}
+(\textbf{todo: elaborate more on this table})\\
 Below is a table which highlights the differences in notation between \gkp{} and \nrs, as well as give the notation I will be using.\\
 \begin{tabular}[H]{|c | c | c | c | m{4,5cm}|}
     \hline

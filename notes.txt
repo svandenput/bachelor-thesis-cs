@@ -1,19 +1,20 @@
 Feedback meeting:
 
 current todo's:
-- tweede bib file
-- schrijven in main
-- kijken naar wat Q precies doet in figure 3
+- security games uitwerken
 - 3.3 schrijven
 - ideal vs attainable uitwerken 4.3
 - think about security bound and proves
-- kijken of er meer constraints in de text staan voor bijde papers
+- schrijven in main
 - to-scan scannen
-- boek lezen beetje
 
+lowprio todo:
+- kijken naar wat Q precies doet in figure 3
+- boek lezen beetje
+- tweede bib file
+
+(\textbf{Question: })
 vragen martijn:
-- extra reference onder fig 3 naar tocite
-- voor sec, is het nodig om alle opties te herevalueren, of is n1-3 overnemen goed genoeg
 
 vragen bart:
 
