@@ -53,18 +53,28 @@ In this section we will explain several concepts important to the rest of our wo
 \subsection{General Notation}
 Strings are binary and bit-wise, the set of all strings is $\{0,1\}^\ast$. The length of x is written as $\abs{\text{x}}$, the concatenation of x and y as x \concatinate{} y, a being the result of b as a \result{} b and taking a random sampling from y and assigning it to x as x \sample{} y. We allow a single type of error message written as \invalid. \keyspace{} is a nonempty key space, \lockspace{} is a lock space, \noncespace{} is a nonce space, \messagespace{} is a message space and \associateddataspace{} is the associated-data space. \messagespace{} contain at least two strings, and if \messagespace{} or \associateddataspace{} contain a string of length x, it must contain all strings of length x. \users{} is the number of users.
 
-\subsection{AE}
+\subsection{Authenticated Encryption}
 
-\subsection{PKE Schemes?}
+\subsection{Nonces and Locks}
+The birthday bound tells us that whenever the length of a key has n bits, a collision between is likely after sampling $2^{n/2}$ different keys.(\textbf{Question: citation needed?}) As a result, key collisions can become a problem within when considering multiple users. Most commonly, this problem is evaded by supplying a additional, non-secret, argument to the security primitive. The idea behind this is that, even when the keys of different users collide, the encryption of the same message will result in different ciphertexts when this x is different. Both the key and the new argument would need to collide for the same problems to arise. Different approaches of using this additional argument have been developed, of which nonces and locks are of interest to us.
 
-\subsection{Nonces vs Locks (and different iv's)}
+\paragraph{Nonces}
+Nonce is short for number once used. As the name suggests, this number is assumed to only be used once per user to encrypt a message. Decrypting multiple messages with one nonce is allowed. Generally, nonces are allowed to repeat between users but, when specifically stated, they can be globally unique.
 
-\subsection{Game Based Security Notions}
+\paragraph{Locks}
+Locks work a little bit different, where nonces are bound to the message, locks are bound to the user. When first encrypting the lock value is provided and bound to the user. On decryption, no lock value is provided. Instead any decryptions will be made with the lock value bound to the user. Locks are assumed to be globally unique.
 
 \subsection{Security Notions}
 ind-\$/ind-lor/ind-cpa/ind-cca also note active and passive attackers
 
+\subsection{Game Based Security Notions}
+When writing out security notions, the limitations imposed on the adversary has can be written in a game based format. When doing this pseudocode is used instead of text. As a example, a security game for a generic encryption block using nonces in a multi-user setting is found in figure.
+
+
+A bit that models the challenge is given to the game and the probability of the adversary solving the challenge is returned. For example, for IND-\$ the challenge bit will signal wether we are in the real of the ideal world and the chance of the adversary guessing this bit right is returned. In addition, the oracles that the adversary has access to area written out.
+
 \subsection{Security Proofs}
+general introduction to how we proof security of generic composition.
 
 \section{\nrs{} and \gkp{} in Detail}
 In this section we explain the parts from \gkp{} and \nrs{} important to our work. Afterwards, a comparison is made between the two papers. Some notations will be different from the original papers for improved consistency. What are called tags in \gkp, we will call locks instead to avoid confusion with the output of mac functions and we call the output of the AMAC the tag instead of the ciphertext. The security notions from \nrs{} are converted to a game-based format using insights from (\textbf{todo add citation for Automated Analysis of Protocols that use Authenticated Encryption: How Subtle AEAD}) in order to better match the notation from \gkp{} and be more adaptable to a multi-user setting.
@@ -131,7 +141,7 @@ The security of a MAC is defined as \advantage{F,\adversary}{MAC} = \probability
 A nonce-based authenticated encryption scheme is defined by triple $\mathit{\Pi}$ = $(\keyspace{},\text{E},\text{D})$. Deterministic encryption algorithm E takes four inputs $(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends the length of \keyinstance, \nonceinstance, \associateddatainstance{} and \messageinstance. If, and only if, $(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ is not in $\keyspace \times \noncespace \times \associateddataspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Decryption algorithm D takes four inputs $(\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance)$ and outputs a value \messageinstance. both E and D are required to satisfy correctness (if E$(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then D$(\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if D$(\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then E$(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ = \ciphertextinstance). 
 
 \paragraph{Security}
-The security of a nAE is defined as \advantage{$\mathit{\Pi}$,\adversary}{nAE} = \probabilityblock{nAE-IND\$}{\adversary}{0}{1}, where nAE-IND\$ is in figure \ref{fig: nAE-IND game}. In this game, set $U$ keeps track of all used nonces as the adversary is not allowed to repeat those. Following the translation of IND\$ to a security game for AE from (\textbf{todo add citation for Automated Analysis of Protocols that use Authenticated Encryption: How Subtle AEAD}), \_ denotes a variable that is irrelevant and set $Q$ keeps tack of all query results in order to prevent trivial wins.
+The security of a nAE is defined as \advantage{$\mathit{\Pi}$,\adversary}{nAE} = \probabilityblock{nAE-IND\$}{\adversary}{0}{1}, where nAE-IND\$ is in figure \ref{fig: nAE-IND game}. In this game, set $U$ keeps track of all used nonces as the adversary is not allowed to repeat those on encryption. Following the translation of IND\$ to a security game for AE from (\textbf{todo add citation for Automated Analysis of Protocols that use Authenticated Encryption: How Subtle AEAD}), \_ denotes a variable that is irrelevant and set $Q$ keeps tack of all query results in order to prevent trivial wins.
     \begin{figure}
         \centering
         \begin{pchstack}[boxed,center,space=0.5cm]
@@ -307,7 +317,7 @@ The ADEM' scheme considered is made by creating A.enc' and A.dec' calls using th
 In this section we will highlight the important differences between \gkp{} and \nrs{}. (\textbf{Question: I feel like this section is very factual right now, while it might also be worthwhile to elaborate on some things a bit more.})
 
 \paragraph{Setting}
-\nrs{} is written is single-user, multiple-use key setting while \gkp{} is written is a multi-user, single-use key setting. As a result, \gkp{} uses locks while \nrs{} uses nonces. (\textbf{Question: is it necessary to elaborate on how these settings lead to lock, or nonce usage, or would it suffice to explain this in section 2.4}).
+\nrs{} is written is single-user, multiple-use key setting while \gkp{} is written is a multi-user, one-time use key setting. As a result, \gkp{} uses locks while \nrs{} uses nonces. (\textbf{Question: is it necessary to elaborate on how these settings lead to lock, or nonce usage, or would it suffice to explain this in section 2.4}).
 
 \paragraph{Aim}
 While \nrs{} is aimed at generalizing the AE constructions, \gkp{} is aimed aimed at finding a single construction that is safe when used in public key encryption. Most notably, this results in \nrs{} evaluating 20 possible constructions while \gkp{} evaluates one. Additionally, the constructions from \nrs{} are able to use AD while the construction form \gkp{} cannot.
@@ -316,13 +326,13 @@ While \nrs{} is aimed at generalizing the AE constructions, \gkp{} is aimed aime
 The security notions of \nrs{} are written in a IND\$ fashion while the security notions of \gkp{} are written in a lor fashion. In other words, \nrs{} requires the valid ciphertext to be indistinguishable from random strings, \gkp{} only requires them to be indistinguishable from each other. As a result, the MAC primitives of the two papers have different security requirements. In \nrs{}, the tag is required to be indistinguishable from a random string while in \gkp{} the tag is only required to be unforgeable.
 
 \section{Defining the New Primitive}
-In this section we will discuss a new security primitive, the lock-based one time use Authenticated Encryption scheme, loAE scheme for short. As the name suggests, this primitive is used in a setting where a key is used only once to encrypt and authenticate a single message. We uses locks instead of nonces, as you will never have to decrypt messages with multiple nonces for a single user. Below, we discuss the notation of the loAE.
+In this section we will discuss a new security primitive, the lock-based one-time use Authenticated Encryption scheme, loAE scheme for short. As the name suggests, this primitive is used in a setting where a key is used only once to encrypt and authenticate a single message.
 
 \subsection{loAE}
 A loAE scheme is defined by tuple $(\text{AE.enc},\text{AE.dec})$. Deterministic algorithm AE.enc takes three inputs $(\keyinstance,\lockinstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. If, and only if $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Deterministic algorithm AE.dec takes three inputs $(\keyinstance,n,\ciphertextinstance)$ and outputs a value \messageinstance. Both AE.enc and EA.dec are required to satisfy correctness (if AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ = \ciphertextinstance).
 
 \subsection{Security Model}
-To define the security, we use a ind\$ security notion instead of left-or-right one as, in our setting, ind\$ is the stronger security notion. (\textbf{Question: is it necessary to elaborate on how this here, or would it suffice to explain this in section 2.6}) We use a function that always returns \invalid{} on decryption calls to ensure the adversary can not guess which ciphertexts would be valid ciphertexts. To match our setting, the user is only allowed one encryption query, locks may not repeat between users and decryption queries are only allowed after the encryption.The security is defined as \advantage{\adversary,\users}{loAE} = \probabilityblock{loAE-IND\$}{\adversary,\users}{0}{1}, where loAE-IND\$ is in figure \ref{fig: nAE-IND game}.
+The security is defined as \advantage{\adversary,\users}{loAE} = \probabilityblock{loAE-IND\$}{\adversary,\users}{0}{1}, where loAE-IND\$ is in figure \ref{fig: loAE-IND game}.
 \begin{figure}
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} loAE-IND\$$^{b}_{\adversary,\users}$ }]{
@@ -357,38 +367,34 @@ To define the security, we use a ind\$ security notion instead of left-or-right 
 \end{figure}
 
 \subsection{Explanation of the Security Model}
-In this subsection we will discuss the security game loAE-IND\$ line by line.\\
-\begin{tabular}{|m{13,5cm}|}
-\hline Draft:\\
-\textit{line 0:} We start by initializing the set of all used locks to the empty set.
-\textit{line 1:} Next we loop over each user to initialize them.
-\textit{line 2:} For each user, we sample a uniformly random key from the key space and assign it to that user-key.
-\textit{line 3:} for each user, we initialize the user-ciphertext to be undefined. We do not use set notation for this as done in \gkp{}, as we can never have multiple ciphertexts related to one user.
-\textit{line 4:} After initializing all users, we run the algorithm of the adversary and safe the output.
-\textit{line 5:} We end by returning this output.
-\textit{line 6:} We do not allow multiple encryptions per user. Therefore, if the ciphertexts is defined we return \invalid.
-\textit{line 7:} Locks are not allowed to repeat, if the lock is in the set of used sets we return \invalid.
-\textit{line 8:} If these checks pass, we start the encryption by adding the lock to the sets of used locks
-\textit{line 9:} We bind the lock to the user-lock.
-\textit{line 10:} We encrypt the message using the user-key and the user-lock.
-\textit{line 11:} The random function should return \invalid{} whenever AE returns \invalid{}. Therefore the random function is only called if b = 1 and AE does not return \invalid.
-\textit{line 12:} The random function samples a string with the uniformly at random from the set of all strings with the length of the ciphertext. \textbf{(todo: add part about ideal vs attainable)}
-\textit{line 13:} The computed ciphertext is bound to the user-ciphertext. \textbf{(todo: add part about the fact that this might be \invalid)}
-\textit{line 14:} Return the ciphertext.
-\textit{line 15:} If the user-ciphertext is not defined, decryption is not allowed and we return \invalid.
-\textit{line 16:} If the input ciphertext of Odec is allowed to be the same as the user-ciphertext, then it is trivial to distinguish as in this case the ideal words will return \invalid{} while the real world does not. For this reason the real world should return \invalid{} as well.
-\textit{line 17:} If these checks pass, we decrypt the ciphertext.
-\textit{line 18:} The ideal world always returns \invalid{}.
-\textit{line 19:} We return the decrypted message.\\
-\hline
-\end{tabular}
+In this section we will elaborate on the security game loAE-IND\$, as well as why this model was chosen over some alternatives. As you will never have to decrypt messages with multiple nonces for a single user, we uses locks instead of nonces. Locks may not repeat between users. The user is only allowed one encryption query and decryption queries are only allowed after the encryption as we are using one-time use keys.
+
+To define the security, we use a ind\$ security notion instead of left-or-right one as it is the stronger security notion in our setting. (\textbf{Question: is it necessary to elaborate on how this here, or would it suffice to explain this in section 2.6}) On decryption, we use a function that always returns \invalid{} to ensure the adversary can not guess which ciphertexts would be valid ciphertexts.
+
+\paragraph{Multiple users}
+Line 1 loops over all the users to initialize them while line 2 assigns a random key to each user. These users are given as an argument to the oracles Oenc and Odec.
+
+\paragraph{Locks}
+Line 0 initializes the set of all used locks to the empty set. Locks are not allowed to repeat, if the lock is in the set of used sets we return \invalid{} on line 7. If this check passes, add the lock to the sets of used locks in line 8 and bind it ot the user in line 9. Note that locks may be added to the set of used locks even if they are never used to encrypt a valid message. (\textbf{todo: see if this needs to be altered})
+
+\paragraph{Encryption and decryption}
+If the given arguments are valid, and we are in the real world, line 10 encrypts the message and line 17 decrypts the message.
+
+\paragraph{one-time use keys}
+The variable $C_\user$ is used to prevent multiple encryptions from making multiple encryptions. In contrast to \gkp{}, we do not use set notation, as we can never have multiple ciphertexts related to one user. In line 3, we set $C_\user$ to be undefined. We do not allow multiple encryptions per user. Therefore, if the ciphertexts is defined in line 6, we return \invalid. In line 13, the newly computed ciphertext is bound to $C_\user$. If the encryption was invalid, $C_\user$ will stay undefined. Even though this leads to the adversary being able to call Oenc twice on a single user, this will not give the adversary a advantage as the values for which AE.enc returns \invalid{} are known. If the user has made no valid encryption yet, decryption is not allowed and we return \invalid{} on line 15 as $C_\user$ will be undefined.
+
+\paragraph{Preventing trivial wins}
+Line 16 prevents a trivial win. If the ciphertext given to Odec is allowed to be the same as the ciphertext returned by Oenc, it would be trivial to distinguish the real and ideal world. The ideal world would return \invalid{} while the real world would not. For this reason the real world should return \invalid{} as well.
+
+\paragraph{Implementation of \$}
+On encryption, whenever AE returns \invalid{}, the random function should return \invalid{} as well. Therefore, the random function is only called if b = 1 and AE.enc does not return \invalid. This is checked in line 11. If the check passes, the random function samples as string uniformly at random from the set of all strings with the length of the ciphertext and binds it to the ciphertext in line 12. On decryption, the ideal world always returns \invalid{}. \textbf{(todo: add part about ideal vs attainable)}
 
 \section{Constructions}
 In this section we discuss how we can construct a safe loAE. Similarly to \gkp{} and \nrs{} we will look at constructions combining a deterministic encryption primitive and mac primitive. First write down the definitions of these two primitives, then we will look at how we can combine the two and which security bounds we can expect. Lastly we compare our choices with existing alternatives.
 
 \subsection{Used Primitives}
 \paragraph{loE}
-A lock-based one time use encryption scheme, loE for short, is defined by tuple $(\text{E.enc},\text{E.dec})$. Deterministic algorithm E.enc takes three inputs $(\keyinstance,\lockinstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. If, and only if, $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Deterministic algorithm E.dec takes three inputs $(\keyinstance,\lockinstance,\ciphertextinstance)$ and outputs a value \messageinstance. Both E.enc and E.dec are required to satisfy correctness (if E.enc$(\keyinstance,\lockinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then E.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if E.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then E.enc$(\keyinstance,\lockinstance,\messageinstance)$ = \ciphertextinstance). 
+A lock-based one-time use encryption scheme, loE for short, is defined by tuple $(\text{E.enc},\text{E.dec})$. Deterministic algorithm E.enc takes three inputs $(\keyinstance,\lockinstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. If, and only if, $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Deterministic algorithm E.dec takes three inputs $(\keyinstance,\lockinstance,\ciphertextinstance)$ and outputs a value \messageinstance. Both E.enc and E.dec are required to satisfy correctness (if E.enc$(\keyinstance,\lockinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then E.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if E.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then E.enc$(\keyinstance,\lockinstance,\messageinstance)$ = \ciphertextinstance). 
 
 \paragraph{Security}
 The security of a loE is defined as \advantage{\adversary,\users}{loE} = \probabilityblock{loE-IND\$}{\adversary,\users}{0}{1}, where loE-IND\$ is in figure \ref{fig: loE-IND game}. The user is only allowed one encryption query and locks may not repeat between users. Decryption queries are only allowed after the encryption.
@@ -419,7 +425,7 @@ The security of a loE is defined as \advantage{\adversary,\users}{loE} = \probab
     \end{figure}
     
 \paragraph{loMAC}
-A lock-based one time use MAC is a deterministic algorithm M.mac that takes a fixed length \keyinstance{} in \keyspace{}, a fixed length \lockinstance{} in \lockspace{} and a variable length message \messageinstance{} in \messagespace{} and outputs either a n-bit length string we call tag \taginstance, or \invalid. If, and only if, $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \taginstance{} will be \invalid. 
+A lock-based one-time use MAC is a deterministic algorithm M.mac that takes a fixed length \keyinstance{} in \keyspace{}, a fixed length \lockinstance{} in \lockspace{} and a variable length message \messageinstance{} in \messagespace{} and outputs either a n-bit length string we call tag \taginstance, or \invalid. If, and only if, $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \taginstance{} will be \invalid. 
 
 \paragraph{Security}
 The security of a PRF-MAC is defined as \advantage{F,\adversary,\users}{loMAC} = \probabilityblock{loMAC-PRF}{\adversary,\users}{0}{1}, where loMAC-PRF is in figure \ref{fig: loMAC-PRF game}. The user is only allowed one mac query and locks may not repeat between users. Verification queries are only allowed after the encryption.

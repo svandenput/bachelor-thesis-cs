@@ -1,10 +1,8 @@
 Feedback meeting:
 
 current todo's:
-- security games uitwerken
-- 3.3 schrijven
-- ideal vs attainable uitwerken 4.3
 - think about security bound and proves
+- ideal vs attainable uitwerken 4.3
 - schrijven in main
 - to-scan scannen
 
@@ -18,6 +16,8 @@ vragen martijn:
 
 vragen bart:
 
+(\textbf{todo: })
+\paragraph{title}
 schrijven progress:
 1: crude, kan update
 2: intro schrijven
