@@ -1,6 +1,8 @@
 Feedback meeting:
 
 current todo's:
+- sec models uitleggen in 5
+- klaar maken voor martijn
 - think about security bound and proves
 - ideal vs attainable uitwerken 4.3
 - schrijven in main
