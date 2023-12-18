@@ -1,8 +1,6 @@
 Feedback meeting:
 
 current todo's:
-- sec models uitleggen in 5
-- klaar maken voor martijn
 - think about security bound and proves
 - ideal vs attainable uitwerken 4.3
 - schrijven in main
@@ -22,27 +20,28 @@ vragen bart:
 \paragraph{title}
 schrijven progress:
 1: crude, kan update
-2: intro schrijven
-2.1: crude, kan update
-2.2: niets, kan af
-2.3: niets, miss niet nodig
-2.4: niets, kan af
-2.5: niets, kan af
-2.6: niets, kan af
+2: ready for check
+2.1: ready for check
+2.2: ready for check
+2.3: ready for check
+2.4: ready for check
+2.5: ready for check
 2.7: niets, kan nog niet beginnen
-3: af?
-3.1: af?
-3.2: af?
-4. intro schrijven
-4.1: mheee, kan af
-4.2: crude, kan af
-4.3: niets, kan af
-5: intro schrijven
-5.1: crude, kan af?
-5.2: crude, kan af?
+3: ready for check
+3.1: ready for check
+3.2: ready for check
+3.3: ready for check
+4. ready for check
+4.1: ready for check
+4.2: ready for check
+4.3: ready for check
+5: ready for check
+5.1: ready for check
+5.2: ready for check
 5.3: niets, moet papers gaan lezen
 5.4: niets, hele lage prio
 6: intro schrijven
 6.1: niets, kan beginnen
 7: niets, niet sure of ik deze uberhaud wil houden
 8: niets, kan crude versie maken
+appendix A: crude, kan afmaken
