@@ -1,6 +1,10 @@
 Feedback meeting:
 
 current todo's:
+- notes section 3+ verwerken
+- sec gkp uitleggen
+- sec lomac
+- read sec proves nrs and gkp
 - think about security bound and proves
 - ideal vs attainable uitwerken 4.3
 - schrijven in main
