@@ -215,7 +215,7 @@ The security of a ADEM is defined as
 \begin{align*} 
     \text{\advantage{ADEM,\adversary,\users}{l-ind-lor-cpa} = \probabilityblock{L-IND-LOR-CPA}{\adversary,\users}{0}{1}}
 \end{align*}
-where L-IND-LOR-CPA is in figure \ref{fig: L-IND-CPA game}. Every user is only allowed one encryption query and locks may not repeat between users. Decryption queries are only allowed after the encryption. The corresponding game can be found in figure 9 from \gkp{}, note that this figure also included a decryption oracle the adversary is not allowed to use. (\textbf{Question: I do not really know if I should elaborate on how this translates to the game, as the game is based on the game of gkp})
+where L-IND-LOR-CPA is in figure \ref{fig: L-IND-CPA game}. Every user is only allowed one encryption as enforced by lines 3, 6 and 11. Locks may not repeat between users as enforced by lines 0, 7, 8 and 9. The corresponding game can be found in figure 9 from \gkp{}, note that this figure also included a decryption oracle the adversary is not allowed to use. 
 \begin{figure}
     \centering
     \begin{pchstack}[boxed,center,space=0.5cm]
@@ -249,7 +249,7 @@ The security of a AMAC is defined as
 \begin{align*} 
     \text{\advantage{AMAC,\adversary,\users}{L-MIOT-UF} = $\text{Pr}[\text{L-MIOT-UF}_{\adversary,\users} = 1]$}
 \end{align*}
-where L-MIOT-UF is in \ref{fig: L-MIOT-UF game}. Every user is only allowed one MAC query and locks may not repeat between users. Verification queries are only allowed after the encryption. The corresponding game can be found in figure 15 of \gkp{}.
+where L-MIOT-UF is in \ref{fig: L-MIOT-UF game}. Every user is only allowed one MAC query as enforced by lines 4, 7 and 12. Locks may not repeat between users as enforced by lines 1, 8, 9 and 10. Verification queries are only allowed after the user made an mac query as enforced by line 4, 12 and 14. line 15 prevents trivial wins. The corresponding game can be found in figure 15 of \gkp{}.
 \begin{figure}
     \centering
     \begin{pchstack}[boxed,center,space=0.5cm]
@@ -292,7 +292,7 @@ The security of a ADEM' is defined as
 \begin{align*} 
     \text{\advantage{ADEM',\adversary,\users}{l-ind-lor-cca} = \probabilityblock{L-IND-LOR-CCA}{\adversary,\users}{0}{1}}
 \end{align*}
-where L-IND-LOR-CCA is in \ref{fig: L-IND-CCA game}. Every user is only allowed one encryption query and locks may not repeat between users. Decryption queries are only allowed after the encryption. The corresponding game can be found in figure 9 of \gkp{}.
+where L-IND-LOR-CCA is in \ref{fig: L-IND-CCA game}. Every user is only allowed one encryption query as enforced by lines 3, 6 and 11. Locks may not repeat between users as enforced by lines 0, 7, 8 and 9. Decryption queries are only allowed after the given user made an encryption as enforced by lines 3, 11 and 13. line 14 prevents trivial wins. The corresponding game can be found in figure 9 of \gkp{}.
 \begin{figure}
     \centering
     \begin{pchstack}[boxed,center,space=0.5cm]
@@ -351,19 +351,16 @@ The ADEM' scheme considered is made by creating A.enc' and A.dec' using the tag-
 \noindent The construction is deemed secure as for any \users{} and a \adversary{} that makes $Q_d$ many Odec queries, the exist $B$ and $C$ such that \advantage{ADEM',$A$,\users}{l-ind-lor-cca} $\leq$ 2\advantage{AMAC,$B$,\users}{l-miot-uf} + \advantage{ADAM,$C$,\users}{l-ind-lor-cpa} holds. Where the running time of $B$ is at most that of $A$ plus the time required to run \users-many ADEM encapsulations and $Q_d$-many ADEM decapsulations and the running time of $C$ is the same as the running time of $A$. Additionally, $B$ poses at most $Q_d$-many Ovrf queries, and $C$ poses no Odec query.
 
 \subsection{Comparison of \gkp{} and \nrs}
-In this section we will highlight the important differences between \gkp{} and \nrs{}. (\textbf{Question: I feel like this section is very factual right now, while it might also be worthwhile to elaborate on some things a bit more. how would you do this?})
+In this section we will highlight how the constructions from \gkp{} and \nrs{} differ, as well as why.
 
-\paragraph{Setting}
-\nrs{} is written is single-user, multiple-use key setting and \gkp{} is written is a multi-user, one-time use key setting. As a result, \gkp{} uses locks while \nrs{} uses nonces. (\textbf{Question: is it necessary to elaborate on how these settings lead to lock, or nonce usage, or would it suffice to explain this in section 2.4}).
-
-\paragraph{Aim}
-While \nrs{} is aimed at generalizing the generic AE constructions, \gkp{} is aimed at finding a single construction that is secure when used in public key encryption. Most notably, this results in \nrs{} evaluating 20 possible constructions while \gkp{} evaluates one. Additionally, the constructions from \nrs{} are able to use AD while the construction form \gkp{} cannot.
+\paragraph{context and aim}
+\nrs{} is written in the context of symmetric cryptography. Because of this, a single-user that reuses its key is considered. \gkp{} is written in the context of asymmetric cryptography. Because of this, multiple users that use their key once are considered. This difference in context leads to a different aim. While \nrs{} is aimed at generalizing the generic AE constructions, \gkp{} is aimed at finding a single construction that is secure when used in public key encryption. Most notably, this results in \nrs{} evaluating 20 possible constructions while \gkp{} evaluates one. Additionally, the constructions from \nrs{} use AD while the construction from \gkp{} does not.
 
 \paragraph{Security Notion}
-The security notions of \nrs{} are written in a IND-\$ fashion while the security notions of \gkp{} are written in a lor fashion. In other words, \nrs{} requires the valid ciphertext to be indistinguishable from random strings. \gkp{} only requires them to be indistinguishable from each other. As a result, the MAC primitives of the two papers have different security requirements. In \nrs{}, the tag is required to be indistinguishable from a random string while in \gkp{} the tag is only required to be unforgeable.
+The security notions from both papers are also related to these differences in context. In \nrs{}, the security notions are written in a IND-\$ fashion, common in symmetric cryptography. Conversely, in \gkp{}, they are written in a IND-LOR fashion, common in asymmetric cryptography. In other words, \nrs{} requires the valid ciphertext to be indistinguishable from random strings. \gkp{} requires them to be indistinguishable from each other. As a result, the MAC primitives of the two papers have different security requirements. In \nrs{}, the tag is required to be indistinguishable from a random string while in \gkp{} the tag is required to be unforgeable. Furthermore, \nrs{} considers nonces while \gkp{} considers locks to match their settings.
 
 \section{Defining the New Primitive}
-In this section we will discuss a new security primitive, the lock-based one-time use Authenticated Encryption scheme, loAE scheme for short. As the name suggests, this primitive is used in a setting where a key is used only once to encrypt and authenticate a single message.
+With the creation of a new primitive, we try to bridge the gap between \nrs{} and \gkp. Like \gkp{}, we consider a authenticated encryption primitive in a setting where multiple users use their key once. But instead of finding a single constructions, we aim to generalize the primitive using the knowledge from \nrs{}. In this section we will discuss this new security primitive, the lock-based one-time use Authenticated Encryption scheme, loAE scheme for short.
 
 \subsection{loAE}
 A loAE scheme is defined by tuple a $(\text{AE.enc},\text{AE.dec})$. Deterministic algorithm AE.enc takes three inputs $(\keyinstance,\lockinstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. If, and only if $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Deterministic algorithm AE.dec takes three inputs $(\keyinstance,n,\ciphertextinstance)$ and outputs a value \messageinstance. Both AE.enc and EA.dec are required to satisfy correctness (if AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ = \ciphertextinstance).
@@ -408,12 +405,12 @@ where loAE-IND-\$-CCA is in figure \ref{fig: loAE-IND game}.
 \end{figure}
 
 \subsection{Explanation of the Security Model}
-In this section we will elaborate on the security model, as well as why this model was chosen over some alternatives. Because we are using one-time use keys, decryption queries are only allowed after the encryption and the user is only allowed one encryption query. Because of this, we use locks instead of nonces.(\textbf{Question: is it necessary to elaborate on how this here, or would it suffice to explain this in section 2.5})
+In this section we will elaborate on the security model, as well as why this model was chosen over some alternatives. Because we consider multiple user who use their keys once, decryption queries of a user are only allowed after an encryption has been made and the user is only allowed one encryption query. We use locks as we want to account for key collisions between users, but not nonces as a user is only allowed to encrypt one message.
 
-To define the security, we use a ind-\$ security notion instead of left-or-right one as it is the stronger security notion in our setting. (\textbf{Question: is it necessary to elaborate on how this here, or would it suffice to explain this in section 2.6}) On decryption, we use a function that always returns \invalid{} to ensure the adversary can not guess which ciphertexts would be valid ciphertexts.
+To define the security, we use IND-\$ security notion instead of IND-LOR. It is the stronger security notion in our setting, as the length of the ciphertext is not randomized. On decryption, we use a function that always returns \invalid{} to ensure the adversary cannot guess which ciphertexts would be valid ciphertexts. The resulting security game is loAE-IND-\$-CCA in figure \ref{fig: loAE-IND game}, which is explained below.
 
 \paragraph{Multiple users}
-Line 1 loops over all the users to initialize with a random key in line 2 and a invalid ciphertext in line 3. These users are given as an argument to the oracles Oenc and Odec.
+Line 1 loops over all the users to initialize with a random key in line 2 and a invalid ciphertext in line 3. Whenever the adversary calls one of the oracles Oenc or Odec, it has to provide a user as an argument.
 
 \paragraph{Locks}
 Line 0 initializes the set of all used locks to the empty set. Locks are not allowed to repeat, if the lock is in the set of used sets we return \invalid{} on line 7. If this check passes, we add the lock to the sets of used locks in line 8 and bind it to the user in line 9. Note that locks may be added to the set of used locks even if they are never used to encrypt a valid message. (\textbf{todo: see if this needs to be altered})
@@ -476,7 +473,7 @@ A lock-based one-time use MAC is defined by a deterministic algorithm M.mac that
 The security of a lock bases, one-time use PRF secure MAC is defined as \begin{align*} 
     \text{\advantage{F,\adversary,\users}{loMAC} = \probabilityblock{loMAC-PRF}{\adversary,\users}{0}{1}}
 \end{align*}
-where loMAC-PRF is in figure \ref{fig: loMAC-PRF game}. Every user is only allowed one MAC query and locks may not repeat between users. Verification queries are only allowed after the MAC query. in contrast to the MAC-PRF from \nrs{}, we need a verification oracle as we only allow one Omac query per user. The PRF will always return \invalid{} to match the loAE. (\textbf{Question: Is this enough explanation when the ideal vs attainable dilemma has been explained in section 4.3 already})
+where loMAC-PRF is in figure \ref{fig: loMAC-PRF game}. Every user is only allowed one MAC query and locks may not repeat between users. Verification queries are only allowed after the MAC query. In contrast to the MAC-PRF from \nrs{}, a verification oracle is needed as we only allow one Omac query per user. In the real world Omac will check similar constraints as the Odec from figure \ref{fig: loAE-IND game}. If a Omac query has been made for the given user, and the given message-tag pair is not the result of this query, then the pair is verified. In the ideal world, this verification query will always return \codefalse{} to match with the loAE scheme that always return \invalid{} on decryption in the ideal world. (\textbf{Question: is this enough explanation to justify the use of a \invalid{} oracle in the ideal world})
     \begin{figure}
         \centering
         \begin{pchstack}[boxed,center,space=0.5cm]
@@ -502,8 +499,8 @@ where loMAC-PRF is in figure \ref{fig: loMAC-PRF game}. Every user is only allow
             \pseudocode[lnstart=14,linenumbering,head={\textbf{Oracle} Ovrf$(\user,\messageinstance,\taginstance)$}]{
                 \pcif T_\user = \invalid: \pcreturn \invalid\\
                 \pcif (\messageinstance,\taginstance) = T_\user : \pcreturn \invalid \\
-                \pcif b = 1 : \pcreturn \codefalse\\
                 \taginstance' \leftarrow \text{M.mac}(\keyinstance_\user,\lockinstance_\user,\messageinstance)\\
+                \pcif b = 1 : \pcreturn \codefalse\\
                 \pcif \taginstance = \taginstance' \\
                 \t \pcreturn \codetrue\\
                 \pcreturn \codefalse
@@ -639,7 +636,7 @@ Below is a table which highlights the differences in notation between \gkp{} and
     \hline
     adversary   &   A   &   $\mathcal{A}$   &   \adversary & the bad guy \\
     \hline
-    random sampling   &   $\xleftarrow{\$}$    &   $\twoheadleftarrow$   &   \sample & get a random ellermetn form the set \\
+    random sampling   &   $\xleftarrow{\$}$    &   $\twoheadleftarrow$   &   \sample & get a random ellement from the set \\
     \hline
     result of randomized function   &   $\xleftarrow{\$}$   &   -   &   \result & get the result of a randomized function with given inputs \\
     \hline

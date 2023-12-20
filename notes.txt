@@ -1,9 +1,6 @@
 Feedback meeting:
 
 current todo's:
-- notes section 3+ verwerken
-- sec gkp uitleggen
-- sec lomac
 - read sec proves nrs and gkp
 - think about security bound and proves
 - ideal vs attainable uitwerken 4.3
@@ -17,6 +14,14 @@ lowprio todo:
 
 (\textbf{Question: })
 vragen martijn:
+- in hoeverre moet ik de a-xxx sec uitleggen als ik dat al in veel detail do later bij 4.3, is het miss handig om die volgorde om te draaien?
+
+toread martijn:
+- adaptations in section 2
+- adaptations in section 3.3
+- addition in intro of section 4
+- rewritten loMAC sec
+- security game uitleg in section 3
 
 vragen bart:
 
