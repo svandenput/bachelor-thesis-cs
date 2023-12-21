@@ -18,7 +18,7 @@ vragen martijn:
 
 toread martijn:
 - adaptations in section 2
-- adaptations in section 3.3
+- adaptations in section 3.2
 - addition in intro of section 4
 - rewritten loMAC sec
 - security game uitleg in section 3
