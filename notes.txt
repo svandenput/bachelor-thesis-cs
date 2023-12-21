@@ -14,7 +14,7 @@ lowprio todo:
 
 (\textbf{Question: })
 vragen martijn:
-- in hoeverre moet ik de a-xxx sec uitleggen als ik dat al in veel detail do later bij 4.3, is het miss handig om die volgorde om te draaien?
+- in hoeverre moet ik de AXXX sec games uitleggen als ik dat al in veel detail do later bij 4.3, is het miss handig om die volgorde om te draaien?
 
 toread martijn:
 - adaptations in section 2
