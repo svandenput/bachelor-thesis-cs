@@ -185,7 +185,7 @@ The security of a nAE is defined as
                 \pcreturn \ciphertextinstance
             }
             \pseudocode[lnstart=13,linenumbering,head={\textbf{Oracle} Odec$(\nonceinstance,\associateddatainstance,\ciphertextinstance)$}]{
-                \pcif b = 1 : \pcreturn \bot\\
+                \pcif b = 1 : \pcreturn \invalid\\
                 \pcif (\nonceinstance,\associateddatainstance,\_,\ciphertextinstance) \in Q : \pcreturn \invalid\\
                 \messageinstance \result \text{D} (\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance)\\
                 Q \result Q \cup \{(\nonceinstance,\associateddatainstance,\messageinstance,\ciphertextinstance)\}\\
@@ -393,7 +393,7 @@ where loAE-IND-\$-CCA is in figure \ref{fig: loAE-IND game}.
             \pcif C_\user = \invalid: \pcreturn \invalid\\
             \pcif \ciphertextinstance = C_\user: \pcreturn \invalid\\
             \messageinstance \result \text{AE.dec}(\keyinstance_\user,\lockinstance_\user,\ciphertextinstance)\\
-            \pcif b = 1 : \messageinstance = \bot\\
+            \pcif b = 1 : \messageinstance \result \invalid\\
             \pcreturn \messageinstance
         }
     \end{pchstack}
@@ -528,8 +528,8 @@ Following \nrs{}, three ways to construct this loAE are of interest, namely the 
             (\ciphertextinstance',\taginstance) \result \ciphertextinstance \\
             \messageinstance \result \text{E.dec}(\keyinstance{}1,\lockinstance,\ciphertextinstance') \\
             \taginstance' \result \text{M.mac}(\keyinstance{}2,\lockinstance,\messageinstance) \\
-            \pcif \taginstance = \taginstance' : \pcreturn \messageinstance \\
-            \pcelse : \pcreturn \invalid
+            \pcif \taginstance \neq \taginstance' : \messageinstance \result \invalid\\
+            \pcreturn \messageinstance
         }
     \end{pchstack}
 \caption{Calls based on N1}
@@ -550,8 +550,8 @@ Following \nrs{}, three ways to construct this loAE are of interest, namely the 
             (\ciphertextinstance',\taginstance) \result \ciphertextinstance\\
             \messageinstance \result \text{E.dec}(\keyinstance{}1,\lockinstance,\ciphertextinstance')\\
             \taginstance' \result \text{M.mac}(\keyinstance{}2,\lockinstance,\ciphertextinstance')\\
-            \pcif \taginstance = \taginstance' : \pcreturn \messageinstance \\
-            \pcelse : \pcreturn \invalid
+            \pcif \taginstance \neq \taginstance' : \messageinstance \result \invalid\\
+            \pcreturn \messageinstance
         }
     \end{pchstack}
 \caption{Calls based on N2}
@@ -572,8 +572,8 @@ Following \nrs{}, three ways to construct this loAE are of interest, namely the 
             \messageinstance' \result \text{E.dec}(\keyinstance{}1,\lockinstance,\ciphertextinstance)\\
             (\messageinstance,\taginstance) \result \messageinstance'\\
             \taginstance' \result \text{M.mac}(\keyinstance{}2,\lockinstance,\messageinstance)\\
-            \pcif \taginstance = \taginstance' : \pcreturn \messageinstance \\
-            \pcelse : \pcreturn \invalid
+            \pcif \taginstance \neq \taginstance' : \messageinstance \result \invalid\\
+            \pcreturn \messageinstance
         }
     \end{pchstack}
 \caption{Calls based on N3}
@@ -581,7 +581,138 @@ Following \nrs{}, three ways to construct this loAE are of interest, namely the 
 \end{figure}
 
 \subsection{Security Bounds}
-We define the constructions secure if there is a tight reduction from breaking the loAE-security of the scheme to breaking the loE-security and the loMAC security of the underlying primitives.
+We define the constructions secure if there is a tight (\textbf{todo: look at tight sec reductions}) reduction from breaking the loAE-security of the scheme to breaking the loE-security or the loMAC security of the underlying primitives.
+
+\paragraph{N2}
+We define two games, loAE-N2 and loAE-N2-switch.
+\begin{figure}[H]
+    \begin{pchstack}[boxed,center,space=0.5cm]
+        \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} loAE-N2$^{b}_{\adversary,\users}$ }]{
+        L \result \emptyset\\
+        \pcfor \user \in [1..N]:\\
+        \t \keyinstance_\user \sample \keyspace\\
+        \t C_\user \result \invalid\\
+        b' \result \adversary\\
+        \pcreturn b'
+        }
+        \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Oenc$(\user,\lockinstance,\messageinstance)$}]{
+            \pcif C_\user \neq \invalid: \pcreturn \invalid\\
+            \pcif \lockinstance \in L: \pcreturn \invalid\\
+            L \result L \cup \{\lockinstance\}\\
+            \lockinstance_\user \result \lockinstance\\
+            (\keyinstance{}1,\keyinstance{}2) \result \keyinstance_j\\
+            \ciphertextinstance' \result \text{E.enc}(\keyinstance{}1,\lockinstance_j,\messageinstance)\\
+            \taginstance \result \text{M.mac}(\keyinstance{}2,\lockinstance_j,\ciphertextinstance')\\
+            \ciphertextinstance \result (\ciphertextinstance',\taginstance)\\
+            \pcif b = 1 \wedge \ciphertextinstance \neq \invalid: \\
+            \t \ciphertextinstance \sample \{0,1\}^{\abs{\ciphertextinstance}}\\
+            C_\user \result \ciphertextinstance\\
+            \pcreturn \ciphertextinstance
+        }
+        \pseudocode[lnstart=17,linenumbering,head={\textbf{Oracle} Odec$(\user,\ciphertextinstance)$}]{
+            \pcif C_\user = \invalid: \pcreturn \invalid\\
+            \pcif \ciphertextinstance = C_\user: \pcreturn \invalid\\
+            (\keyinstance{}1,\keyinstance{}2) \result \keyinstance_j\\
+            (\ciphertextinstance',\taginstance) \result \ciphertextinstance\\
+            \messageinstance \result \text{E.dec}(\keyinstance{}1,\lockinstance_j,\ciphertextinstance')\\
+            \taginstance' \result \text{M.mac}(\keyinstance{}2,\lockinstance_j,\ciphertextinstance')\\
+            \pcif \taginstance \neq \taginstance' : \messageinstance \result \invalid\\
+            \pcif b = 1 : \messageinstance \result \invalid\\
+            \pcreturn \messageinstance
+        }
+    \end{pchstack}
+    \caption{loAE-N2 game, adversary{} has access to oracles Oenc and Odec.}
+    \label{fig: loAE-N2 game}
+\end{figure}
+
+\begin{figure}[H]
+    \begin{pchstack}[boxed,center,space=0.5cm]
+        \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} loAE-N2-switch$^{b}_{\adversary,\users}$ }]{
+        L \result \emptyset\\
+        \pcfor \user \in [1..N]:\\
+        \t \keyinstance_\user \sample \keyspace\\
+        \t C_\user \result \invalid\\
+        b' \result \adversary\\
+        \pcreturn b'
+        }
+        \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Oenc$(\user,\lockinstance,\messageinstance)$}]{
+            \pcif C_\user \neq \invalid: \pcreturn \invalid\\
+            \pcif \lockinstance \in L: \pcreturn \invalid\\
+            L \result L \cup \{\lockinstance\}\\
+            \lockinstance_\user \result \lockinstance\\
+            (\keyinstance{}1,\keyinstance{}2) \result \keyinstance_j\\
+            \ciphertextinstance' \result \text{E.enc}(\keyinstance{}1,\lockinstance_j,\messageinstance)\\
+            \taginstance \result \text{M.mac}(\keyinstance{}2,\lockinstance_j,\ciphertextinstance')\\
+            \ciphertextinstance \result (\ciphertextinstance',\taginstance)\\
+            \pcif b = 1 \wedge \ciphertextinstance \neq \invalid: \\
+            \t \ciphertextinstance \sample \{0,1\}^{\abs{\ciphertextinstance}}\\
+            C_\user \result \ciphertextinstance\\
+            \pcreturn \ciphertextinstance
+        }
+        \pseudocode[lnstart=17,linenumbering,head={\textbf{Oracle} Odec$(\user,\ciphertextinstance)$}]{
+            \pcreturn \invalid
+        }
+    \end{pchstack}
+    \caption{loAE-N2-switch game, adversary{} has access to oracles Oenc and Odec. \textbf{abort} means the game stops running and returns 0.}
+    \label{fig: loAE-N2-switch game}
+\end{figure}
+Any adversary \adversary playing game loAE-N2 that can obtain a output different from \invalid{} from the Odec query, can break the security of the loMAC as well. Concretely we build adversary $B$ against loMAC that breaks its sec game using adversary \adversary.
+
+\begin{figure}[H]
+    \begin{pchstack}[boxed,center,space=0.5cm]
+        \pseudocode[lnstart=-1,linenumbering,head={\textbf{Adverary} B}]{
+        L \result \emptyset\\
+        \pcfor \user \in [1..N]:\\
+        \t \keyinstance_\user \sample \keyspace\\
+        \t C_\user \result \invalid\\
+        \textbf{run } \adversary\\
+        \pcreturn \invalid
+        }
+        \pseudocode[lnstart=5,linenumbering,head={\text{if \adversary{} calls }\textbf{Oracle} Oenc$(\user,\lockinstance,\messageinstance)$}]{
+            \pcif C_\user \neq \invalid: \pcreturn \invalid\\
+            \pcif \lockinstance \in L: \pcreturn \invalid\\
+            L \result L \cup \{\lockinstance\}\\
+            \lockinstance_\user \result \lockinstance\\
+            \ciphertextinstance' \result \text{E.enc}(\keyinstance_j,\lockinstance_j,\messageinstance)\\
+            \taginstance \result \text{Omac}(\user,\lockinstance_j,\ciphertextinstance')\\
+            \ciphertextinstance \result (\ciphertextinstance',\taginstance)\\
+            \pcif b = 1 \wedge \ciphertextinstance \neq \invalid: \\
+            \t \ciphertextinstance \sample \{0,1\}^{\abs{\ciphertextinstance}}\\
+            C_\user \result \ciphertextinstance\\
+            \pcreturn \ciphertextinstance
+        }
+        \pseudocode[lnstart=16,linenumbering,head={\text{if \adversary{} calls }\textbf{Oracle} Odec$(\user,\ciphertextinstance)$}]{
+            \pcif C_\user = \invalid: \pcreturn \invalid\\
+            \pcif \ciphertextinstance = C_\user: \pcreturn \invalid\\
+            (\ciphertextinstance',\taginstance) \result \ciphertextinstance\\
+            \messageinstance \result \text{E.dec}(\keyinstance{}1,\lockinstance_j,\ciphertextinstance')\\
+            t \result \text{Ovrf}(\user,\lockinstance_j,\ciphertextinstance')\\
+            \pcif \taginstance \neq \taginstance' : \messageinstance \result \invalid\\
+            \pcreturn \messageinstance
+        }
+    \end{pchstack}
+    \caption{Adversary B, has access to adversary{} and oracles Omac and Ovrf.}
+    \label{fig: adversary B N2}
+\end{figure}
+The probability that the condition in line 24 of loEA-N2 is false is exactly the probability that the condition in line 22 adversary B is false, and thus wins the loMAC game. As the two games only differ if this condition is false, we can state, regardless of b, that
+\begin{align*}
+    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^0 =1] - \text{Pr}[\text{loAE-N2-switch}_{\text{\adversary,\users}}^0 =1]
+    \leq
+    \text{\advantage{$B$,\users}{loMAC}}
+\end{align*}
+In the switch game, no information can can ever be gained from making a Odec query. As a result, we can define a adversary $C$ that runs $A$, forwards all Oenc queries and disregards all Odec queries. This leads to:
+\begin{align*}
+    \text{Pr}[\text{loAE-N2-switch}_{\text{\adversary,\users}}^0 =1] - \text{Pr}[\text{loAE-N2-switch}_{\text{\adversary,\users}}^1 =1]
+    =
+    \text{\advantage{$C$,\users}{loE}}
+\end{align*}
+We can now prove our theorem:
+\begin{align*}
+\text{\advantage{$A$,\users}{loAE}}    &  = \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^0 =1] - \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =1]
+    \\& \leq \text{\advantage{$C$,\users}{loE}} + \text{Pr}[\text{loAE-N2-switch}_{\text{\adversary,\users}}^0 =1] -  \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =1]
+    \\& \leq \text{\advantage{$C$,\users}{loE}} + \text{Pr}[\text{loAE-N2-switch}_{\text{\adversary,\users}}^0 =1] -  \text{Pr}[\text{loAE-N2-switch}_{\text{\adversary,\users}}^1 =1]
+    \\& = \text{\advantage{$B$,\users}{loMAC}} + \text{\advantage{$C$,\users}{loE}}
+\end{align*}
 
 \subsection{Comparison with Existing Alternatives}
 

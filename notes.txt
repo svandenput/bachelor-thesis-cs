@@ -1,7 +1,6 @@
 Feedback meeting:
 
 current todo's:
-- read sec proves nrs and gkp
 - think about security bound and proves
 - ideal vs attainable uitwerken 4.3
 - schrijven in main
