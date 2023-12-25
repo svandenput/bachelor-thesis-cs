@@ -22,6 +22,7 @@ toread martijn:
 - addition in intro of section 4
 - rewritten loMAC sec
 - security game uitleg in section 3
+- proof N2
 
 vragen bart:
 

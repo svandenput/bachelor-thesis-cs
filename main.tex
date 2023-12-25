@@ -585,13 +585,13 @@ We define the constructions secure if there is a tight (\textbf{todo: look at ti
 
 \paragraph{N2}
 first, we define our theorem:
-\paragraph{Theorem 1.} Let loAE be constructed from loMAC and loE as described in figure \ref{fig: N2 calls}. Then for any number of users \users and any loAE adversary \adversary{} that poses at most $Q_e$ many Oenc queries and at most $Q_d$ many Odec queries, there exist a loMAC adversary $B$ and a loE adversary $C$ such that
+\paragraph{Theorem 1.} Let loAE be constructed from loMAC and loE as described in figure \ref{fig: N2 calls}. Then for any number of users \users{} and any loAE adversary \adversary{} that poses at most $Q_e$ many Oenc queries and at most $Q_d$ many Odec queries, there exist a loMAC adversary $B$ and a loE adversary $C$ such that
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}} = \text{\advantage{$B$,\users}{loMAC}} + \frac{Q_d}{\abs{t}^2} + \text{\advantage{$C$,\users}{loE}}
 \end{align*}
 $\abs{t}$ is the output length of the loMAC. The running time of $B$ is at most that of A plus the time require to run $Q_e$ many E.enc queries and $Q_d$ many E.dec queries. The running time of $C$ is at most that of \adversary. $B$ makes at most $Q_e$ many Omac queries and at most $Q_d$ many Ovrf queries. $C$ makes at most $Q_e$ many Oenc queries.
 \\\\
-To prove this theorem we start by defining game loAE-N2 in figure \ref{fig: loAE-N2 game}. This game is the game loAE-IND-\$-CCA (fig:\ref{fig: loAE-IND game}) with the security calls from N2 (fig:\ref{fig: N2 calls}) filled in.
+To prove this theorem we start by defining game loAE-N2 in figure \ref{fig: loAE-N2 game}. This game is the game loAE-IND-\$-CCA (figure \ref{fig: loAE-IND game}) with the security calls from N2 (figure \ref{fig: N2 calls}) filled in.
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} loAE-N2$^{b}_{\adversary,\users}$ }]{
@@ -632,7 +632,7 @@ To prove this theorem we start by defining game loAE-N2 in figure \ref{fig: loAE
     \label{fig: loAE-N2 game}
 \end{figure}
 
-This gives us
+\noindent This gives us
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}}
     =
@@ -640,7 +640,7 @@ This gives us
     -
     \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =1]
 \end{align*}
-Next we define game N2-switch-1 in fig \ref{fig: N2-switch-1 game}. The only difference between this game and game loAE-N2 is the fact that N2-switch-1 uses the uniformly random function $tag$, instead of the loMAC. This function has the same input as the MAC, and outputs a uniformly random tag that has the same length as the output tag from the MAC.
+Next we define game N2-switch-1 in figure \ref{fig: N2-switch-1 game}. The only difference between this game and game loAE-N2 is the fact that N2-switch-1 uses the uniformly random function $tag$, instead of the loMAC. This function takes the same input as the MAC, and outputs a uniformly random tag with the same length as the output tag from the MAC would have had.
 
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
@@ -682,18 +682,19 @@ Next we define game N2-switch-1 in fig \ref{fig: N2-switch-1 game}. The only dif
     \label{fig: N2-switch-1 game}
 \end{figure}
 
-We expand the probability as follows:
+\noindent
+Using this game, we expand the probability:
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}}
-    &=&
+    &=
     \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^0 =1]
     -
     \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =1]
-    \\& & + \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =1]
+    \\& \hspace{0,3cm}  + \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =1]
     -
     \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =1]
 \end{align*}
-Any adversary \adversary{} winning game loAE-N2, but not N2-switch-1, can break the security of the loMAC as well. Concretely, we define adversary $B$ against loMAC that wins security game loMAC-PRF (fig \ref{fig: loMAC-PRF game}) using this \adversary.
+Any adversary \adversary{} winning game loAE-N2, but not N2-switch-1, can break the security of the loMAC as well. Concretely, we define adversary $B$ against loMAC that wins security game loMAC-PRF (figure \ref{fig: loMAC-PRF game}) using \adversary.
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Adverary} $B$}]{
@@ -730,37 +731,39 @@ Any adversary \adversary{} winning game loAE-N2, but not N2-switch-1, can break 
     \caption{Adversary $B$, has access to \adversary{} and oracles Omac and Ovrf.}
     \label{fig: adversary B N2}
 \end{figure}
-This adversary has the runtime of \adversary{}. For every Oenc query \adversary{} makes, $B$ computes E.enc once, and call Omac once. For every Odec query \adversary{} makes, $B$ computes E.dec once and calls Ovrf once. As the only difference between game loAE-N2 and N2-switch-1 lies in the $tag$ instead of the mac, $\text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^0 =1]
+
+\noindent
+This adversary has the runtime of \adversary{}. For every Oenc query \adversary{} makes, $B$ computes E.enc once, and call Omac once. For every Odec query \adversary{} makes, $B$ computes E.dec once and calls Ovrf once. Using $B$, we can see that $\text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^0 =1]
 -
 \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =1]$ is bound by the advantage that $B$ has. As a result we can rewrite our probability to:
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}}
-    &=&
+    &=
     \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^0 =1]
     -
     \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =1]
-    \\& & + \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =1]
+    \\& \hspace{0,3cm} + \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =1]
     -
     \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =1]
-    \\& \leq & \text{\advantage{$B$,\users}{loMAC}}
+    \\& \leq \text{\advantage{$B$,\users}{loMAC}}
     + \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =1]
     -
     \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =1]
 \end{align*}
-To expand our probability again, we define game N2-switch-2 in fig \ref{fig: N2-switch-2 game}. The only difference between this game and the first switch game is that game 2 will always return \invalid{} when the Odec query is called. Now we expand our probability:
+To expand our probability again, we define game N2-switch-2 in figure \ref{fig: N2-switch-2 game}. The only difference between this game and the first switch game is that game 2 will always return \invalid{} when the Odec query is called. We use this game to expand our probability twice:
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}}
-    &\leq&
+    &\leq
     \text{\advantage{$B$,\users}{loMAC}} 
     +
     \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =1]
     -
     \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^0 =1]
-    \\& &+
+    \\& \hspace{0,3cm}+
     \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^0 =1]
     -
     \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^1 =1]
-    \\& &+
+    \\& \hspace{0,3cm}+
     \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^1 =1]
     -
     \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =1]
@@ -796,30 +799,32 @@ To expand our probability again, we define game N2-switch-2 in fig \ref{fig: N2-
     \caption{N2-switch-2 game, adversary{} has access to oracles Oenc and Odec.}
     \label{fig: N2-switch-2 game}
 \end{figure}
-We know that, in the real world, the oracle Odec from N2-switch-1 always returns \invalid{} unless the condition on 24 is false. As a result, $\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =1] - \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^0 =1]$ will be equal to the chance of this condition being true. As \taginstance' is the result of a function $tag$ where the input of $tag$ may not be equal to the input used to compute \taginstance, the chance of \taginstance{} and \taginstance' being equal will be $\frac{1}{\abs{t}^2}$. Combining this with at most $Q_d$ calls to the decryption oracle, we get:
+
+\noindent
+In the real world, the oracle Odec from N2-switch-1 returns \invalid{} unless the condition on 24 is false. As a result, $\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =1] - \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^0 =1]$ will be equal to the chance of this condition being true. As \taginstance{} and \taginstance' are the result of the uniformly random function $tag$, where the input of $tag$ may not be equal to compute both, the chance of \taginstance{} and \taginstance' being equal will be $\frac{1}{\abs{t}^2}$. Combining this with at most $Q_d$ calls to the decryption oracle, we get:
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}}
-    &\leq&
+    &\leq
     \text{\advantage{$B$,\users}{loMAC}} 
     + \frac{Q_d}{\abs{t}^2} +
     \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^0 =1]
     -
     \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^1 =1]
-    \\& &+
+    \\& \hspace{0,3cm}+
     \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^1 =1]
     -
     \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =1]
 \end{align*}
-In game N2-switch-2, no information can ever be gained from making a Odec query. As a result any adversary $A$ winning this game can break break the security of the loE as well. Concretely, we define adversary $C$ against loE that wins game loE-IND-\$-CPA using this \adversary. Adversary $C$ forwards all Oenc queries and disregards all Odec queries. The runtime of $C$ is that of $A$ and $C$ makes $Q_e$ many Oenc queries. This leads to:
+In N2-switch-2, no information can ever be gained from making a Odec query. As a result any adversary $A$ winning this game can break break the security of the loE as well. Concretely, we define adversary $C$ against loE that wins game loE-IND-\$-CPA using this \adversary. Adversary $C$ forwards all Oenc queries and disregards all Odec queries. The runtime of $C$ is that of $A$ and $C$ makes $Q_e$ many Oenc queries. This leads to:
 \begin{align*}
     \text{Pr}[\text{N2-switch-2}_{\text{$C$,\users}}^0 =1] - \text{Pr}[\text{N2-switch-2}_{\text{$C$,\users}}^1 =1]& = \text{\advantage{$C$,\users}{loE}}
 \end{align*}
-In addition to this, games N2-switch-2 and loAE-N2 are equal in the ideal world leading to. $\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^1 =1]
+In addition to this, games N2-switch-2 and loAE-N2 are equal in the ideal world, resulting in $\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^1 =1]
 -
 \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =1]$ = 0. Filling both these in gives us our final result:
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}}
-    &\leq&
+    &\leq
     \text{\advantage{$B$,\users}{loMAC}} 
     + \frac{Q_d}{\abs{t}^2} +
     \text{\advantage{$C$,\users}{loE}}
