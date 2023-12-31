@@ -45,7 +45,7 @@
 \pagenumbering{arabic}
 
 \section{Introduction}
-Although symmetric and asymmetric cryptography are both subfields of cryptography, their research area's can be quite separated. This can lead to knowledge gaps between the two when work in asymmetric crypto uses constructions that are more common in symmetric crypto or the other way around. In this fashion, a paper by Giacon, Kiltz and Poettering \cite{PKC:GiaKilPoe18}, which we henceforth call \gkp{}, uses a construction that is very similar to Authenticated Encryption following the generic encrypt-then-MAC construction from Bellare and Namprempre \cite{AC:BelNam00}. This construction has since been revised in a paper by Namprempre, Rogaway and Thomas Shrimpton \cite{EC:NamRogShr14}, which we henceforth call \nrs{}. In this revision, a new set of constructions is given that be better applicable to common use cases. The aim of this thesis is to apply the knowledge from \nrs{} to the setting of \gkp{} and while doing so, create a new primitive for authenticated encryption suited for asymmetric settings.
+Although symmetric and asymmetric cryptography are both subfields of cryptography, their research area's can be quite separated. This can lead to knowledge gaps between the two whenever work in asymmetric crypto uses constructions that are more common in symmetric crypto or the other way around. In this fashion, a paper by Giacon, Kiltz and Poettering \cite{PKC:GiaKilPoe18}, which we henceforth call \gkp{}, uses a construction that is very similar to Authenticated Encryption following the generic encrypt-then-MAC construction from Bellare and Namprempre \cite{AC:BelNam00}. This construction has since been revised in a paper by Namprempre, Rogaway and Thomas Shrimpton \cite{EC:NamRogShr14}, which we henceforth call \nrs{}. In this revision, a new set of constructions is given that be better applicable to common use cases. The aim of this thesis is to apply the knowledge from \nrs{} to the setting of \gkp{} and, while doing so, create a new primitive for authenticated encryption suited for asymmetric settings.
 
 \section{Preliminaries}
 In this section we will explain several concepts important to the rest of our work, as well as some general notation.
@@ -203,7 +203,7 @@ A nAE scheme is constructed by several different schemes that combine the MAC an
 In \gkp{}, the concept of augmentation using locks is discussed. The authors start by showing some data encapsulation mechanisms are vulnerable to a passive multi-instance distinguishing- and key recovery and how this can lead to problems when used in public key encryption. They define the augmented data encapsulation mechanisms, ADEM for short, that uses locks to negate these insecurities. Additionally, they show how a ADEM that is secure against passive attacks can be combined with a MAC that is augmented in a similar fashion, called a AMAC, to construct ADEM' that is safe against active attackers. This construction is similar to construction N2 from \nrs.
 
 \subsubsection{Used Primitives}
-In \gkp{}, \messagespace{} is not required to contain at least two strings, and to contain all strings of length x if it contains a string of length x. Additionally, \keyspace{} is required to be finite but not required to be non-empty. 
+In \gkp{}, \messagespace{} is not required to contain at least two strings, and to contain all strings of length x if it contains a string of length x. Additionally, \keyspace{} is required to be finite but not required to be non-empty. The security games are only explained briefly in this section, a more in-depth explanation of the relevant constructs can be found in section \ref{sec: loAE security model}.
 \paragraph{ADEM}
 A ADEM scheme is defined by tuple a $(\text{A.enc}, \text{A.dec})$. Deterministic algorithm A.enc takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}.  Deterministic algorithm A.dec takes a \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and outputs a message \messageinstance{} in \messagespace{} or \invalid{} to indicate rejection. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{} we have A.dec$(\keyinstance,\lockinstance,\text{A.enc}(\keyinstance,\lockinstance,\messageinstance))$ = \messageinstance. 
 
@@ -212,6 +212,7 @@ The security of a ADEM is defined as
 \begin{align*} 
     \text{\advantage{ADEM,\adversary,\users}{l-ind-lor-cpa} = \probabilityblock{L-IND-LOR-CPA}{\adversary,\users}{0}{1}}
 \end{align*}
+(\textbf{Question: I was not sure to what extend should I explain the constructs from these games that I reuse and explain further in section 4.2, so I explained them briefly and wrote a note in the introduction of this section. What are your thoughts on this?})
 where L-IND-LOR-CPA is in figure \ref{fig: L-IND-CPA game}. Every user is only allowed one encryption as enforced by lines 3, 6 and 11. Locks may not repeat between users as enforced by lines 0, 7, 8 and 9. The corresponding game can be found in figure 9 from \gkp{}, note that this figure also included a decryption oracle the adversary is not allowed to use. 
 \begin{figure}
     \centering
@@ -362,7 +363,7 @@ With the creation of a new primitive, we try to bridge the gap between \nrs{} an
 \subsection{loAE}
 A loAE scheme is defined by tuple a $(\text{AE.enc},\text{AE.dec})$. Deterministic algorithm AE.enc takes three inputs $(\keyinstance,\lockinstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. If, and only if $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Deterministic algorithm AE.dec takes three inputs $(\keyinstance,n,\ciphertextinstance)$ and outputs a value \messageinstance. Both AE.enc and EA.dec are required to satisfy correctness (if AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ = \ciphertextinstance).
 
-\subsection{Security Model}
+\subsection{loAE Security Model} \label{sec: loAE security model}
 The security is defined as 
 \begin{align*} 
     \text{\advantage{\adversary,\users}{loAE} = \probabilityblock{loAE-IND-\$-CCA}{\adversary,\users}{0}{1}}
@@ -582,16 +583,19 @@ Following \nrs{}, three ways to construct this loAE are of interest, namely the 
 
 \subsection{Security Bounds}
 We define the constructions secure if there is a tight (\textbf{todo: look at tight sec reductions}) reduction from breaking the loAE-security of the scheme to breaking the loE-security or the loMAC security of the underlying primitives.
+(\textbf{Note: This section is likely to contain some mistakes. I started trying to proof N2 as you said this would most likely be the easiest one. I plan to do N1 and N3 if you think the proof for N2 is correct.})
 
+\newpage
 \paragraph{N2}
 first, we define our theorem:
 \paragraph{Theorem 1.} Let loAE be constructed from loMAC and loE as described in figure \ref{fig: N2 calls}. Then for any number of users \users{} and any loAE adversary \adversary{} that poses at most $Q_e$ many Oenc queries and at most $Q_d$ many Odec queries, there exist a loMAC adversary $B$ and a loE adversary $C$ such that
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}} = \text{\advantage{$B$,\users}{loMAC}} + \frac{Q_d}{\abs{t}^2} + \text{\advantage{$C$,\users}{loE}}
 \end{align*}
+(\textbf{Question: can you start sentences with a sign in a theorem?}).
 $\abs{t}$ is the output length of the loMAC. The running time of $B$ is at most that of A plus the time require to run $Q_e$ many E.enc queries and $Q_d$ many E.dec queries. The running time of $C$ is at most that of \adversary. $B$ makes at most $Q_e$ many Omac queries and at most $Q_d$ many Ovrf queries. $C$ makes at most $Q_e$ many Oenc queries.
 \\\\
-To prove this theorem we start by defining game loAE-N2 in figure \ref{fig: loAE-N2 game}. This game is the game loAE-IND-\$-CCA (figure \ref{fig: loAE-IND game}) with the security calls from N2 (figure \ref{fig: N2 calls}) filled in.
+To prove this theorem we start by defining game loAE-N2 in figure \ref{fig: loAE-N2 game}. This game is the game loAE-IND-\$-CCA (figure \ref{fig: loAE-IND game}) AE.enc and AE.dec substituted with the N2 calls from figure \ref{fig: N2 calls}.
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} loAE-N2$^{b}_{\adversary,\users}$ }]{
@@ -636,11 +640,11 @@ To prove this theorem we start by defining game loAE-N2 in figure \ref{fig: loAE
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}}
     =
-    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^0 =1]
+    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^0 =0]
     -
-    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =1]
+    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =0]
 \end{align*}
-Next we define game N2-switch-1 in figure \ref{fig: N2-switch-1 game}. The only difference between this game and game loAE-N2 is the fact that N2-switch-1 uses the uniformly random function $tag$, instead of the loMAC. This function takes the same input as the MAC, and outputs a uniformly random tag with the same length as the output tag from the MAC would have had.
+Next we define game N2-switch-1 in figure \ref{fig: N2-switch-1 game}. The only difference between this game and game loAE-N2 is the fact that N2-switch-1 uses the uniformly random function $tag$, instead of the loMAC. This function takes the same input as the MAC would take, and outputs a uniformly random tag with the same length as the output tag from the MAC would have had.
 
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
@@ -687,14 +691,14 @@ Using this game, we expand the probability:
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}}
     &=
-    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^0 =1]
+    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^0 =0]
     -
-    \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =1]
-    \\& \hspace{0,3cm}  + \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =1]
+    \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =0]
+    \\& \hspace{0,3cm}  + \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =0]
     -
-    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =1]
+    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =0]
 \end{align*}
-Any adversary \adversary{} winning game loAE-N2, but not N2-switch-1, can break the security of the loMAC as well. Concretely, we define adversary $B$ against loMAC that wins security game loMAC-PRF (figure \ref{fig: loMAC-PRF game}) using \adversary.
+Any adversary \adversary{} winning game loAE-N2, but not N2-switch-1, can break the security of the loMAC. Concretely, we define adversary $B$ against loMAC that wins security game loMAC-PRF (figure \ref{fig: loMAC-PRF game}) using \adversary.
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Adverary} $B$}]{
@@ -722,7 +726,7 @@ Any adversary \adversary{} winning game loAE-N2, but not N2-switch-1, can break 
             \pcif C_\user = \invalid: \pcreturn \invalid\\
             \pcif \ciphertextinstance = C_\user: \pcreturn \invalid\\
             (\ciphertextinstance',\taginstance) \result \ciphertextinstance\\
-            \messageinstance \result \text{E.dec}(\keyinstance{}1,\lockinstance_j,\ciphertextinstance')\\
+            \messageinstance \result \text{E.dec}(\keyinstance{}_j,\lockinstance_j,\ciphertextinstance')\\
             passed \result \text{Ovrf}(\user,\ciphertextinstance',\taginstance')\\
             \pcif \neg passed : \messageinstance \result \invalid\\
             \pcreturn \messageinstance
@@ -733,22 +737,22 @@ Any adversary \adversary{} winning game loAE-N2, but not N2-switch-1, can break 
 \end{figure}
 
 \noindent
-This adversary has the runtime of \adversary{}. For every Oenc query \adversary{} makes, $B$ computes E.enc once, and call Omac once. For every Odec query \adversary{} makes, $B$ computes E.dec once and calls Ovrf once. Using $B$, we can see that $\text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^0 =1]
+This adversary has the runtime of \adversary{}. For every Oenc query \adversary{} makes, $B$ computes E.enc once, and call Omac once. For every Odec query \adversary{} makes, $B$ computes E.dec once and calls Ovrf once. Note that, alternatively, $B$ could return 0 if $passed$ is \codetrue{} to avoid having to do E.dec computations. To increase consistency with the other two cases, these computations are still made. Using $B$, we can see that $\text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^0 =0]
 -
-\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =1]$ is bound by the advantage that $B$ has. As a result we can rewrite our probability to:
+\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =0]$ is bound by the advantage that $B$ has. As a result we can rewrite our probability to:
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}}
     &=
-    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^0 =1]
+    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^0 =0]
     -
-    \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =1]
-    \\& \hspace{0,3cm} + \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =1]
+    \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =0]
+    \\& \hspace{0,3cm} + \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =0]
     -
-    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =1]
+    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =0]
     \\& \leq \text{\advantage{$B$,\users}{loMAC}}
-    + \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =1]
+    + \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =0]
     -
-    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =1]
+    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =0]
 \end{align*}
 To expand our probability again, we define game N2-switch-2 in figure \ref{fig: N2-switch-2 game}. The only difference between this game and the first switch game is that game 2 will always return \invalid{} when the Odec query is called. We use this game to expand our probability twice:
 \begin{align*}
@@ -756,17 +760,17 @@ To expand our probability again, we define game N2-switch-2 in figure \ref{fig: 
     &\leq
     \text{\advantage{$B$,\users}{loMAC}} 
     +
-    \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =1]
+    \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =0]
     -
-    \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^0 =1]
+    \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^0 =0]
     \\& \hspace{0,3cm}+
-    \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^0 =1]
+    \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^0 =0]
     -
-    \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^1 =1]
+    \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^1 =0]
     \\& \hspace{0,3cm}+
-    \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^1 =1]
+    \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^1 =0]
     -
-    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =1]
+    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =0]
 \end{align*}
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
@@ -801,27 +805,27 @@ To expand our probability again, we define game N2-switch-2 in figure \ref{fig: 
 \end{figure}
 
 \noindent
-In the real world, the oracle Odec from N2-switch-1 returns \invalid{} unless the condition on 24 is false. As a result, $\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =1] - \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^0 =1]$ will be equal to the chance of this condition being true. As \taginstance{} and \taginstance' are the result of the uniformly random function $tag$, where the input of $tag$ may not be equal to compute both, the chance of \taginstance{} and \taginstance' being equal will be $\frac{1}{\abs{t}^2}$. Combining this with at most $Q_d$ calls to the decryption oracle, we get:
+In the real world, the oracle Odec from N2-switch-1 returns \invalid{}, unless the condition on line 24 is false. As a result, $\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =0] - \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^0 =0]$ will be equal to the chance of this condition being true. As \taginstance{} and \taginstance' are the result of the uniformly random function $tag$, where the input of $tag$ may not be equal when computing both, the chance of \taginstance{} and \taginstance' being equal will be $\frac{1}{\abs{t}^2}$ for every Odec calls. Combining this with at most $Q_d$ calls to the decryption oracle, we get:
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}}
     &\leq
     \text{\advantage{$B$,\users}{loMAC}} 
     + \frac{Q_d}{\abs{t}^2} +
-    \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^0 =1]
+    \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^0 =0]
     -
-    \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^1 =1]
+    \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^1 =0]
     \\& \hspace{0,3cm}+
-    \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^1 =1]
+    \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^1 =0]
     -
-    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =1]
+    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =0]
 \end{align*}
 In N2-switch-2, no information can ever be gained from making a Odec query. As a result any adversary $A$ winning this game can break break the security of the loE as well. Concretely, we define adversary $C$ against loE that wins game loE-IND-\$-CPA using this \adversary. Adversary $C$ forwards all Oenc queries and disregards all Odec queries. The runtime of $C$ is that of $A$ and $C$ makes $Q_e$ many Oenc queries. This leads to:
 \begin{align*}
-    \text{Pr}[\text{N2-switch-2}_{\text{$C$,\users}}^0 =1] - \text{Pr}[\text{N2-switch-2}_{\text{$C$,\users}}^1 =1]& = \text{\advantage{$C$,\users}{loE}}
+    \text{Pr}[\text{N2-switch-2}_{\text{$C$,\users}}^0 =0] - \text{Pr}[\text{N2-switch-2}_{\text{$C$,\users}}^1 =0]& = \text{\advantage{$C$,\users}{loE}}
 \end{align*}
-In addition to this, games N2-switch-2 and loAE-N2 are equal in the ideal world, resulting in $\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^1 =1]
+In addition to this, games N2-switch-2 and loAE-N2 are equal in the ideal world, resulting in $\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^1 =0]
 -
-\text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =1]$ = 0. Filling both these in gives us our final result:
+\text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =0]$ = 0. Filling both these in gives us our final result:
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}}
     &\leq
