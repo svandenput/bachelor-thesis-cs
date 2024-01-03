@@ -1,4 +1,6 @@
 Feedback meeting:
+- 
+
 
 current todo's:
 - ideal vs attainable uitwerken 4.3
@@ -19,7 +21,7 @@ toread martijn:
 - addition in intro of section 4
 - rewritten loMAC sec
 - security game uitleg in section 3
-- proof N2
+- proof N2 section 5.3
 
 vragen bart:
 

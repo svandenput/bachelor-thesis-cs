@@ -13,6 +13,7 @@
 \usepackage{amssymb}
 \addbibresource{cryptobib/crypto.bib}
 \GetFileInfo{rutitlepage.dtx}
+\newtheorem{theorem}{Theorem}
 
 \pagestyle{fancy}
 \fancyhf{}
@@ -469,7 +470,7 @@ A lock-based one-time use MAC is defined by a deterministic algorithm M.mac that
 The security of a lock bases, one-time use PRF secure MAC is defined as \begin{align*} 
     \text{\advantage{F,\adversary,\users}{loMAC} = \probabilityblock{loMAC-PRF}{\adversary,\users}{0}{1}}
 \end{align*}
-where loMAC-PRF is in figure \ref{fig: loMAC-PRF game}. Every user is only allowed one MAC query and verification queries are only allowed after the MAC query. Locks may not repeat between users. In contrast to the MAC-PRF from \nrs{}, a verification oracle is needed as we only allow one Omac query per user. In the real world Ovrf will check similar constraints as the Odec from figure \ref{fig: loAE-IND game}. If a Omac query has been made for the given user, and the given message-tag pair is not the result of this query, then the pair is verified. In the ideal world, this verification query will always return \codefalse{} to match with the loAE scheme that always return \invalid{} on decryption in the ideal world. (\textbf{Question: is this enough explanation to justify the use of a \invalid{} oracle in the ideal world})
+where loMAC-PRF is in figure \ref{fig: loMAC-PRF game}. Every user is only allowed one MAC query and verification queries are only allowed after the MAC query. Locks may not repeat between users. In contrast to the MAC-PRF from \nrs{}, a verification oracle is needed as we only allow one Omac query per user. In the real world Ovrf will check similar constraints as the Odec from figure \ref{fig: loAE-IND game}. If a Omac query has been made for the given user, and the given message-tag pair is not the result of this query, then the pair is verified. In the ideal world, uniformly random function $tag$ is used instead of the loMAC. This function takes the same input as the MAC would take, and outputs a uniformly random tag with the same length as the output tag from the MAC would have had.
     \begin{figure}
         \centering
         \begin{pchstack}[boxed,center,space=0.5cm]
@@ -488,7 +489,7 @@ where loMAC-PRF is in figure \ref{fig: loMAC-PRF game}. Every user is only allow
                 \lockinstance_\user \result \lockinstance\\
                 \taginstance \leftarrow \text{M.mac}(\keyinstance_\user,\lockinstance_\user,\messageinstance)\\
                 \pcif b = 1 \wedge \taginstance \neq \invalid: \\
-                \t \taginstance \sample \{0,1\}^{\abs{\taginstance}}\\
+                \t \taginstance \result tag(\keyinstance_\user,\lockinstance_\user,\messageinstance)\\
                 T_\user \result (\messageinstance,\taginstance)\\
                 \pcreturn \taginstance
             }
@@ -496,7 +497,8 @@ where loMAC-PRF is in figure \ref{fig: loMAC-PRF game}. Every user is only allow
                 \pcif T_\user = \invalid: \pcreturn \invalid\\
                 \pcif (\messageinstance,\taginstance) = T_\user : \pcreturn \invalid \\
                 \taginstance' \leftarrow \text{M.mac}(\keyinstance_\user,\lockinstance_\user,\messageinstance)\\
-                \pcif b = 1 : \pcreturn \codefalse\\
+                \pcif b = 1 : \\
+                \t \taginstance' \leftarrow tag(\keyinstance_\user,\lockinstance_\user,\messageinstance)\\
                 \pcif \taginstance = \taginstance' \\
                 \t \pcreturn \codetrue\\
                 \pcreturn \codefalse
@@ -588,14 +590,14 @@ We define the constructions secure if there is a tight (\textbf{todo: look at ti
 \newpage
 \paragraph{N2}
 first, we define our theorem:
-\paragraph{Theorem 1.} Let loAE be constructed from loMAC and loE as described in figure \ref{fig: N2 calls}. Then for any number of users \users{} and any loAE adversary \adversary{} that poses at most $Q_e$ many Oenc queries and at most $Q_d$ many Odec queries, there exist a loMAC adversary $B$ and a loE adversary $C$ such that
+\begin{theorem}
+Let loAE be constructed from loMAC and loE as described in figure \ref{fig: N2 calls}. Then for any number of users \users{} and any loAE adversary \adversary{} that poses at most $Q_e$ many Oenc queries, limited by N, and at most $Q_d$ many Odec queries, there exist a loMAC adversary $B$ and a loE adversary $C$ such that:
 \begin{align*}
-    \text{\advantage{$A$,\users}{loAE}} = \text{\advantage{$B$,\users}{loMAC}} + \frac{Q_d}{\abs{t}^2} + \text{\advantage{$C$,\users}{loE}}
+    \text{\advantage{$A$,\users}{loAE}} = \text{\advantage{$B$,\users}{loMAC}} + \frac{Q_d}{\abs{t}^2} + \text{\advantage{$C$,\users}{loE}},
 \end{align*}
-(\textbf{Question: can you start sentences with a sign in a theorem?}).
-$\abs{t}$ is the output length of the loMAC. The running time of $B$ is at most that of A plus the time require to run $Q_e$ many E.enc queries and $Q_d$ many E.dec queries. The running time of $C$ is at most that of \adversary. $B$ makes at most $Q_e$ many Omac queries and at most $Q_d$ many Ovrf queries. $C$ makes at most $Q_e$ many Oenc queries.
-\\\\
-To prove this theorem we start by defining game loAE-N2 in figure \ref{fig: loAE-N2 game}. This game is the game loAE-IND-\$-CCA (figure \ref{fig: loAE-IND game}) AE.enc and AE.dec substituted with the N2 calls from figure \ref{fig: N2 calls}.
+where $\abs{t}$ is the output length of the loMAC. The running time of $B$ is at most that of A plus the time require to run $Q_e$ many E.enc encapsulations and $Q_d$ many E.dec decapsulations. The running time of $C$ is at most that of \adversary. Additionally, $B$ makes at most $Q_e$ many Omac queries and at most $Q_d$ many Ovrf queries and $C$ makes at most $Q_e$ many Oenc queries.
+\end{theorem}
+Within this theorem, both $Q_e$ and $Q_d$ refer to the total queries the adversary is allowed to make, not the queries per user. To prove this theorem we start by defining game loAE-N2 in figure \ref{fig: loAE-N2 game}. This game is the game loAE-IND-\$-CCA (figure \ref{fig: loAE-IND game}) AE.enc and AE.dec substituted with the N2 algorithms from figure \ref{fig: N2 calls}.
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} loAE-N2$^{b}_{\adversary,\users}$ }]{
@@ -717,12 +719,10 @@ Any adversary \adversary{} winning game loAE-N2, but not N2-switch-1, can break 
             \ciphertextinstance' \result \text{E.enc}(\keyinstance_j,\lockinstance_j,\messageinstance)\\
             \taginstance \result \text{Omac}(\user,\lockinstance_j,\ciphertextinstance')\\
             \ciphertextinstance \result (\ciphertextinstance',\taginstance)\\
-            \pcif b = 1 \wedge \ciphertextinstance \neq \invalid: \\
-            \t \ciphertextinstance \sample \{0,1\}^{\abs{\ciphertextinstance}}\\
             C_\user \result \ciphertextinstance\\
             \pcreturn \ciphertextinstance
         }
-        \pseudocode[lnstart=16,linenumbering,head={\text{if \adversary{} calls }\textbf{Oracle} Odec$(\user,\ciphertextinstance)$}]{
+        \pseudocode[lnstart=14,linenumbering,head={\text{if \adversary{} calls }\textbf{Oracle} Odec$(\user,\ciphertextinstance)$}]{
             \pcif C_\user = \invalid: \pcreturn \invalid\\
             \pcif \ciphertextinstance = C_\user: \pcreturn \invalid\\
             (\ciphertextinstance',\taginstance) \result \ciphertextinstance\\
@@ -732,14 +732,12 @@ Any adversary \adversary{} winning game loAE-N2, but not N2-switch-1, can break 
             \pcreturn \messageinstance
         }
     \end{pchstack}
-    \caption{Adversary $B$, has access to \adversary{} and oracles Omac and Ovrf.}
+    \caption{Adversary $B$, has access to \adversary{} and oracles Omac and Ovrf. Note that $\keyinstance_\user$ is the MAC key in this game.}
     \label{fig: adversary B N2}
 \end{figure}
 
 \noindent
-This adversary has the runtime of \adversary{}. For every Oenc query \adversary{} makes, $B$ computes E.enc once, and call Omac once. For every Odec query \adversary{} makes, $B$ computes E.dec once and calls Ovrf once. Note that, alternatively, $B$ could return 0 if $passed$ is \codetrue{} to avoid having to do E.dec computations. To increase consistency with the other two cases, these computations are still made. Using $B$, we can see that $\text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^0 =0]
--
-\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =0]$ is bound by the advantage that $B$ has. As a result we can rewrite our probability to:
+This adversary has the runtime of \adversary{}. For every Oenc query \adversary{} makes, $B$ computes E.enc once, and call Omac once. For every Odec query \adversary{} makes, $B$ computes E.dec once and calls Ovrf once. Note that, alternatively, $B$ could return 0 if $passed$ is \codetrue{} to avoid having to do E.dec computations. To increase consistency with the other two cases, these computations are still made. Using $B$, we can see that $\text{Pr}[\text{loMAC-PRF}_{\text{\adversary,\users}}^0 =0]=\text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^0 =0]$ as $B$ simulates game loAE-N2 with $b$ = 0 whenever its own $b$ is 0. In addition, we can see that $\text{Pr}[\text{loMAC-PFR}_{\text{\adversary,\users}}^1 =0]=\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =0]$ as $B$ simulates game N2-switch-1 with $b$ = 0 whenever its own $b$ is 1. As a result we can rewrite our probability to:
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}}
     &=
@@ -749,7 +747,14 @@ This adversary has the runtime of \adversary{}. For every Oenc query \adversary{
     \\& \hspace{0,3cm} + \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =0]
     -
     \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =0]
-    \\& \leq \text{\advantage{$B$,\users}{loMAC}}
+    \\& =
+    \text{Pr}[\text{loMAC-PRF}_{\text{\adversary,\users}}^0 =0]
+    -
+    \text{Pr}[\text{loMAC-PRF}_{\text{\adversary,\users}}^1 =0]
+    \\& \hspace{0,3cm} + \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =0]
+    -
+    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =0]
+    \\& = \text{\advantage{$B$,\users}{loMAC}}
     + \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =0]
     -
     \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =0]
