@@ -736,6 +736,7 @@ Any adversary \adversary{} winning game loAE-N2, but not N2-switch-1, can break 
     \label{fig: adversary B N2}
 \end{figure}
 
+
 \noindent
 This adversary has the runtime of \adversary{}. For every Oenc query \adversary{} makes, $B$ computes E.enc once, and call Omac once. For every Odec query \adversary{} makes, $B$ computes E.dec once and calls Ovrf once. Note that, alternatively, $B$ could return 0 if $passed$ is \codetrue{} to avoid having to do E.dec computations. To increase consistency with the other two cases, these computations are still made. Using $B$, we can see that $\text{Pr}[\text{loMAC-PRF}_{\text{\adversary,\users}}^0 =0]=\text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^0 =0]$ as $B$ simulates game loAE-N2 with $b$ = 0 whenever its own $b$ is 0. In addition, we can see that $\text{Pr}[\text{loMAC-PFR}_{\text{\adversary,\users}}^1 =0]=\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0 =0]$ as $B$ simulates game N2-switch-1 with $b$ = 0 whenever its own $b$ is 1. As a result we can rewrite our probability to:
 \begin{align*}
