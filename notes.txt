@@ -1,8 +1,9 @@
 Feedback meeting:
-- 
-
 
 current todo's:
+- think about the story
+- overvieuw maken over wat ik nog wil doen
+- intro bijwerken
 - ideal vs attainable uitwerken 4.3
 - to-scan scannen
 
@@ -16,12 +17,10 @@ vragen martijn:
 - 
 
 toread martijn:
-- adaptations in section 2
-- adaptations in section 3.3
-- addition in intro of section 4
-- rewritten loMAC sec
-- security game uitleg in section 3
 - proof N2 section 5.3
+- structure of 3.2 with CPA and CCA
+- 3.3
+- intro 4
 
 vragen bart:
 
