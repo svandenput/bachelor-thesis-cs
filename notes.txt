@@ -2,7 +2,7 @@ Feedback meeting:
 -
 
 current todo's:
-- linenumbers checken proof
+- feedback 9 jan
 - intro bijwerken
 - to-scan scannen
 

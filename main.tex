@@ -359,7 +359,7 @@ The security notions from both papers also reflect the differences in contexts. 
 With the creation of a new primitive, we evaluate the lock construction from \gkp{} in the context of symmetric crypto. Like \gkp{}, we consider the authenticated encryption primitive in a setting where multiple users use their key once. But instead of finding a single constructions, we aim to generalize the primitive using the knowledge from \nrs{}. In this section we will discuss this new security primitive, the lock-based one-time use Authenticated Encryption scheme, loAE scheme for short.
 
 \subsection{loAE}
-A loAE scheme is defined by a tuple $(\text{AE.enc},\text{AE.dec})$. Deterministic algorithm AE.enc takes three inputs $(\keyinstance,\lockinstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. If, and only if $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Deterministic algorithm AE.dec takes three inputs $(\keyinstance,n,\ciphertextinstance)$ and outputs a value \messageinstance. Both AE.enc and EA.dec are required to satisfy correctness (if AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ = \ciphertextinstance).
+A loAE scheme is defined by a tuple $(\text{AE.enc},\text{AE.dec})$. Deterministic algorithm AE.enc takes three inputs $(\keyinstance,\lockinstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. If, and only if $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Deterministic algorithm AE.dec takes three inputs $(\keyinstance,\lockinstance,\ciphertextinstance)$ and outputs a value \messageinstance. Both AE.enc and EA.dec are required to satisfy correctness (if AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ = \ciphertextinstance).
 
 \subsection{loAE Security Model} \label{sec: loAE security model}
 The security is defined as 
@@ -467,7 +467,7 @@ A lock-based one-time use MAC is defined by a deterministic algorithm M.mac that
 The security of a lock bases, one-time use PRF secure MAC is defined as \begin{align*} 
     \text{\advantage{F,\adversary,\users}{loMAC} = \probabilityblock{loMAC-PRF}{\adversary,\users}{0}{1}}
 \end{align*}
-where loMAC-PRF is in Figure \ref{fig: loMAC-PRF game}. Every user is only allowed one MAC query and verification queries are only allowed after the MAC query. Locks may not repeat between users. In contrast to the MAC-PRF from \nrs{}, a verification oracle is needed as we only allow one Omac query per user. In the real world Ovrf will check similar constraints as the Odec from Figure \ref{fig: loAE-IND game}. If a Omac query has been made for the given user, and the given message-tag pair is not the result of this query, then the pair is verified. In the ideal world, uniformly random function $tag$ is used instead of the loMAC. To define this function we write $\mathit{Func}(\keyspace,\lockspace,\messagespace,\tagspace)$ to denote the set of all functions from key space all functions from key space \keyspace, lock space \lockspace{} and message space \messagespace{} to tag space \tagspace. We need to define this function specifically as we want the tags resulting from computations in oracle Ovrf to match with those in oracle Omac. 
+where loMAC-PRF is in Figure \ref{fig: loMAC-PRF game}. Every user is only allowed one MAC query and verification queries are only allowed after the MAC query. Locks may not repeat between users. In contrast to the MAC-PRF from \nrs{}, a verification oracle is needed as we only allow one Omac query per user. In the real world Ovrf will check similar constraints as the Odec from Figure \ref{fig: loAE-IND game}. If a Omac query has been made for the given user, and the given message-tag pair is not the result of this query, then the pair is verified. In the ideal world, uniformly random function $tag$ is used instead of the loMAC. To define this function we write $\mathit{Func}(\keyspace,\lockspace,\messagespace,\tagspace)$ to denote the set of all functions from key space all functions from key space \keyspace, lock space \lockspace{} and message space \messagespace{} to tag space \tagspace. We need to define this function specifically as we want the tags resulting from computations in oracle Ovrf to match with those in oracle Omac. When the input of $tag$ is outside its domain, it will return \invalid.
     \begin{figure}
         \centering
         \begin{pchstack}[boxed,center,space=0.5cm]
@@ -590,11 +590,11 @@ We define the constructions secure if there is a tight (\textbf{todo: look at ti
 \paragraph{N2}
 first, we define our theorem:
 \begin{theorem}
-Let loAE be constructed from loMAC and loE as described in Figure \ref{fig: N2 calls}. Assume ciphertext space \ciphertextspace{} from the loE to be a subset of message space \tagspace from the loMAC as well as loMAC and loE having a shared lock space. Then, for any number of users \users{} and any loAE adversary \adversary{} that poses at most $Q_e$ many Oenc queries, and at most $Q_d$ many Odec queries, there exist a loMAC adversary $B$ and a loE adversary $C$ such that:
+Let loAE be constructed from loMAC and loE as described in Figure \ref{fig: N2 calls}. If, ciphertext space \ciphertextspace{} from the loE to be a subset of message space \messagespace{} from the loMAC as well as loMAC and loE having a shared lock space. Then, for any number of users \users{} and any loAE adversary \adversary{} that poses at most $Q_e$ many Oenc queries, and at most $Q_d$ many Odec queries, there exist a loMAC adversary $B$ and a loE adversary $C$ such that:
 \begin{align*}
-    \text{\advantage{$A$,\users}{loAE}} \leq \text{\advantage{$B$,\users}{loMAC}} + \frac{Q_d}{2^{\abs{t}}} + \text{\advantage{$C$,\users}{loE}}
+    \text{\advantage{$A$,\users}{loAE}} \leq \text{\advantage{$B$,\users}{loMAC}} + \frac{Q_d}{2^{\textnormal{n}}} + \text{\advantage{$C$,\users}{loE}}
 \end{align*}
-where $\abs{t}$ is the output length of the loMAC. The running time of $B$ is at most that of A plus the time required to run $Q_e$ many \textnormal{E.enc} encapsulations and $Q_d$ many \textnormal{E.dec} decapsulations. The running time of $C$ is at most that of \adversary. Additionally, $B$ makes at most $Q_e$ many Omac queries and at most $Q_d$ many Ovrf queries and $C$ makes at most $Q_e$ many Oenc queries.
+where \textnormal{n} is the output length of the loMAC. The running time of $B$ is at most that of A plus the time required to run $Q_e$ many \textnormal{E.enc} encapsulations and $Q_d$ many \textnormal{E.dec} decapsulations. The running time of $C$ is at most that of \adversary. Additionally, $B$ makes at most $Q_e$ many Omac queries and at most $Q_d$ many Ovrf queries and $C$ makes at most $Q_e$ many Oenc queries.
 \end{theorem}
 \noindent
 Within this theorem, both $Q_e$ and $Q_d$ refer to the total queries the adversary is allowed to make, not the queries per user. As a result $Q_e$ is limited by N.
@@ -648,13 +648,13 @@ To prove this theorem we start by defining game loAE-N2 in Figure \ref{fig: loAE
     -
     \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =0].
 \end{align*}
-Next we define game N2-switch-1 in Figure \ref{fig: N2-switch-1 game}. The only difference between this game and game loAE-N2 is the fact that N2-switch-1 uses the uniformly random function $tag$, instead of the loMAC. To define this function we write $\mathit{Func}(\keyspace,\lockspace,\ciphertextspace,\tagspace)$ to denote the set of all functions from key space all functions from key space \keyspace, lock space \lockspace{} and ciphertext space from E.enc \ciphertextspace{} to tag space \tagspace. We define this function specifically as we want the tags resulting from computations in oracle Oenc to match with those in oracle Odec.
+Next we define game N2-switch-1 in Figure \ref{fig: N2-switch-1 game}. The only difference between this game and game loAE-N2 is the fact that N2-switch-1 uses the uniformly random function $tag$, instead of the loMAC. To define this function we write $\mathit{Func}(\keyspace,\lockspace,\ciphertextspace,\tagspace)$ to denote the set of all functions key the key space from the MAC \keyspace, the shared lock space \lockspace{} and ciphertext space from E.enc \ciphertextspace{} to the tag space \tagspace. We define this function specifically as we want the tags resulting from computations in oracle Oenc to match with those in oracle Odec. When the input of $tag$ is outside its domain, it will return \invalid.
 
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} N2-switch-1$_{\adversary,\users}$ }]{
         L \result \emptyset\\
-        tag \sample \mathit{Func}(\keyspace_{mac},\lockspace,\messagespace,\tagspace)\\
+        tag \sample \mathit{Func}(\keyspace_{mac},\lockspace,\ciphertextspace,\tagspace)\\
         \pcfor \user \in [1..N]:\\
         \t \keyinstance_\user \sample \keyspace\\
         \t C_\user \result \invalid\\
@@ -738,7 +738,7 @@ Next, we can rewrite $\text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}} =0] - 
 \end{figure}
 
 \noindent
-This adversary has the runtime of \adversary{}. For every Oenc query \adversary{} makes, $B$ computes E.enc once, and calls Omac once. For every Odec query \adversary{} makes, $B$ computes E.dec once and calls Ovrf once. Note that, alternatively, $B$ could return 0 if $passed$ is \codetrue{} to avoid having to do E.dec computations. To increase consistency with the other two cases, these computations are still made. Now we can see that $\text{Pr}[\text{loMAC-PRF}_{\text{$B$,\users}}^0 =0]=\text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^0 =0]$ as $B$ perfectly simulates game loAE-N2 with $b$ = 0 whenever its own $b$ is 0. In addition, we can see that $\text{Pr}[\text{loMAC-PFR}_{\text{$B$,\users}}^1 =0]=\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]$ as $B$ perfectly simulates game N2-switch-1 whenever its own $b$ is 1. As a result we can rewrite our probability to:
+The runtime of $C$ is that of $A$. For every Oenc query \adversary{} makes, $B$ computes E.enc once, and calls Omac once. For every Odec query \adversary{} makes, $B$ computes E.dec once and calls Ovrf once. Note that, alternatively, $B$ could return 0 if $passed$ is \codetrue{} to avoid having to do E.dec computations. To increase consistency with the other two cases, these computations are still made. We can see that $\text{Pr}[\text{loMAC-PRF}_{\text{$B$,\users}}^0 =0]=\text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^0 =0]$ as $B$ perfectly simulates game loAE-N2 with $b$ = 0 when its own $b$ is 0. In addition, $\text{Pr}[\text{loMAC-PFR}_{\text{$B$,\users}}^1 =0]=\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]$ as $B$ perfectly simulates game N2-switch-1 whenever its own $b$ is 1. As a result we can rewrite our advantage to:
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}}
     &=
@@ -760,7 +760,7 @@ This adversary has the runtime of \adversary{}. For every Oenc query \adversary{
     -
     \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =0].
 \end{align*}
-To expand our probability again, we define game N2-switch-2 in Figure \ref{fig: N2-switch-2 game}. The only difference between this game and the first switch game is that game 2 will always return \invalid{} when the Odec query is called. We use this game to expand our probability:
+To expand our probability again, we define game N2-switch-2 in Figure \ref{fig: N2-switch-2 game}. The Odec oracle from this game always returns \invalid{}, apart from that it is equal to the first switch game. The Odec oracle is written down more elaborately to include the event $bad$, this is to support prove tactics from \cite{EC:BelRog06}. We use this game to expand our probability:
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}}
     &=
@@ -778,7 +778,7 @@ To expand our probability again, we define game N2-switch-2 in Figure \ref{fig: 
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} N2-switch-2$_{\adversary,\users}$ }]{
         L \result \emptyset\\
-        tag \sample \mathit{Func}(\keyspace_{mac},\lockspace,\messagespace,\tagspace)\\
+        tag \sample \mathit{Func}(\keyspace_{mac},\lockspace,\ciphertextspace,\tagspace)\\
         \pcfor \user \in [1..N]:\\
         \t \keyinstance_\user \sample \keyspace\\
         \t C_\user \result \invalid\\
@@ -798,31 +798,43 @@ To expand our probability again, we define game N2-switch-2 in Figure \ref{fig: 
             \pcreturn \ciphertextinstance
         }
         \pseudocode[lnstart=16,linenumbering,head={\textbf{Oracle} Odec$(\user,\ciphertextinstance)$}]{
-            \pcreturn \invalid
+            \pcif C_\user = \invalid: \pcreturn \invalid\\
+            \pcif \ciphertextinstance = C_\user: \pcreturn \invalid\\
+            (\keyinstance{}1,\keyinstance{}2) \result \keyinstance_j\\
+            (\ciphertextinstance',\taginstance) \result \ciphertextinstance\\
+            \messageinstance \result \text{E.dec}(\keyinstance{}1,\lockinstance_j,\ciphertextinstance')\\
+            \taginstance' \result tag(\keyinstance{}2,\lockinstance_j,\ciphertextinstance')\\
+            \pcif \taginstance \neq \taginstance' : \messageinstance \result \invalid\\
+            \pcelse: \\
+            \t bad \result \codetrue\\
+            \t \messageinstance \result \invalid\\
+            \pcreturn \messageinstance
         }
     \end{pchstack}
     \caption{N2-switch-2 game, adversary{} has access to oracles Oenc and Odec. Key space $\keyspace_{mac}$ is the key space from M.mac.}
     \label{fig: N2-switch-2 game}
 \end{figure}
-(\textbf{todo: argument about switch})
+\noindent
+As N2-switch-1 and N2-switch-2 are so called equal-until-bad, meaning they are equal as long as the event $bad$ is not set to \codetrue, we know $\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]-\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0] \leq \text{Pr}[bad=\codetrue]$ \cite{EC:BelRog06}. As $bad$ is set to \codetrue{} if, and only if, \taginstance=\taginstance', we can state $\text{Pr}[bad=\codetrue] = \text{Pr}[\taginstance=\taginstance']$. The adversary needs to provide tag \taginstance{} and ciphertext \ciphertextinstance{}' for the $tag$ function, where the provided tag-ciphertext pair may not be the result of the encryption query the provided user made. Consequently, \taginstance{} and \taginstance' are only equal when the adversary is able to guess the output of $tag$ for a ciphertext that is not encrypted by the provided user. The function $tag$ is uniformly random so, every fresh Odec query, the probability that \taginstance{} and \taginstance' are equal is $\frac{1}{2^{\text{n}}}$. Combined with at most $Q_d$ Odec queries we get $\text{Pr}[\taginstance=\taginstance'] = \text{Pr}[bad=\codetrue] \leq \frac{Q_d}{2^{\text{n}}}$ and thus, we can fill in $\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]-\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0] \leq \text{Pr}[bad=\codetrue] \leq \frac{Q_d}{2^{\text{n}}}$ to obtain:
+
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}}
     &\leq
     \text{\advantage{$B$,\users}{loMAC}} 
     +
-    \frac{Q_d}{2^{\abs{t}}}
+    \frac{Q_d}{2^{\text{n}}}
     +
     \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =0].
 \end{align*}
-We define game N2-switch-3 in Figure \ref{fig: N2-switch-3 game} to expand our probability one last time. Switch game 3 is equal to switch game 2 but always return lazily sampled random bits when the outcome of E.enc is valid. We use this game to expand our probability to:
+We define game N2-switch-3 in Figure \ref{fig: N2-switch-3 game} to expand our probability one last time. Switch game 3 is equal to switch game 2 but always return lazily sampled random bits when the outcome of E.enc is valid. We also simplify Odec as we no longer need the event $bad$. We use this game to expand our probability to:
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}}
     &\leq
     \text{\advantage{$B$,\users}{loMAC}} 
     +
-    \frac{Q_d}{2^{\abs{t}}}
+    \frac{Q_d}{2^{\text{n}}}
     +
     \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0]
     -
@@ -836,7 +848,7 @@ We define game N2-switch-3 in Figure \ref{fig: N2-switch-3 game} to expand our p
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} N2-switch-3$_{\adversary,\users}$ }]{
         L \result \emptyset\\
-        tag \sample \mathit{Func}(\keyspace_{mac},\lockspace,\messagespace,\tagspace)\\
+        tag \sample \mathit{Func}(\keyspace_{mac},\lockspace,\ciphertextspace,\tagspace)\\
         \pcfor \user \in [1..N]:\\
         \t \keyinstance_\user \sample \keyspace\\
         \t C_\user \result \invalid\\
@@ -865,13 +877,66 @@ We define game N2-switch-3 in Figure \ref{fig: N2-switch-3 game} to expand our p
     \label{fig: N2-switch-3 game}
 \end{figure}
 \noindent
-(\textbf{todo: argument about switch})
+The next step is to rewrite $\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0] - \text{Pr}[\text{N2-switch-3}_{\text{\adversary,\users}} =0]$ into a loE advantage. To do so, we define adversary $C$ against loE in Figure \ref{fig: adversary c N2}. This adversary is playing game loE-IND-\$-CPA (Figure \ref{fig: loE-IND game}), and has access to \adversary. 
+\begin{figure}[H]
+    \begin{pchstack}[boxed,center,space=0.5cm]
+        \pseudocode[lnstart=-1,linenumbering,head={\textbf{Adverary} $C$}]{
+        L \result \emptyset\\
+        \pcfor \user \in [1..N]:\\
+        \t C_\user \result \invalid\\
+        b' \result \textbf{run } \adversary\\
+        \pcreturn b'
+        }
+        \pseudocode[lnstart=4,linenumbering,head={\text{if \adversary{} calls }\textbf{Oracle} Oenc$(\user,\lockinstance,\messageinstance)$}]{
+            \pcif C_\user \neq \invalid: \pcreturn \invalid\\
+            \pcif \lockinstance \in L: \pcreturn \invalid\\
+            L \result L \cup \{\lockinstance\}\\
+            \lockinstance_\user \result \lockinstance\\
+            \ciphertextinstance' \result \text{Oenc}(\user,\lockinstance_j,\messageinstance)\\
+            \taginstance \result \{0,1\}^{\text{n}}\\
+            \ciphertextinstance \result (\ciphertextinstance',\taginstance)\\
+            C_\user \result \ciphertextinstance\\
+            \pcreturn \ciphertextinstance
+        }
+        \pseudocode[lnstart=13,linenumbering,head={\text{if \adversary{} calls }\textbf{Oracle} Odec$(\user,\ciphertextinstance)$}]{
+            \pcreturn \invalid
+        }
+    \end{pchstack}
+    \caption{Adversary $C$, has access to \adversary{} and oracle Oenc. Note the Oenc in line 10 refers to the encryption oracle Oenc that $C$ has access to, not the oracle Oenc $A$ has access to.}
+    \label{fig: adversary c N2}
+\end{figure}
+\noindent
+The runtime of $C$ is that of $A$. For every Oenc query $A$ makes, $C$ makes $Q_e$ one Oenc query. We can see that $\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0] = \text{Pr}[\text{loE-IND-\$-CPA}_{\text{$C$,\users}}^0 =0]$ as $C$ perfectly simulates N2-switch-2 when its own $b$ is 0. In addition, $\text{Pr}[\text{N2-switch-3}_{\text{\adversary,\users}} =0] = \text{Pr}[\text{loE-IND-\$-CPA}_{\text{$C$,\users}}^1 =0]$ as $C$ perfectly simulates N2-switch-3 when its own $b$ is 1. This gives us:
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}}
     &\leq
     \text{\advantage{$B$,\users}{loMAC}} 
     +
-    \frac{Q_d}{2^{\abs{t}}}
+    \frac{Q_d}{2^{\text{n}}}
+    +
+    \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0]
+    -
+    \text{Pr}[\text{N2-switch-3}_{\text{\adversary,\users}} =0]
+    \\& \hspace{0,3cm}+
+    \text{Pr}[\text{N2-switch-3}_{\text{\adversary,\users}} =0]
+    -
+    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =0].
+    \\& \leq
+    \text{\advantage{$B$,\users}{loMAC}} 
+    +
+    \frac{Q_d}{2^{\text{n}}}
+    +
+    \text{Pr}[\text{loE-IND-\$-CPA}_{\text{$C$,\users}}^0 =0]
+    -
+    \text{Pr}[\text{loE-IND-\$-CPA}_{\text{$C$,\users}}^1 =0]
+    \\& \hspace{0,3cm}+
+    \text{Pr}[\text{N2-switch-3}_{\text{\adversary,\users}} =0]
+    -
+    \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =0].
+    \\& \leq
+    \text{\advantage{$B$,\users}{loMAC}} 
+    +
+    \frac{Q_d}{2^{\text{n}}}
     +
     \text{\advantage{$C$,\users}{loE}}
     \\& \hspace{0,3cm}+
@@ -879,49 +944,15 @@ We define game N2-switch-3 in Figure \ref{fig: N2-switch-3 game} to expand our p
     -
     \text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =0].
 \end{align*}
-By definition, $\text{Pr}[\text{N2-switch-3}_{\text{\adversary,\users}} =0]$ and $\text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =0]$ are equal, giving our result:
+Lastly, $\text{Pr}[\text{N2-switch-3}_{\text{\adversary,\users}} =0]$ and $\text{Pr}[\text{loAE-N2}_{\text{\adversary,\users}}^1 =0]$ are equal by definition, giving our result:
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}}
     &\leq
     \text{\advantage{$B$,\users}{loMAC}} 
-    + \frac{Q_d}{2^{\abs{t}}} +
+    + \frac{Q_d}{2^{\text{n}}} +
     \text{\advantage{$C$,\users}{loE}}.
 \end{align*}
 \end{proof}
-
-in the real world, the oracle Odec from N2-switch-1 returns \invalid{}, unless the condition on line 26 is \codefalse{} and thus, N2-switch-1 and N2-switch-2 are equal whenever this condition is \codefalse. As \taginstance{} and \taginstance' are the result of the uniformly random function $tag$, where the input of $tag$ may not be equal when computing both, the chance of \taginstance{} and \taginstance' being equal will be $\frac{1}{2^{\abs{t}}}$ for every Odec calls. Combined with a adversary that makes at most $Q_d$ calls to the decryption oracle, we get a chance of $\frac{Q_d}{2^{\abs{t}}}$ for the condition in line 24 to be \codefalse. using this chance, and fact that N2-switch-1 and N2-switch-2 are equal whenever the condition is \codefalse, we can see that $\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}}^0]$ is bound by $\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^0 =0]$ and $\frac{Q_d}{2^{\abs{t}}}$. Consequently $\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0] - \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^0 =0] \leq \frac{Q_d}{2^{\abs{t}}}$ holds and we get:
-
-Next, we can rewrite $\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^0 =0] - \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^1 =0]$ into a loE advantage. To do so, we define adversary $C$ against loE in Figure \ref{fig: adversary c N2}. This adversary is playing game loE-IND-\$-CPA (Figure \ref{fig: loE-IND game}), and has access to \adversary. 
-\begin{figure}[H]
-    \begin{pchstack}[boxed,center,space=0.5cm]
-        \pseudocode[lnstart=-1,linenumbering,head={\textbf{Adverary} $C$}]{
-        L \result \emptyset\\
-        \pcfor \user \in [1..N]:\\
-        \t \keyinstance_\user \sample \keyspace\\
-        \t C_\user \result \invalid\\
-        b' \result \textbf{run } \adversary\\
-        \pcreturn b'
-        }
-        \pseudocode[lnstart=5,linenumbering,head={\text{if \adversary{} calls }\textbf{Oracle} Oenc$(\user,\lockinstance,\messageinstance)$}]{
-            \pcif C_\user \neq \invalid: \pcreturn \invalid\\
-            \pcif \lockinstance \in L: \pcreturn \invalid\\
-            L \result L \cup \{\lockinstance\}\\
-            \lockinstance_\user \result \lockinstance\\
-            \ciphertextinstance' \result \text{Oenc}(\keyinstance_j,\lockinstance_j,\messageinstance)\\
-            \taginstance \result tag(\user,\lockinstance_j,\ciphertextinstance')\\
-            \ciphertextinstance \result (\ciphertextinstance',\taginstance)\\
-            C_\user \result \ciphertextinstance\\
-            \pcreturn \ciphertextinstance
-        }
-        \pseudocode[lnstart=14,linenumbering,head={\text{if \adversary{} calls }\textbf{Oracle} Odec$(\user,\ciphertextinstance)$}]{
-            \pcreturn \invalid
-        }
-    \end{pchstack}
-    \caption{Adversary $C$, has access to \adversary{} and oracle Oenc. Note that $\keyinstance_\user$ is the MAC key in this game.}
-    \label{fig: adversary c N2}
-\end{figure}
-\noindent
-The runtime of $C$ is that of $A$, for every Oenc query $A$ makes, $C$ makes $Q_e$ one Oenc query. (\textbf{Question: do we need to include the tag computations in our theorem?}) Adversary $C$ perfectly simulates N2-switch-2, so we get $\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^0 =0] = \text{Pr}[\text{loE-IND-\$-CPA}_{\text{$C$,\users}}^0 =0]$ and $\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}}^1 =0] = \text{Pr}[\text{loE-IND-\$-CPA}_{\text{$C$,\users}}^1 =0]$, thus:
 
 \subsection{Comparison with Existing Alternatives}
 
