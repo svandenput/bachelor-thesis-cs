@@ -1,12 +1,13 @@
 Feedback meeting:
--
+- gkp lock motivation lezen
 
 current todo's:
-- feedback 9 jan
+- feedback meetings
 - intro bijwerken
 - to-scan scannen
 
 lowprio todo:
+- proof nog meer leesbaar maken met highlighted text
 - kijken naar wat Q precies doet in figure 3
 - ideal vs attainable uitwerken 4.3
 - boek lezen beetje
@@ -17,11 +18,6 @@ vragen martijn:
 - 
 
 toread martijn:
-- proof N2 section 5.3
-- structure of 3.2 with CPA and CCA
-- 3.3
-- intro 4
-- use of funct in loMAC and proof
 
 vragen bart:
 

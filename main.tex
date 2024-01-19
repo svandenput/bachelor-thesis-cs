@@ -590,7 +590,7 @@ We define the constructions secure if there is a tight (\textbf{todo: look at ti
 \paragraph{N2}
 first, we define our theorem:
 \begin{theorem}
-Let loAE be constructed from loMAC and loE as described in Figure \ref{fig: N2 calls}. If, ciphertext space \ciphertextspace{} from the loE to be a subset of message space \messagespace{} from the loMAC as well as loMAC and loE having a shared lock space. Then, for any number of users \users{} and any loAE adversary \adversary{} that poses at most $Q_e$ many Oenc queries, and at most $Q_d$ many Odec queries, there exist a loMAC adversary $B$ and a loE adversary $C$ such that:
+Let loAE be constructed from loMAC and loE as described in Figure \ref{fig: N2 calls} Let the ciphertext space \ciphertextspace{} from the loE be a subset of message space \messagespace{} from the loMAC and let loMAC and loE have a shared lock space. Then, for any number of users \users{} and any loAE adversary \adversary{} that poses at most $Q_e$ many Oenc queries, and at most $Q_d$ many Odec queries, there exist a loMAC adversary $B$ and a loE adversary $C$ such that:
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}} \leq \text{\advantage{$B$,\users}{loMAC}} + \frac{Q_d}{2^{\textnormal{n}}} + \text{\advantage{$C$,\users}{loE}}
 \end{align*}
@@ -685,7 +685,7 @@ Next we define game N2-switch-1 in Figure \ref{fig: N2-switch-1 game}. The only 
         }
     \end{pchstack}
     \caption{N2-switch-1, adversary{} has access to oracles Oenc and Odec. 
-    Key space $\keyspace_{mac}$ is the key space from M.mac.}
+    Key space $\keyspace_{mac}$ is the key space from M.mac. Line 13 and 22 are different compared to loAE-N2, additionally line 14 and 15 from loAE-N2 are removed.}
     \label{fig: N2-switch-1 game}
 \end{figure}
 
@@ -811,11 +811,11 @@ To expand our probability again, we define game N2-switch-2 in Figure \ref{fig: 
             \pcreturn \messageinstance
         }
     \end{pchstack}
-    \caption{N2-switch-2 game, adversary{} has access to oracles Oenc and Odec. Key space $\keyspace_{mac}$ is the key space from M.mac.}
+    \caption{N2-switch-2 game, adversary{} has access to oracles Oenc and Odec. Key space $\keyspace_{mac}$ is the key space from M.mac. Line 24-26 are different compared to N2-switch-1.}
     \label{fig: N2-switch-2 game}
 \end{figure}
 \noindent
-As N2-switch-1 and N2-switch-2 are so called equal-until-bad, meaning they are equal as long as the event $bad$ is not set to \codetrue, we know $\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]-\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0] \leq \text{Pr}[bad=\codetrue]$ \cite{EC:BelRog06}. As $bad$ is set to \codetrue{} if, and only if, \taginstance=\taginstance', we can state $\text{Pr}[bad=\codetrue] = \text{Pr}[\taginstance=\taginstance']$. The adversary needs to provide tag \taginstance{} and ciphertext \ciphertextinstance{}' for the $tag$ function, where the provided tag-ciphertext pair may not be the result of the encryption query the provided user made. Consequently, \taginstance{} and \taginstance' are only equal when the adversary is able to guess the output of $tag$ for a ciphertext that is not encrypted by the provided user. The function $tag$ is uniformly random so, every fresh Odec query, the probability that \taginstance{} and \taginstance' are equal is $\frac{1}{2^{\text{n}}}$. Combined with at most $Q_d$ Odec queries we get $\text{Pr}[\taginstance=\taginstance'] = \text{Pr}[bad=\codetrue] \leq \frac{Q_d}{2^{\text{n}}}$ and thus, we can fill in $\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]-\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0] \leq \text{Pr}[bad=\codetrue] \leq \frac{Q_d}{2^{\text{n}}}$ to obtain:
+(\textbf{note: the following argument is not perfect yet, and should be fixed if I have the time.}) As N2-switch-1 and N2-switch-2 are so called identical-until-$bad$, meaning they are equal as long as the event $bad$ is not set to \codetrue, we know $\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]-\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0] \leq \text{Pr}[bad=\codetrue]$ \cite{EC:BelRog06}. As $bad$ is set to \codetrue{} if, and only if, \taginstance=\taginstance', we can state $\text{Pr}[bad=\codetrue] = \text{Pr}[\taginstance=\taginstance']$. The adversary needs to provide tag \taginstance{} and ciphertext \ciphertextinstance{}' for the $tag$ function, where the provided tag-ciphertext pair may not be the result of the encryption query the provided user made. Consequently, \taginstance{} and \taginstance' are only equal when the adversary is able to guess the output of $tag$ for a ciphertext that is not encrypted by the provided user. The function $tag$ is uniformly random so, every fresh Odec query, the probability that \taginstance{} and \taginstance' are equal is $\frac{1}{2^{\text{n}}}$. Combined with at most $Q_d$ Odec queries we get $\text{Pr}[\taginstance=\taginstance'] = \text{Pr}[bad=\codetrue] \leq \frac{Q_d}{2^{\text{n}}}$ and thus, we can fill in $\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]-\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0] \leq \text{Pr}[bad=\codetrue] \leq \frac{Q_d}{2^{\text{n}}}$ to obtain:
 
 \begin{align*}
     \text{\advantage{$A$,\users}{loAE}}
@@ -873,7 +873,7 @@ We define game N2-switch-3 in Figure \ref{fig: N2-switch-3 game} to expand our p
             \pcreturn \invalid
         }
     \end{pchstack}
-    \caption{N2-switch-3 game, adversary{} has access to oracles Oenc and Odec. Key space $\keyspace_{mac}$ is the key space from M.mac.}
+    \caption{N2-switch-3 game, adversary{} has access to oracles Oenc and Odec. Key space $\keyspace_{mac}$ is the key space from M.mac. Line 15 and 16 are different compared to N2-switch-2, and Odec is simplified.}
     \label{fig: N2-switch-3 game}
 \end{figure}
 \noindent
@@ -1016,7 +1016,7 @@ Below is a table which highlights the differences in notation between \gkp{} and
 Below are some notes and thought with relation to our last meeting. They might be a bit crude as they are just for you to read once. Firstly, I wrote down in broad lines the story I want to tell. Afterwards I have a list of thing that I think we still \textit{can} do, in our meeting I would like to discuss priority with you. Lastly, I made a list of topics on which topics which might be nice to find some papers on.
 
 \paragraph{Story}
-The story I would like to tell starts with locks as a augmentation in a multi-user setting. GKP introduces locks as a augmentation to a AE scheme in a hybrid encryption context. The AE construction that is considered follows the generic Encrypt-then-MAC construction that originated in a asymmetric crypto setting. This generic Encrypt-then-MAC construction has been reconsidered in a symmetric crypto setting by NRS. In my thesis, I reconsider the lock-based AE in a symmetric crypto setting using the knowledge from NRS. NRS gives me a good example of how a generic AE construction should be considered in a symmetric setting. The result will be lock-based, one time use AE primitive, considered in a symmetric setting. This primitive will be useful for hybrid encryption, possible it has some more use cases.
+The story I would like to tell starts with locks as a augmentation in a multi-user setting. GKP introduces locks as a augmentation to a AE scheme in a hybrid encryption context. The AE construction that is considered follows the generic Encrypt-then-MAC construction that originated in a symmetric crypto setting. This generic Encrypt-then-MAC construction has been reconsidered in a symmetric crypto setting by NRS. In my thesis, I reconsider the lock-based AE in a symmetric crypto setting using the knowledge from NRS. NRS gives me a good example of how a generic AE construction should be considered in a symmetric setting. The result will be lock-based, one time use AE primitive, considered in a symmetric setting. This primitive will be useful for hybrid encryption, possible it has some more use cases.
 
 \paragraph{Todo}
 I put the todos in a list and explain them shortly when needed
@@ -1031,13 +1031,8 @@ I put the todos in a list and explain them shortly when needed
 \paragraph{papers}
 I put the potential papers in a list and explain them shortly when needed. I am not sure which of these I need or which actually exist, it is just a list I wrote down as a starting point.
 \begin{itemize}
-    \item paper on ideal vs attainable security (if I still want to include that)
-    \item paper for the origin of AE security notion where decryption always returns \invalid{} in the ideal world
     \item paper on why ind\$ implies ind lor
-    \item paper with other lock implementations (if exist)
-    \item paper for the origin of locks (if not GKP)
-    \item paper on the origin of ind\$ and ind lor
-    \item paper for the origin of hybrid encryption
+    \item paper with other lock implementations (will prob cite gkp)
     \item papers for other use cases (if I want to include that)
     \item papers for other alternatives (if I want to include that)
     \item paper on the information theoretical mac component (if I want to include that)
