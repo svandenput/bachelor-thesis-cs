@@ -1,8 +1,6 @@
 Feedback meeting:
-- gkp lock motivation lezen
 
 current todo's:
-- feedback meetings
 - intro bijwerken
 - to-scan scannen
 
