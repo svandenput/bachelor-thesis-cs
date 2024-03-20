@@ -11,17 +11,21 @@ lowprio todo:
 - N1 en N2 switch 2 uitwerken?
 - ideal vs attainable uitwerken 4.3
 - boek lezen beetje
+- note over andere 17 cases die miss nu wel secure zijn
 - tweede bib file
 
 (\textbf{Question: })
 vragen martijn:
-- 
 
 toread martijn:
+intro
+related work
 
 vragen bart:
 
 toread bart:
+intro
+bewijs
 
 (\textbf{todo: })
 \paragraph{title}

@@ -45,46 +45,52 @@
 \pagenumbering{arabic}
 
 \section{Introduction}
-Although symmetric and asymmetric cryptography are both subfields of cryptography, their research area's can be quite separated. This can lead to knowledge gaps between the two whenever work in asymmetric crypto uses constructions that are more common in symmetric crypto or the other way around. In this fashion, a paper by Giacon, Kiltz and Poettering \cite{PKC:GiaKilPoe18}, which we henceforth call \gkp{}, uses a construction that is very similar to Authenticated Encryption following the generic encrypt-then-MAC construction from Bellare and Namprempre \cite{AC:BelNam00}. This construction has since been revised in a paper by Namprempre, Rogaway and Thomas Shrimpton \cite{EC:NamRogShr14}, which we henceforth call \nrs{}. In this revision, a new set of constructions is given that be better applicable to common use cases. The aim of this thesis is to apply the knowledge from \nrs{} to the setting of \gkp{} and, while doing so, create a new primitive for authenticated encryption suited for asymmetric settings.
+(\textbf{Question: it is better to have section heading or not?})\\
+(\textbf{Question: do you use GKP and NRS to reference the paper, of the people?})\\
+To implement public-key encryption, a hybrid paradigm is typically followed: To encrypt a message, a session key is generated using a randomized key encapsulation mechanism (KEM). This key is then used to encrypt the message using a deterministic data encapsulation mechanism (DEM). Both the KEM and DEM output their own ciphertexts, which are concatenated to form the public-key encryption ciphertext. Although using big session keys for hybrid encryption is generally safer, when compared to using small keys, expanding the size of the key is not always a viable option. This might be due to limitations in computing power or memory or due to security primitives having fixed key sizes. Giacon, Kiltz and Poettering propose augmentation using locks (originally called tags, but renamed to locks here to avoid overloaded terms) as an alternative solution to key expansion in a paper \cite{PKC:GiaKilPoe18} which we henceforth call \gkp{}. Augmentation with locks works by giving the security primitive an additional input field, called the lock, to distinguish multiple users using the same key. The augmentation can improve security in a multi-user setting, without the need to expand the key.
+\\\\
+After defining this augmentation, they apply it to a DEM  and a MAC function, to create an augmented DEM (ADEM) and an augmented MAC (AMAC). These two are combined to construct an authenticated encryption primitive following the generic encrypt-then-MAC construction from Bellare and Namprempre \cite{AC:BelNam00}. This construction is proven secure whenever the underlying ADEM and AMAC are secure. The generic composition of authenticated encryption has since been revised in a paper by Namprempre, Rogaway and Shrimpton \cite{EC:NamRogShr14}, which we henceforth call \nrs{}. In this revision, the generic composition using a MAC function and a deterministic encryption primitive is more thoroughly investigated for two commonly used encryption primitive. For both, multiple different constructions are proven secure, whenever the underlying primitives are secure.
+\\\\
+Although ADEM+AMAC construction given in GKP is secure, it is not clearly defined as authenticated encryption primitive. As a result, its security is evaluated as a DEM, not as an authenticated encryption primitive. Additionally, only the encrypt-then-MAC construction is considered in GKP. In this thesis, generic construction of authenticated encryption using locks is more toughly investigated. We formally compare the constructions and the notation from NRS and GKP (Chapter 3). We define a new cryptographic primitive, the lock-based authenticated encryption, which we analyze in a multi-user setting (Chapter 4). Using the knowledge from NRS, multiple generic constructions of this primitive are considered, all using a lock-based encryption primitive and a lock-based MAC function (Chapter 5). These constructions are then proven to be secure, whenever the underlying primitives are secure (Appendix A).
 
 \section{Preliminaries}
 In this section we will explain several concepts important to the rest of our work, as well as some general notation.
 
 \subsection{General Notation}
-Strings are binary and bit-wise, the set of all strings is $\{0,1\}^\ast$. The length of $x$ is written as $\abs{x}$, the concatenation of $x$ and $y$ as $x$ \concatinate{} $y$, $a$ being the result of $b$ as $a$ \result{} $b$ and taking a random sampling from $y$ and assigning it to $x$ as $x$ \sample{} $y$. We write \users{} for the number of users and allow a single type of error message written as \invalid. Any tuple containing \invalid{} will be \invalid{} as well. We define the following spaces, all of them being subsets of the set of all strings: nonempty key space \keyspace{}, lock space \lockspace{}, nonce space \noncespace{}, message space \messagespace{}, ciphertext space \ciphertextspace, tag space \tagspace{} and associated-data space \associateddataspace{}. Unless stated otherwise, \messagespace{} contains at least two strings, and if \messagespace{} or \associateddataspace{} contains a string of length $x$, it must contain all strings of length $x$.
+Strings are binary and bit-wise, the set of all strings is $\{0,1\}^\ast$. The length of $x$ is written as $\abs{x}$, the concatenation of $x$ and $y$ as $x$ \concatinate{} $y$, $a$ being the result of $b$ as $a$ \result{} $b$, and taking a uniform random sampling from set $z$ and assigning it to $x$ as $x$ \sample{} $z$. We write \users{} for the number of users and allow a single type of error message written as \invalid. Any tuple containing \invalid{} will be \invalid{} as well. We define the following spaces, all of them being subsets of the set of all strings: nonempty key space \keyspace{}, lock space \lockspace{}, nonce space \noncespace{}, message space \messagespace{}, ciphertext space \ciphertextspace, tag space \tagspace{}, and associated data space \associateddataspace{}. Unless stated otherwise, \messagespace{} contains at least two strings, and if \messagespace{} or \associateddataspace{} contains a string of length $x$, it must contain all strings of length $x$. There are no further constraints on these spaces.
 
 \subsection{Authenticated Encryption}
-Two different security requirements are data privacy, the insurance that data cannot be viewed by na unauthorized party, and data integrity, the insurance that data has not been modified by an unauthorized party. Authenticated encryption combines both of these security requirements into one and ensures both data privacy and integrity. Some authenticated encryption schemes allow an additional input AD, short for associated data. The associated data is specifically required to not have data privacy but does require data integrity. Authenticated encryption schemes that support AD are called AEAD schemes.
+Two different security requirements are data privacy, the insurance that data cannot be viewed by an unauthorized party, and data integrity, the insurance that data has not been modified by an unauthorized party. Authenticated encryption combines both of these security requirements into one and ensures both data privacy and integrity. A basic authenticated encryption scheme consists of a encryption call and a decryption call. The encryption call takes a message and a key to a self-authenticating ciphertext. The decryption call takes a self-authenticating ciphertext and a key to a message. Some authenticated encryption schemes allow an additional input AD, short for associated data. The associated data is specifically required to not have data privacy but does require data integrity. Authenticated encryption schemes that support AD are called AEAD schemes.
+
+\subsection{Message Authentication}
+Message authentication can be done using a massage authentication code, MAC for short. A basic MAC function takes a message and key and outputs a tag which authenticates the message. Some MAC function also have a verification call that takes a message, key and tag and outputs either \codetrue{} or \codefalse. A mac function can have different security requirements, it is said to be PRF secure when it is infeasible to distinguish the tag it outputs from the result of a pseudo-random function from all massage-key pairs to all tags. A MAC is said to be unforgeable when it is infeasible to create a valid message-tag pair without knowledge of the secret key. A PRF secure MAC is also unforgeable, given the tag space is big enough, while a unforgeable MAC is not necessarily PRF secure.
 
 \subsection{Nonces and Locks}
-A basic deterministic encryption scheme takes a message and key as input, and outputs a ciphertext. Using this encryption scheme, a message encrypted under the same key leads to the same ciphertext. Giving nonces or locks as an additional input to the encryption scheme can ensure a message encrypted under the same key will lead to a different ciphertext. Although nonces and locks look similar, their purpose and exact working differ leading to different use cases.
+A basic deterministic encryption scheme takes a message and key as input, and outputs a ciphertext. Using this encryption scheme, a message encrypted under the same key leads to the same ciphertext. Both GPk and NRS resolve this by giving the encryption scheme an additional argument. In GKP locks are used and in NRS nonces are used. Although nonces and locks look similar, their purpose and exact working differ leading to different use cases. Most notably, nonces are useful when one user is allowed  to encrypt multiple messages and locks are only useful when there are multiple users.
 
 \paragraph{Nonces}
-Using a basic deterministic encryption encryption scheme, a message encrypted twice by the same user results in the same ciphertext. This can leak information about the message, and can be prevented using a nonce. A nonce is a number that is assumed to only be used once per user to encrypt a message. Whenever a message is encrypted twice with the same key, but with two different nonces, the resulting ciphertexts should be indistinguishable from two ciphertexts corresponding to two different messages. As a result, it is infeasible for an adversary to guess if a message has been sent multiple times. The adversary is usually allowed to let a user decrypt multiple messages with one nonce. Nonces are only used when a user uses its key multiple times, as otherwise a message will never be encrypted by the same user twice.
+Using a basic deterministic encryption scheme, a message encrypted twice by the same user results in the same ciphertext. This can leak information about the message, and can be prevented using a nonce. A nonce is a number that is assumed to only be used once per user to encrypt a message. Whenever a message is encrypted twice with the same key, but with two different nonces, the resulting ciphertexts should be indistinguishable from two ciphertexts corresponding to two different messages. As a result, it is infeasible for an adversary to guess if a message has been sent multiple times. The adversary is usually allowed to let a user decrypt multiple messages with one nonce. Nonces are only used when a user uses its key multiple times, as otherwise a message will never be encrypted by the same user twice.
 
 \paragraph{Locks}
-Using a basic deterministic encryption encryption scheme, a message encrypted by two users that have the same key results in the same ciphertext. This can leak information about the secret keys used, and can be prevented using locks. Whereas nonces are bound to the message, locks are bound to the user. Each user has one lock, provided the users have one key each, and will encrypt all their messages using that lock. Whenever a message is encrypted twice with the same key, but with two different locks, the resulting ciphertexts should be indistinguishable from two ciphertexts corresponding to two different messages. As a result, it is infeasible for a adversary to see when two users have a key collision unless locks collide as well. To prevent a collision in locks, we assume locks to be globally unique. The adversary is usually only allowed to let a user decrypt messages with the correct lock. Locks are only used in a multi-user setting, as key collision is impossible when there is one user.  
+Using a basic deterministic encryption scheme, a message encrypted by two users that have the same key results in the same ciphertext. This can leak information about the secret keys used, and can be prevented using locks. Whereas nonces are bound to the message, locks are bound to the user. Each user has one lock, provided the users have one key each, and will encrypt all their messages using that lock. Whenever a message is encrypted twice with the same key, but with two different locks, the resulting ciphertexts should be indistinguishable from two ciphertexts corresponding to two different messages. As a result, it is infeasible for an adversary to see when two users have a key collision unless locks collide as well. To prevent collisions in locks, we assume locks to be globally unique. The adversary is usually only allowed to let a user decrypt messages with the correct lock. Locks are only used in a multi-user setting, as key collision is impossible when there is one user.  
 
 \subsection{Security Notions}
-The security of a cryptographic construction can be modeled as a distinguishing advantage. There are different things we can distinguish on, leading to different security notions. The relevant ones are written below.
+The security of a cryptographic construction can be modeled as a distinguishing advantage. There are different things we can distinguish on, leading to different security notions. to understand NRS and GKP it is important to see which security notions they use, all the relevant notions are written below.
 
 \paragraph{IND-CPA vs IND-CCA}
-You can model against an passive or an active attacker. A passive attacker can only read the messages while an active attacker can also alter the messages. A passive attacker can be modelled using a chosen plaintext attack, CPA for short. In this model, the adversary can choose the plaintext that is encrypted, but not the ciphertext that is decrypted. An active attacker can be modelled using a chosen ciphertext attack, CCA for short. In this model, the adversary can choose the plaintext that is encrypted, as well as the ciphertext that is decrypted. Shorthand notations for the two is IND-CPA and IND-CCA, respectively. IND-CCA implies IND-CPA, but not the other way around.
+You can model against an passive or an active attacker. A passive attacker can only read the messages while an active attacker can also alter the messages. A passive attacker can be modelled using a chosen plaintext attack, CPA for short. In this model, the adversary can choose the plaintext that is encrypted, but not the ciphertext that is decrypted. An active attacker can be modelled using a chosen ciphertext attack, CCA for short. In this model, the adversary can choose the plaintext that is encrypted, as well as the ciphertext that is decrypted. Shorthand notations for the two is IND-CPA and IND-CCA, respectively. IND-CCA implies IND-CPA, but not the other way around. Both GKP and NRS model the authenticated encryption primitive using IND-CPA and the underlying encryption primitive using IND-CCA.
 
 \paragraph{IND-\$ vs IND-LOR}
-Left-or-right-indistinguishablility refers to a situation where the adversary gives two messages, and is given a ciphertext. The adversary has to guess which of the two messages corresponds to the ciphertext. \$-indistinguishablility refers to a situation where the adversary is given access to either the real construction, or to a lazily sampled random function \$. This random function returns a random string with the same length as the ciphertext would have. The adversary has to guess which of these two it has access to. As long as the length of the ciphertext only depends on the length of the message, not the content, IND-\$ implies IND-LOR, but not the other way around. (\textbf{todo: add citation})
+Left-or-right-indistinguishablility refers to a situation where the adversary gives two messages, and is given a ciphertext. The adversary has to guess which of the two messages corresponds to the ciphertext. \$-indistinguishablility refers to a situation where the adversary is given access to either the real construction, or to a lazily sampled random function \$. This random function returns a random string with the same length as the ciphertext would have. The adversary has to guess which of these two it has access to. As long as the length of the ciphertext only depends on the length of the message, not the content, IND-\$ implies IND-LOR, but not the other way around(\textbf{todo: add citation}). IND-\$ is used by GPK and IND-LOR is used by NRS
 
 \noindent\\
 Both of these are separate dimensions and they can be combined into 4 different notions. For example IND-\$-CCA refers to a situation where the adversary has to distinguish between the real construction, or a random function while being able to choose both the plaintext that is encrypted and the ciphertext that is decrypted.
 
-\paragraph{PRF-MAC vs unforgeable MAC}
-A MAC function is said to be PRF secure when it is infeasible to distinguish the tag it outputs from the result of a PRF taking its input space to the tag space. A MAC is said to be unforgeable when it is infeasible to create a valid message-tag pair without using the secret key. A PRF secure MAC is also unforgeable, given the tag space is big enough, while a unforgeable MAC is not necessarily PRF secure.
-
-\subsection{Game Based Security Notions}
-Security notions can be written in a game-based format, using pseudocode instead of text. As a example, the IND-\$-CPA game of a nonce-based encryption scheme can be found in Figure \ref{fig: nE-IND game}. A challenge bit $b$ is given to the game, in this case $b$ signals whether we are in the real or the ideal world. The adversary guesses this bit and returns $b'$, signaling its guess for $b$. In addition, the adversary can have access to oracles. In our example there is only one oracle that takes a nonce and a message. Using game based notation, you can clearly write out all the limitations. For example, the limitation that nonces cannot be reused is modeled by lines 0, 5 and 6. Lines 8 and 9 model how the random function \$ behaves. These limitations could be written out in text based format as well but when there are multiple limitations, writing it out in a game based format can be more comprehensible and precise. (\textbf{todo: add part about game hops})
+\paragraph{Game Based Security Notions}
+These security notions can be written in a game-based format, using pseudocode instead of text. As a example, the IND-\$-CPA game of a nonce-based encryption scheme can be found in Figure \ref{fig: nE-IND game}. A challenge bit $b$ is given to the game, in this case $b$ signals whether we are in the real or the ideal world. The adversary guesses this bit and returns $b'$, signaling its guess for $b$. In addition, the adversary can have access to oracles. In our example there is only one oracle that takes a nonce and a message. Using game based notation, you can clearly write out all the limitations. For example, the limitation that nonces cannot be reused is modeled by lines 0, 5 and 6. Lines 8 and 9 model how the random function \$ behaves. These limitations could be written out in text based format as well but when there are multiple limitations, writing it out in a game based format can make both the security notion, as well as security proofs, more comprehensible and precise.
 
 \subsection{Security Proofs}
-general introduction to how we proof security of generic composition.
+To proof the security of a generic composition we use a security reduction. To define the reduction we bind the advantage of the generic composition by terms of the advantages of the underlying primitives. To do this we show that an advantage on the generic composition can be leveraged to gain an advantage on the underlying primitives. In other words, we show that if we can break the security of the generic composition we can break the security of the underlying primitives. If successful, we can conclude that the composition is secure as long as the underlying primitives are secure.
 
 \section{\nrs{} and \gkp{} in Detail}
 In this section we explain the parts from \gkp{} and \nrs{} important to our work. Afterwards, a comparison is made between the two papers. Some notations will be different from the original papers for improved consistency. What are called tags in \gkp, we will call locks instead to avoid confusion with the output of MAC functions and we call the output of the AMAC the tag instead of the ciphertext. The security notions from \nrs{} are converted to a game-based format using insights from (\textbf{todo add citation for Automated Analysis of Protocols that use Authenticated Encryption: How Subtle AEAD}) in order to better match the notation from \gkp{} and be more adaptable to a multi-user setting. The security games are only explained briefly in this section, a more in-depth explanation of the relevant constructs can be found in section \ref{sec: loAE security model}.
@@ -125,7 +131,7 @@ where nE-IND-\$-CPA is in Figure \ref{fig: nE-IND game}. Set $U$ keeps track of 
 \end{figure}
     
 \paragraph{MAC}
-A MAC is defined by a algorithm F that takes a key \keyinstance{} in \keyspace{} and a string \messageinstance{} and outputs either a n-bit tag \taginstance{} or \invalid. The domain of F is the set X off al m such that F$(\keyinstance,\messageinstance)\neq \invalid$ is in X, this domain may not depend on \keyinstance.
+A MAC is defined by an algorithm F that takes a key \keyinstance{} in \keyspace{} and a string \messageinstance{} and outputs either a n-bit tag \taginstance{} or \invalid. The domain of F is the set $X$ off al m such that F$(\keyinstance,\messageinstance)\neq \invalid$ is in $X$, this domain may not depend on \keyinstance.
 
 \paragraph{MAC security}
 The security of a MAC is defined as 
@@ -197,21 +203,21 @@ where nAE-IND-\$-CCA is in Figure \ref{fig: nAE-IND game}. The adversary is not 
     \end{figure}
 
 \subsubsection{Construction}
-A nAE scheme is constructed by several different schemes that combine the MAC and nE into a nAE. We define the constructions secure as there is a tight reduction from breaking the nAE-security of the scheme to breaking the nE-security and the PRF security of the underlying primitives. Three different schemes, named N1, N2 and N3 were proven to be secure they can be viewed in Figure 6 of \nrs{}. Noteworthy is that these relate to encrypt-and-MAC, encrypt-then-MAC and MAC-then-encrypt respectively. This shows the notion from \cite{AC:BelNam00}, stating that encrypt-then-MAC is the only safe construction, does not transfer to this setting.
+A nAE scheme is constructed by several different schemes that combine the MAC and nE into a nAE. We define the constructions secure as there is a tight reduction from breaking the nAE-security of the scheme to breaking the nE-security and the PRF security of the underlying primitives. Three different schemes, named N1, N2 and N3 were proven to be secure they can be viewed in Figure 6 of \nrs{}. Noteworthy is that these relate to encrypt-and-MAC, encrypt-then-MAC and MAC-then-encrypt, respectively. This shows the notion from \cite{AC:BelNam00}, stating that encrypt-then-MAC is the only safe construction, does not transfer to this setting.
 
 \subsection{\gkp}
-In \gkp{}, the concept of augmentation using locks is discussed. The authors start by showing some data encapsulation mechanisms are vulnerable to a passive multi-instance distinguishing- and key recovery and how this can lead to problems when used in public key encryption. They define the augmented data encapsulation mechanisms, ADEM for short, that uses locks to negate these insecurities. Additionally, they show how a ADEM that is secure against passive attacks can be combined with a MAC that is augmented in a similar fashion, called a AMAC, to construct ADEM that is safe against active attackers. This construction is similar to construction N2 from \nrs. 
+In \gkp{}, the concept of augmentation using locks is discussed. The authors start by showing that some data encapsulation mechanisms are vulnerable to a passive multi-instance distinguishing- and key recovery and how this can lead to problems when used in public key encryption. They define the augmented data encapsulation mechanisms, ADEM for short, that uses locks to negate these insecurities. Additionally, they show how an ADEM that is secure against passive attacks can be combined with a MAC that is augmented in a similar fashion, called an AMAC, to construct an ADEM that is safe against active attackers. This construction is similar to construction N2 from \nrs. 
 
 \subsubsection{Primitives}
 \paragraph{ADEM}
-A ADEM scheme is defined by a tuple $(\text{A.enc}, \text{A.dec})$. Deterministic algorithm A.enc takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}.  Deterministic algorithm A.dec takes a \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and outputs a message \messageinstance{} in \messagespace{} or \invalid{} to indicate rejection. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{} we have A.dec$(\keyinstance,\lockinstance,\text{A.enc}(\keyinstance,\lockinstance,\messageinstance))$ = \messageinstance. We will consider both CPA and CCA security separately for this scheme.
+An ADEM scheme is defined by a tuple $(\text{A.enc}, \text{A.dec})$. Deterministic algorithm A.enc takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}.  Deterministic algorithm A.dec takes a \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and outputs a message \messageinstance{} in \messagespace{} or \invalid{} to indicate rejection. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{} we have A.dec$(\keyinstance,\lockinstance,\text{A.enc}(\keyinstance,\lockinstance,\messageinstance))$ = \messageinstance. We will consider both CPA and CCA security separately for this scheme.
 
 \paragraph{ADEM-CPA security}
 The security of a ADEM-CPA, just called ADEM in \gkp, is defined as 
 \begin{align*} 
     \text{\advantage{ADEM,\adversary,\users}{l-ind-lor-cpa} = \probabilityblock{L-IND-LOR-CPA}{\adversary,\users}{0}{1}}
 \end{align*}
-where L-IND-LOR-CPA is in Figure \ref{fig: L-IND-CPA game}. Every user is only allowed one encryption as enforced by lines 3, 6 and 11. Locks may not repeat between users as enforced by lines 0, 7, 8 and 9. The corresponding game can be found in Figure 9 from \gkp{}. Note that this figure also includes a decryption oracle, the adversary is not allowed to use this oracle considering CPA security. 
+where L-IND-LOR-CPA is in Figure \ref{fig: L-IND-CPA game}. Every user is only allowed one encryption as enforced by lines 3, 6 and 11. Locks may not repeat between users as enforced by lines 0, 7, 8 and 9. The corresponding game can be found in Figure 9 from \gkp{}. Note that this figure also includes a decryption oracle, but the adversary is not allowed to use this oracle considering CPA security. 
 \begin{figure}
     \centering
     \begin{pchstack}[boxed,center,space=0.5cm]
@@ -238,11 +244,11 @@ where L-IND-LOR-CPA is in Figure \ref{fig: L-IND-CPA game}. Every user is only a
 \end{figure}
 
 \paragraph{ADEM-CCA security}
-The security of a ADEM-CCA, called ADEM' in \gkp, is defined as 
+The security of an ADEM-CCA, called ADEM' in \gkp, is defined as 
 \begin{align*} 
     \text{\advantage{ADEM',\adversary,\users}{l-ind-lor-cca} = \probabilityblock{L-IND-LOR-CCA}{\adversary,\users}{0}{1}}
 \end{align*}
-where L-IND-LOR-CCA is in \ref{fig: L-IND-CCA game}. Every user is only allowed one encryption query as enforced by lines 3, 6 and 11. Locks may not repeat between users as enforced by lines 0, 7, 8 and 9. Decryption queries are only allowed after the given user made an encryption as enforced by lines 3, 11 and 13. Line 14 prevents trivial distinctions. The corresponding game can be found in Figure 9 of \gkp{}.
+where L-IND-LOR-CCA is in figure \ref{fig: L-IND-CCA game}. Every user is only allowed one encryption query as enforced by lines 3, 6 and 11. Locks may not repeat between users as enforced by lines 0, 7, 8 and 9. Decryption queries are only allowed after the given user made an encryption as enforced by lines 3, 11 and 13. Line 14 prevents trivial distinctions. The corresponding game can be found in Figure 9 of \gkp{}.
 \begin{figure}
     \centering
     \begin{pchstack}[boxed,center,space=0.5cm]
@@ -275,14 +281,14 @@ where L-IND-LOR-CCA is in \ref{fig: L-IND-CCA game}. Every user is only allowed 
 \end{figure}
 
 \paragraph{AMAC}
-A AMAC scheme is defined by a tuple $(\text{M.mac},\text{M.vrf})$. Deterministic algorithm M.mac takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, and a message \messageinstance{} in \messagespace{} and outputs a tag \taginstance{} in \tagspace{}. Deterministic algorithm M.vrf takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, a message \messageinstance{} in \messagespace{} and a tag \taginstance{} in \tagspace{} and returns either \codetrue{} or \codefalse. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{}, all corresponding \taginstance{} \result M.mac$(\keyinstance,\lockinstance,\messageinstance)$ gives M.vrf$(\keyinstance,\lockinstance,\messageinstance,\taginstance)$ = \codetrue. 
+An AMAC scheme is defined by a tuple $(\text{M.mac},\text{M.vrf})$. Deterministic algorithm M.mac takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, and a message \messageinstance{} in \messagespace{} and outputs a tag \taginstance{} in \tagspace{}. Deterministic algorithm M.vrf takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{}, a message \messageinstance{} in \messagespace{} and a tag \taginstance{} in \tagspace{} and returns either \codetrue{} or \codefalse. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{}, all corresponding \taginstance{} \result M.mac$(\keyinstance,\lockinstance,\messageinstance)$ gives M.vrf$(\keyinstance,\lockinstance,\messageinstance,\taginstance)$ = \codetrue. 
 
 \paragraph{AMAC security}
 The security of a AMAC is defined as
 \begin{align*} 
     \text{\advantage{AMAC,\adversary,\users}{L-MIOT-UF} = $\text{Pr}[\text{L-MIOT-UF}_{\adversary,\users} = 1]$}
 \end{align*}
-where L-MIOT-UF is in \ref{fig: L-MIOT-UF game}. Every user is only allowed one MAC query as enforced by lines 4, 7 and 12. Locks may not repeat between users as enforced by lines 1, 8, 9 and 10. Verification queries are only allowed after the user made an mac query as enforced by lines 4, 12 and 14. Line 15 prevents trivial distinctions. The corresponding game can be found in Figure 15 of \gkp{}.
+where L-MIOT-UF is in figure \ref{fig: L-MIOT-UF game}. Every user is only allowed one MAC query as enforced by lines 4, 7 and 12. Locks may not repeat between users as enforced by lines 1, 8, 9 and 10. Verification queries are only allowed after the user made an mac query as enforced by lines 4, 12 and 14. Line 15 prevents trivial distinctions. The corresponding game can be found in Figure 15 of \gkp{}.
 \begin{figure}
     \centering
     \begin{pchstack}[boxed,center,space=0.5cm]
@@ -317,11 +323,11 @@ where L-MIOT-UF is in \ref{fig: L-MIOT-UF game}. Every user is only allowed one 
     \label{fig: L-MIOT-UF game}
 \end{figure}
 
-\paragraph{notational differences}
-In \gkp{}, \messagespace{} is not required to contain at least two strings, and to contain all strings of length x if it contains a string of length x. Additionally, \keyspace{} is required to be finite but not required to be non-empty.
+\paragraph{Notational Differences}
+In \gkp{}, \messagespace{} is not required to contain at least two strings, and to contain all strings of length $x$ if it contains a string of length $x$. Additionally, \keyspace{} is required to be finite but not required to be non-empty.
 
 \subsubsection{Construction}
-In \gkp, a ADEM scheme that is CCA secure is constructed using a ADEM scheme that is CPA secure and a AMAC scheme. The construction follows the the tag-then-encrypt method from \cite{AC:BelNam00}. The resulting algorithms A.enc and A.dec are in Figure \ref{fig: A.enc' and A.dec' calls}. Note that these are called A.enc' and A.dec' in \gkp.
+In \gkp, an ADEM scheme that is CCA secure is constructed using an ADEM scheme that is CPA secure and an AMAC scheme. The construction follows the the encrypt-then-MAC method from \cite{AC:BelNam00}. The resulting algorithms A.enc and A.dec are in Figure \ref{fig: A.enc' and A.dec' calls}. Note that these are called A.enc' and A.dec' in \gkp.
 \begin{figure}
     \centering
     \begin{pchstack}[boxed,center,space=0.5cm]
@@ -349,17 +355,17 @@ In \gkp, a ADEM scheme that is CCA secure is constructed using a ADEM scheme tha
 \subsection{Comparison of \gkp{} and \nrs}
 In this section we will highlight how the constructions from \gkp{} and \nrs{} differ, as well as why.
 
-\paragraph{context and aim}
+\paragraph{Context and Aim}
 \nrs{} is written in the context of symmetric cryptography. Historically, a single-user that reuses a single key is considered in this context, \nrs{} follows this trend. \gkp{} is written in the context of hybrid encryption. In this context, multiple users that use their key once are considered for the encryption primitive. Apart from this difference in context, there is also a different aim. While \nrs{} is aimed at generalizing the generic nAE constructions, \gkp{} is aimed at finding a single construction that can be used for hybrid encryption. Most notably, this results in \nrs{} evaluating 20 possible constructions while \gkp{} evaluates one. Additionally, \nrs{} incorporates AD while \gkp{} does not.
 
 \paragraph{Security Notion}
 The security notions from both papers also reflect the differences in contexts. In \nrs{}, the security notions are written in a IND-\$ fashion, common in symmetric cryptography. Conversely, in \gkp{}, they are written in a IND-LOR fashion, common in Hybrid encryption. In other words, \nrs{} requires the valid ciphertext to be indistinguishable from random strings while \gkp{} requires them to be indistinguishable from each other. As a result, the MAC primitives of the two papers have different security requirements. In \nrs{}, the tag is required to be indistinguishable from a random string while in \gkp{} the tag is required to be unforgeable. Furthermore, \nrs{} considers nonces while \gkp{} considers locks to match their respective settings.
 
 \section{Defining the New Primitive}
-With the creation of a new primitive, we evaluate the lock construction from \gkp{} in the context of symmetric crypto. Like \gkp{}, we consider the authenticated encryption primitive in a setting where multiple users use their key once. But instead of finding a single constructions, we aim to generalize the primitive using the knowledge from \nrs{}. In this section we will discuss this new security primitive, the lock-based one-time use Authenticated Encryption scheme, loAE scheme for short.
+With the creation of a new primitive, we evaluate the lock construction from \gkp{} in the context of symmetric crypto. Like \gkp{}, we consider the authenticated encryption primitive in a setting where multiple users use their key once. Instead of finding a single constructions, we aim to generalize the primitive using the knowledge from \nrs{}. In this section we will discuss this new security primitive, the lock-based one-time use Authenticated Encryption scheme, loAE scheme for short.
 
 \subsection{loAE}
-A loAE scheme is defined by a tuple $(\text{AE.enc},\text{AE.dec})$. Deterministic algorithm AE.enc takes three inputs $(\keyinstance,\lockinstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. If, and only if $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Deterministic algorithm AE.dec takes three inputs $(\keyinstance,\lockinstance,\ciphertextinstance)$ and outputs a value \messageinstance. Both AE.enc and EA.dec are required to satisfy correctness (if AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ = \ciphertextinstance).
+A loAE scheme is defined by a tuple $(\text{AE.enc},\text{AE.dec})$. Deterministic algorithm AE.enc takes three inputs $(\keyinstance,\lockinstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. If, and only if, $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Deterministic algorithm AE.dec takes three inputs $(\keyinstance,\lockinstance,\ciphertextinstance)$ and outputs a value \messageinstance. Both AE.enc and EA.dec are required to satisfy correctness (if AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ = \ciphertextinstance).
 
 \subsection{loAE Security Model} \label{sec: loAE security model}
 The security is defined as 
@@ -399,9 +405,9 @@ where loAE-IND-\$-CCA is in Figure \ref{fig: loAE-IND game}.
     \caption{loAE-IND-\$-CCA game, adversary{} has access to oracles Oenc and Odec.}
     \label{fig: loAE-IND game}
 \end{figure}
-Because we consider multiple user who use their keys once, decryption queries of a user are only allowed after an encryption has been made and the user is only allowed one encryption query. We do not use nonces as a user is only allowed to encrypt one message.
+Because we consider multiple users who use their keys once, decryption queries of a user are only allowed after an encryption has been made and the user is only allowed one encryption query. We do not use nonces as a user is only allowed to encrypt one message.
 
-To define the security, we use IND-\$ security notion instead of IND-LOR. It is the stronger security notion in our setting, as the length of the ciphertext is not randomized. On decryption, we use a function that always returns \invalid{} to ensure the adversary cannot guess which ciphertexts would be valid ciphertexts. The resulting security game is explained below.
+To define the security, we use IND-\$ security notion instead of IND-LOR. It is the stronger security notion in our setting, as the length of the ciphertext is not randomized. On decryption, we use a function that always returns \invalid{} to ensure the adversary cannot guess which ciphertexts would be valid ciphertexts. The idea behind the resulting security game is explained below.
 
 \paragraph{Multiple users}
 Line 1 loops over all the users to initialize with a random key in line 2 and an invalid ciphertext in line 3. Whenever the adversary calls one of the oracles Oenc or Odec, it has to specify user $j$.
@@ -508,7 +514,7 @@ where loMAC-PRF is in Figure \ref{fig: loMAC-PRF game}. Every user is only allow
     \end{figure}
 
 \subsection{Construction}
-Following \nrs{}, three ways to construct this loAE are of interest, namely the ones following from the N1, N2 and N3 scheme. The schemes, adjusted to our setting, are in Figure \ref{fig: N schemes}. \nrs{} considers 17 more schemes but as no one of them has proven to be secure we will not consider those. The AE.enc and AE.dec calls corresponding to N1, N2 and N3 are in Figure \ref{fig: N1 calls}, \ref{fig: N2 calls} and \ref{fig: N3 calls} respectively.
+Following \nrs{}, three ways to construct this loAE are of interest, namely the ones following from the N1, N2 and N3 scheme. The schemes, adjusted to our setting, are in Figure \ref{fig: N schemes}. \nrs{} considers 17 more schemes but as none of them has proven to be secure we will not consider those. The AE.enc and AE.dec calls corresponding to N1, N2 and N3 are in Figure \ref{fig: N1 calls}, \ref{fig: N2 calls} and \ref{fig: N3 calls} respectively.
 \begin{figure}
     \centering
     \includegraphics[scale = 0.4]{images/N-schemes.png}
@@ -596,8 +602,6 @@ We define the constructions secure if there is a tight (\textbf{todo: look at ti
 Within this theorem, both $Q_e$ and $Q_d$ refer to the total queries the adversary is allowed to make, not the queries per user. As a result $Q_e$ is limited by \users.\\\\
 To proof this we prove the cases N1, N2 and N3 separately, the full proof can be found in appendix B.
 
-\subsection{Comparison with Existing Alternatives}
-
 \section{Use Cases}
 should consist of:
 \begin{itemize}
@@ -606,59 +610,25 @@ should consist of:
 \subsection{PKE Schemes}
 
 \section{Related Work}
-\textbf{Location not final yet}
+(\textbf{Note: I was really not to sure what I should put in this section so I just have a general structure and some questions for now})
+\begin{itemize}
+    \item locks: introduced in GKP maybe include some other use cases of locks (if they exist)? (\textbf{Question: I feel like it might be a bit needless to include NRS and GKP again as their relation to our work is already discussed})
+    \item similar Generic construction problems: "Authenticated Encryption: Relations among Notions and Analysis of the Generic Composition Paradigm" by Mihir Bellare and Chanathip Namprempre and reconsidered by NRS
+    \item hybrid encryption: alternative solutions for hybrid encryption (\textbf{Question: is this needed? I feel like it might be a bit off as hybrid encryption is a use case, not the fundamental problem we are trying to solve here})
+    \item Maybe some other one time use AE primitive evaluated in a multi user setting?
+    \item (\textbf{Question: I am not sure if I should still add something})
+\end{itemize}
 
 \section{Conclusion}
 
 \newpage
 \printbibliography[heading=bibintoc,title={References}]
+
 \section*{Appendix A}
 \addcontentsline{toc}{section}{\protect\numberline{}\hspace{-0,527 cm}Appendix A}
-(\textbf{todo: elaborate more on this table})\\
-Below is a table which highlights the differences in notation between \gkp{} and \nrs, as well as give the notation I will be using.\\
-\begin{tabular}[H]{|c | c | c | c | m{4,5cm}|}
-    \hline
-    Name   &   \gkp   &   \nrs   &   my notation & rough meaning \\[0.5 ex]
-    \hline
-    \hline
-    message   &   $m$   &   $M$   &   \messageinstance &  message the user sends \\
-    \hline
-    ciphertext space   &   $\mathcal{C}$   &   -   &   \ciphertextspace & set of all possible ciphertext options \\
-    \hline
-    ciphertext   &   $c$   &   $C$   &   \ciphertextinstance & encrypted message \\
-    \hline
-    associated data   &   -   &   $A$   &   \associateddatainstance & data you want to authenticate but not encrypt \\
-    \hline
-    tag space   &   $\mathcal{C}$   &   -   &   \tagspace & set off all possible tag options \\
-    \hline
-    tag   &   $c$   &   $T$   &   \taginstance & output of MAC function \\
-    \hline
-    key   &   $k$   &   $K$   &   \keyinstance   & user key \\
-    \hline
-    nonce space   &   -   &   $\mathcal{N}$   &   \noncespace & set of all nonce options \\
-    \hline
-    nonce   &   -   &   $n$   &   \nonceinstance & number only used once \\
-    \hline
-    lock space   &   $\mathcal{T}$   &   -   &   \lockspace & set of all possible lock options \\
-    \hline
-    lock   &   $t$   &   -   &   \lockinstance & nonce that is bound to the user \\
-    \hline
-    adversary   &   A   &   $\mathcal{A}$   &   \adversary & the bad guy \\
-    \hline
-    random sampling   &   $\xleftarrow{\$}$    &   $\twoheadleftarrow$   &   \sample & get a random ellement from the set \\
-    \hline
-    result of randomized function   &   $\xleftarrow{\$}$   &   -   &   \result & get the result of a randomized function with given inputs \\
-    \hline
-    %Name   &   \gkp   &   \GCrec   &   my notation & rough meaning \\
-    %\hline
-\end{tabular}
-
-\section*{Appendix B}
-\addcontentsline{toc}{section}{\protect\numberline{}\hspace{-0,527 cm}Appendix B}
 To proof Theorem 1, we proof the cases N1, N2 and N3 separately, after proving all three we can conclude Theorem 1 holds.
 \section{N1}
-(\textbf{remark: I feel like I must be missing something in either N1 or N3. I remember you saying one of them would be harder, but to me they felt pretty simular to N2.})
-first, we define our theorem:
+First, we define our theorem:
 \begin{theorem}
 Let loAE be constructed from loMAC and loE as described in Figure \ref{fig: N1 calls} Let ciphertext space \ciphertextspace{} from the loE be a subset of message space \messagespace{} from the loMAC and let loMAC and loE have a shared lock space. Then, for any number of users \users{} and any loAE adversary \adversary{} that poses at most $Q_e$ many Oenc queries, and at most $Q_d$ many Odec queries, there exist a loMAC adversary $B$ and a loE adversary $C$ such that:
 \begin{align*}
@@ -1026,7 +996,7 @@ Lastly, $\text{Pr}[\text{N1-switch-3}_{\text{\adversary,\users}} =0]$ and $\text
 \end{proof}
 
 \section{N2}
-first, we define our theorem:
+First, we define our theorem:
 \begin{theorem}
 Let loAE be constructed from loMAC and loE as described in Figure \ref{fig: N2 calls} Let ciphertext space \ciphertextspace{} from the loE be a subset of message space \messagespace{} from the loMAC and let loMAC and loE have a shared lock space. Then, for any number of users \users{} and any loAE adversary \adversary{} that poses at most $Q_e$ many Oenc queries, and at most $Q_d$ many Odec queries, there exist a loMAC adversary $B$ and a loE adversary $C$ such that:
 \begin{align*}
@@ -1394,7 +1364,7 @@ Lastly, $\text{Pr}[\text{N2-switch-3}_{\text{\adversary,\users}} =0]$ and $\text
 \end{proof}
 
 \section{N3}
-first, we define our theorem:
+First, we define our theorem:
 \begin{theorem}
 Let loAE be constructed from loMAC and loE as described in Figure \ref{fig: N3 calls} Let ciphertext space \ciphertextspace{} from the loE be a subset of message space \messagespace{} from the loMAC and let loMAC and loE have a shared lock space. Then, for any number of users \users{} and any loAE adversary \adversary{} that poses at most $Q_e$ many Oenc queries, and at most $Q_d$ many Odec queries, there exist a loMAC adversary $B$ and a loE adversary $C$ such that:
 \begin{align*}
@@ -1764,7 +1734,9 @@ Lastly, $\text{Pr}[\text{N3-switch-3}_{\text{\adversary,\users}} =0]$ and $\text
 \end{proof}
 
 \newpage\noindent
-Below are some notes and thought with relation to our last meeting. They might be a bit crude as they are just for you to read once. Firstly, I wrote down in broad lines the story I want to tell. Afterwards I have a list of thing that I think we still \textit{can} do, in our meeting I would like to discuss priority with you. Lastly, I made a list of topics on which topics which might be nice to find some papers on.
+\section*{Appendix B}
+\addcontentsline{toc}{section}{\protect\numberline{}\hspace{-0,527 cm}Appendix B}
+Below is a short version of the story I wanna tell in this thesis, and some todos. These may both be ignored for now as they will be removed later on anyway.
 
 \paragraph{Story}
 The story I would like to tell starts with locks as a augmentation in a multi-user setting. GKP introduces locks as a augmentation to a AE scheme in a hybrid encryption context as an alternative to longer keys. Locks might be prefered in due to tecnical contraints (lack in computing power or fixed key size), longer keys are not feasable. The AE construction that is considered in GKP follows the generic Encrypt-then-MAC construction that originated in a symmetric crypto setting. This generic Encrypt-then-MAC construction has been reconsidered in a symmetric crypto setting by NRS. In my thesis, I reconsider the lock-based AE in a symmetric crypto setting using the knowledge from NRS. NRS gives me a good example of how a generic AE construction should be considered in a symmetric setting. The result will be lock-based, one time use AE primitive, considered in a symmetric setting. This primitive will be useful for hybrid encryption, possibly it has some more use cases.
