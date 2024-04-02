@@ -1,5 +1,5 @@
 Feedback meeting:
-versie klaar maken voor bart
+related work + open problems
 
 current todo's:
 - intro bijwerken
@@ -18,13 +18,15 @@ lowprio todo:
 vragen martijn:
 
 toread martijn:
-intro
-related work
+related work + open problems
+section 2
 
 vragen bart:
+wat is BOYR 97
 
 toread bart:
 intro
+section 2
 bewijs
 
 (\textbf{todo: })
