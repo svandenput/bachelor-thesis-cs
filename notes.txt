@@ -1,11 +1,12 @@
 Feedback meeting:
-related work + open problems
++AD in nrs uitleg
+open problem: multiple uses
 
 current todo's:
-- intro bijwerken
-- to-scan scannen
 
 lowprio todo:
+- to-scan scannen
+- non-generic AEAD encode-then-encypher
 - proof nog meer leesbaar maken met highlighted text
 - kijken naar wat Q precies doet in figure 3
 - N1 en N2 switch 2 uitwerken?
