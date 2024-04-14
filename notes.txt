@@ -1,6 +1,4 @@
 Feedback meeting:
-+AD in nrs uitleg
-open problem: multiple uses
 
 current todo's:
 
@@ -17,13 +15,15 @@ lowprio todo:
 
 (\textbf{Question: })
 vragen martijn:
+use cases?
+alternatives to locks?
 
 toread martijn:
-related work + open problems
+section 1
 section 2
 
 vragen bart:
-wat is BOYR 97
+A Concrete Security Treatment of Symmetric Encryption proved juist dat dan ind-$ en ind-lor elkaar imply-en
 
 toread bart:
 intro
