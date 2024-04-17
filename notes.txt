@@ -15,20 +15,17 @@ lowprio todo:
 
 (\textbf{Question: })
 vragen martijn:
-use cases?
-alternatives to locks?
+raar ding met citation
+nieuwe meetings
 
 toread martijn:
 section 1
 section 2
 
 vragen bart:
-A Concrete Security Treatment of Symmetric Encryption proved juist dat dan ind-$ en ind-lor elkaar imply-en
 
 toread bart:
-intro
-section 2
-bewijs
+
 
 (\textbf{todo: })
 \paragraph{title}

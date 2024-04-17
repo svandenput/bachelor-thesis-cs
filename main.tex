@@ -47,7 +47,7 @@
 \pagenumbering{arabic}
 
 \section{Introduction}
-To implement public-key encryption, a hybrid paradigm is typically followed: To encrypt a message, a ephemeral key is generated using a randomized key encapsulation mechanism (KEM). This key is then used to encrypt the message using a deterministic data encapsulation mechanism (DEM). Both the KEM and DEM output their own ciphertexts, which are concatenated to form the public-key encryption ciphertext. Classical analysis of DEMs considers a single user. Because of this, the security bounds of these analysis do not always transfer to the real worlds where you can have millions of users. To make sure the security bounds are also good if you have many users, you can use larger ephemeral keys. Although using larger keys for DEMs is generally safer, expanding the size of the key is not always a viable option. This might be due to limitations in computing power or memory, or due to security primitives having fixed key sizes. Giacon, Kiltz and Poettering, henceforth \gkp{}, propose augmentation using locks (originally called tags, but renamed to locks here to avoid overloaded terms) as an alternative solution to key expansion in a multi-user setting \cite{PKC:GiaKilPoe18}. Augmentation with locks works by giving the security primitive an additional input field, called the lock, to distinguish multiple users using the same key. The augmentation can improve security in a multi-user setting, without the need to expand the key.
+To implement public-key encryption, a hybrid paradigm is typically followed: To encrypt a message, an ephemeral key is generated using a randomized key encapsulation mechanism (KEM). This key is then used to encrypt the message using a deterministic data encapsulation mechanism (DEM). Both the KEM and DEM output their own ciphertexts, which are concatenated to form the public-key encryption ciphertext. Classical analysis of DEMs considers a single user. Because of this, the security bounds of these analysis do not always transfer to the real worlds where you can have millions of users. To make sure the security bounds are also good if you have many users, you can use larger ephemeral keys. Although using larger keys for DEMs is generally safer, expanding the size of the key is not always a viable option. This might be due to limitations in computing power or memory, or due to security primitives having fixed key sizes. Giacon, Kiltz and Poettering, henceforth \gkp{}, propose augmentation using locks (originally called tags, but renamed to locks here to avoid overloaded terms) as an alternative solution to key expansion in a multi-user setting \cite{PKC:GiaKilPoe18}. Augmentation with locks works by giving the security primitive an additional input field, called the lock, to distinguish multiple users using the same key. The augmentation can improve security in a multi-user setting, without the need to expand the key.
 \\\\
 After defining this augmentation, GKP apply the augmentation to a DEM and a MAC function, to create an augmented DEM (ADEM) and an augmented MAC (AMAC). These two are combined to construct an authenticated encryption primitive following the generic encrypt-then-MAC composition from Bellare and Namprempre \cite{AC:BelNam00}. This composition is proven secure whenever the underlying ADEM and AMAC are secure. The generic composition of authenticated encryption has been revised in a paper by Namprempre, Rogaway and Shrimpton \cite{EC:NamRogShr14}, which we henceforth call \nrs{}. In this revision, the generic composition using a MAC function and a deterministic encryption primitive is more thoroughly investigated. They shine light on the fact that the kind of encryption primitive used has a impact on which kinds of generic compositions are secure. When using a nonce-based authenticated encryption primitive and a MAC function, the encrypt-and-MAC, the encrypt-then-MAC and the MAC-then-encrypt are proven to be secure whenever the underlying primitives are secure.
 \\\\
@@ -606,28 +606,32 @@ should consist of:
 	\item possible use cases
 \end{itemize}
 \subsection{PKE Schemes}
+\subsection{MLS?}
+\subsection{Secure channels?}
 
 \section{Related Work}
-The idea of "locks", used for our lAE, originates from GKP, where augmentation using locks is proposed as an alternative to key expansion in a multi user setting in order to prevent cythertext collisions between users. Another alternative solution to this problem would be the use of probabilistic encryption. Generic composition of authenticated encryption using probabilistic encryption is explored by Bellare and Namprempre \cite{AC:BelNam00}.
-Another alternative solution would be ... and is discussed in ...\textbf{(question: Im not sure if im missing something obvious.)}
-
-The generic composition of authenticated encryption was first studied by Bellare and Namprempre \cite{AC:BelNam00}. The three most common composition modes encrypt-and-MAC, encrypt-then-MAC and MAC-then-encrypt discussed and evaluated using a probabilistic encryption block. NRS further investigates these composition modes using either nonce-based encryption, or IV-based encryption. For IV-based encryption, 8 schemes are proven secure and for nonce based encryption 3 schemes, relating to encrypt-and-MAC, encrypt-then-MAC and MAC-then-encrypt, are proven secure.
-
-As an alternative to generic composition, authenticated encryption can also be composed non-generically.
-\textbf{todo: write something for GCM}
-\textbf{todo: write something for OCB}
-
-\textbf{(question: Why did you let me look at GCM and OCB only? )}
-
-
+\label{sec: related work}
+The idea of "locks", used for our lAE, originates from GKP, where augmentation using locks is proposed as an alternative to key expansion in a multi user setting in order to prevent cythertext collisions between users. \textbf{(question: Im not sure if I should elaborate this more here as I already wrote quite a lot on it in section 3)} An alternative solution to this problem would be the use of probabilistic encryption. Generic composition of authenticated encryption using probabilistic encryption is explored by Bellare and Namprempre \cite{AC:BelNam00}. They find generic construction to be secure when using the encrypt-then-MAC method. Another alternative solution would be ... and is discussed in ...\textbf{(question: Im not sure if im missing something obvious.)}
+\\\\
+The generic composition of authenticated encryption was first studied by Bellare and Namprempre \cite{AC:BelNam00}. The three most common composition modes encrypt-and-MAC, encrypt-then-MAC and MAC-then-encrypt are introduced and evaluated using a probabilistic encryption block. NRS further investigates these composition modes and state that the type of encryption primitive used, as well as the required end-result, influences which compositions are secure. They investigate ways to compose a nonce-bases authenticated encryption scheme. Using IV-based encryption, 8 schemes are proven secure. Using nonce based encryption 3 schemes, relating to encrypt-and-MAC, encrypt-then-MAC and MAC-then-encrypt, are proven secure.
+\\\\
+As an alternative to generic composition, authenticated encryption can also be composed non-generically. In this fashion, Rogaway, Bellare and Black propose OCB as a non-generic authenticated encryption construction \cite{CCS:RBBK01}. OCB is highly parallelizable and is cheaper in computation compared to generic construction. In the basic form, it can not take in associated data but an extension has been given to allow for this. It is proven secure whenever the underlying block cipher is secure. McGrew and Viega propose Galois/Counter Mode, GCM as a non-generic authenticated encryption construction \cite{mcgrew2004security}. Is a highly efficient mode of operation, also due to its parallelizability. It incorporates counter mode using a even length block cipher and supports the usage of associated data. In a addition to authenticated encryption, it can also be used as a standalone MAC function.
+\textbf{(question: Why did you let me look at GCM and OCB specifically? )}
 
 \section{Open Problems}
-\begin{itemize}
-    \item Other possible N schemes that are not proven secure or insecure
-    \item Addition of AD
-    \item adding locks to non-generic AE constructions
-    \item multi-use
-\end{itemize}
+In this section, we will look at some related challenges that are left unsolved. Wherever possible we will also indicate what needs to be done in order to solve these problems.
+
+\paragraph*{Other N schemes}
+In this thesis, the only the N-schemes evaluated are alterations on the ones proven secure by NRS. NRS finds 20 possible N-schemes. Without using AD, 10 possible N-schemes remain. To more thoroughly investigate the security of different lAE compositions, the other 7 N-schemes should also be proven secure or be proven insecure with a counterexample.
+
+\paragraph*{Adding AD}
+The lAE construction is only evaluated without the possibility to add associated data. To allow for this, A slight modification should be made to the definition of the lAE. With AD added, there will be 20 possible N-schemes, three of witch will relate to the secure schemes from NRS. These three schemes should be prioritized as they have the highest likelihood of begin secure. For a more rigorous analysis, all 20 schemes should be evaluated.
+
+\paragraph*{Evaluating lAE with multiple uses}
+The evaluation of the lAE construction is limited to a key that is used once. A more in-depth analysis could evaluate the construction in a setting where a key can be used multiple times. In order to maintain a security, you would likely need to alter the lAE definition to also incorporate nonces. As this is a new input a new set of possible compositions should be generated and evaluated. 
+
+\paragraph*{Augmenting non-generic constructions with locks}
+The non-generic constructions mentioned in section \ref{sec: related work} can possibly be augmented with locks as well. The augmented versions will most likely have lower computational cost when compared to generic composition, as well as be highly parallelizable. When proven secure, this will lead to more efficient instantiations of the lAE.
 
 \section{Conclusion}
 
