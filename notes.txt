@@ -1,6 +1,7 @@
 Feedback meeting:
 
 current todo's:
+proofs geen sections meer
 
 lowprio todo:
 - to-scan scannen

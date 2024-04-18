@@ -49,7 +49,7 @@
 \section{Introduction}
 To implement public-key encryption, a hybrid paradigm is typically followed: To encrypt a message, an ephemeral key is generated using a randomized key encapsulation mechanism (KEM). This key is then used to encrypt the message using a deterministic data encapsulation mechanism (DEM). Both the KEM and DEM output their own ciphertexts, which are concatenated to form the public-key encryption ciphertext. Classical analysis of DEMs considers a single user. Because of this, the security bounds of these analysis do not always transfer to the real worlds where you can have millions of users. To make sure the security bounds are also good if you have many users, you can use larger ephemeral keys. Although using larger keys for DEMs is generally safer, expanding the size of the key is not always a viable option. This might be due to limitations in computing power or memory, or due to security primitives having fixed key sizes. Giacon, Kiltz and Poettering, henceforth \gkp{}, propose augmentation using locks (originally called tags, but renamed to locks here to avoid overloaded terms) as an alternative solution to key expansion in a multi-user setting \cite{PKC:GiaKilPoe18}. Augmentation with locks works by giving the security primitive an additional input field, called the lock, to distinguish multiple users using the same key. The augmentation can improve security in a multi-user setting, without the need to expand the key.
 \\\\
-After defining this augmentation, GKP apply the augmentation to a DEM and a MAC function, to create an augmented DEM (ADEM) and an augmented MAC (AMAC). These two are combined to construct an authenticated encryption primitive following the generic encrypt-then-MAC composition from Bellare and Namprempre \cite{AC:BelNam00}. This composition is proven secure whenever the underlying ADEM and AMAC are secure. The generic composition of authenticated encryption has been revised in a paper by Namprempre, Rogaway and Shrimpton \cite{EC:NamRogShr14}, which we henceforth call \nrs{}. In this revision, the generic composition using a MAC function and a deterministic encryption primitive is more thoroughly investigated. They shine light on the fact that the kind of encryption primitive used has a impact on which kinds of generic compositions are secure. When using a nonce-based authenticated encryption primitive and a MAC function, the encrypt-and-MAC, the encrypt-then-MAC and the MAC-then-encrypt are proven to be secure whenever the underlying primitives are secure.
+After defining this augmentation, GKP apply the augmentation to a DEM and a MAC function, to create an augmented DEM (ADEM) and an augmented MAC (AMAC). These two are combined to construct an authenticated encryption primitive following the generic encrypt-then-MAC composition from Bellare and Namprempre \cite{AC:BelNam00}. This composition is proven secure whenever the underlying ADEM and AMAC are secure. The generic composition of authenticated encryption has been revised by Namprempre, Rogaway and Shrimpton \cite{EC:NamRogShr14}, which we henceforth call \nrs{}. In this revision, the generic composition using a MAC function and a deterministic encryption primitive is more thoroughly investigated. They shine light on the fact that the kind of encryption primitive used has a impact on which kinds of generic compositions are secure. When using a nonce-based authenticated encryption primitive and a MAC function, the encrypt-and-MAC, the encrypt-then-MAC and the MAC-then-encrypt are proven to be secure whenever the underlying primitives are secure.
 \\\\
 Although the ADEM+AMAC composition given by GKP is secure, it is not clearly defined as authenticated encryption primitive. As a result, its security is evaluated as a DEM, not as an authenticated encryption primitive. Additionally, only the encrypt-then-MAC composition is considered by GKP and it is not shown if other composition methods could be secure. In this thesis, generic composition of authenticated encryption using locks is more thoroughly investigated. We formally compare the constructions and the notation from NRS and GKP (Chapter 3). To evaluate generic composition using locks, we define a new cryptographic primitive which we analyze in a multi-user setting (Chapter 4). Using the knowledge from NRS, three generic compositions (encrypt-and-MAC, encrypt-then-MAC and MAC-then-encrypt) of this primitive are considered, all using a lock-based encryption primitive and a lock-based MAC function (Chapter 5). These compositions are then proven to be secure, whenever the underlying primitives are secure (Appendix A).
 
@@ -66,7 +66,7 @@ Two different security requirements are data privacy, the insurance that data ca
 Message authentication can be done using a message authentication code, MAC for short. A basic MAC function takes a message and key and outputs a tag which authenticates the message. Some MAC functions also have a verification call that takes a message, key and tag and outputs either \codetrue{} or \codefalse. A MAC function can have different security requirements. It is said to be PRF secure when it is infeasible to distinguish the output tag from the result of a pseudo-random function that takes all message-key pairs to the tag space. A MAC is said to be unforgeable when it is infeasible to create a valid message-tag pair without knowledge of the secret key. A PRF secure MAC is also unforgeable, given the tag space is big enough, while a unforgeable MAC is not necessarily PRF secure.
 
 \subsection{Nonces and Locks}
-A basic deterministic encryption scheme takes a message and key as input, and outputs a ciphertext. Using this encryption scheme, a message encrypted under the same key leads to the same ciphertext. Both GPK and NRS resolve this by giving the encryption scheme an additional argument. GKP uses locks while NRS uses nonces. Although nonces and locks look similar, their purpose and exact working differ leading to different use cases. Most notably, nonces are useful when one user is allowed  to encrypt multiple messages and locks are only useful when there are multiple users.
+A basic deterministic encryption scheme takes a message and key as input, and outputs a ciphertext. Using this encryption scheme, a message encrypted under the same key leads to the same ciphertext. Both GPK (Giacon, Kiltz and Poettering) and NRS (Namprempre, Rogaway and Shrimpton) resolve this by giving the encryption scheme an additional argument. GKP uses locks while NRS uses nonces. Although nonces and locks look similar, their purpose and exact working differ leading to different use cases. Most notably, nonces are useful when one user is allowed  to encrypt multiple messages and locks are only useful when there are multiple users.
 
 \paragraph{Nonces}
 Using a basic deterministic encryption scheme, a message encrypted twice by the same user results in the same ciphertext. This can leak information about the message, which can be prevented by using a nonce. A nonce is a number that is assumed to only be used once per user to encrypt a message. Whenever a message is encrypted twice with the same key, but with two different nonces, the resulting ciphertexts should be indistinguishable from two ciphertexts corresponding to two different messages. As a result, it is infeasible for an adversary to guess if a message has been sent multiple times. The adversary is usually allowed to let a user decrypt multiple messages with one nonce. Nonces are only used when a user uses its key multiple times, as otherwise a message will never be encrypted by the same user twice.
@@ -478,7 +478,7 @@ where lMAC-PRF is in Figure \ref{fig: lMAC-PRF game}. Every user is only allowed
             \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} lMAC-PRF$^{b}_{\adversary,\users}$ }]{
                 L \result \emptyset\\
                 \pcif b = 1: \\
-                \t tag \sample \mathit{Func}(\keyspace \times \lockspace \times \messagespace)\\
+                \t tag \sample \mathit{Func}(\keyspace \times \lockspace \times \messagespace, \tagspace)\\
                 \pcfor \user \in [1..N]:\\
                 \t \keyinstance_\user \sample \keyspace\\
                 \t T_\user \result \invalid\\
@@ -591,9 +591,11 @@ We define the composition secure if there is a tight reduction from breaking the
 
 \begin{theorem}
     Let lAE be constructed from lMAC and lE as described in Figure \ref{fig: N1 calls}, \ref{fig: N2 calls} or \ref{fig: N3 calls}. Let ciphertext space \ciphertextspace{} from the lE be a subset of message space \messagespace{} from the lMAC and let lMAC and lE have a shared lock space. Then, for any number of users \users{} and any lAE adversary \adversary{} that poses at most $Q_e$ many Oenc queries, and at most $Q_d$ many Odec queries, there exist a lMAC adversary $B$ and a lE adversary $C$ such that:
+    \textnormal{
     \begin{align*}
-        \text{\advantage{$A$,\users}{lAE}} \leq \text{\advantage{$B$,\users}{lMAC}} + \frac{Q_d}{2^{\textnormal{n}}} + \text{\advantage{$C$,\users}{lE}},
+        \text{\advantage{$A$,\users}{lAE}} \leq \text{\advantage{$B$,\users}{lMAC}} + \text{\advantage{$C$,\users}{lE}} + \frac{Q_d}{2^{\text{n}}},
     \end{align*}
+    }
     where \textnormal{n} is the output length of the lMAC in bits. The running time of $B$ is at most that of A plus the time required to run $Q_e$ many \textnormal{E.enc} encapsulations and $Q_d$ many \textnormal{E.dec} decapsulations. The running time of $C$ is at most that of \adversary. Additionally, $B$ makes at most $Q_e$ many Omac queries and at most $Q_d$ many Ovrf queries and $C$ makes at most $Q_e$ many Oenc queries.
 \end{theorem}
 \noindent
@@ -642,12 +644,14 @@ The non-generic constructions mentioned in section \ref{sec: related work} can p
 \addcontentsline{toc}{section}{\protect\numberline{}\hspace{-0,527 cm}Appendix A}
 To prove Theorem 1, we prove the cases N1, N2 and N3 separately, after proving all three we can conclude Theorem 1 holds.
 \section{N1}
-First, we define our theorem:
+First, we repeat theorem 1 with N1 filled in:
 \begin{theorem}
 Let lAE be constructed from lMAC and lE as described in Figure \ref{fig: N1 calls}. Let ciphertext space \ciphertextspace{} from the lE be a subset of message space \messagespace{} from the lMAC and let lMAC and lE have a shared lock space. Then, for any number of users \users{} and any lAE adversary \adversary{} that poses at most $Q_e$ many Oenc queries, and at most $Q_d$ many Odec queries, there exist a lMAC adversary $B$ and a lE adversary $C$ such that:
+\textnormal{
 \begin{align*}
-    \text{\advantage{$A$,\users}{lAE}} \leq \text{\advantage{$B$,\users}{lMAC}} + \frac{Q_d}{2^{\textnormal{n}}} + \text{\advantage{$C$,\users}{lE}},
+    \text{\advantage{$A$,\users}{lAE}} \leq \text{\advantage{$B$,\users}{lMAC}} + \text{\advantage{$C$,\users}{lE}} + \frac{Q_d}{2^{\text{n}}},
 \end{align*}
+}
 where \textnormal{n} is the output length of the lMAC in bits. The running time of $B$ is at most that of A plus the time required to run $Q_e$ many \textnormal{E.enc} encapsulations and $Q_d$ many \textnormal{E.dec} decapsulations. The running time of $C$ is at most that of \adversary. Additionally, $B$ makes at most $Q_e$ many Omac queries and at most $Q_d$ many Ovrf queries and $C$ makes at most $Q_e$ many Oenc queries.
 \end{theorem}
 \noindent
@@ -708,7 +712,7 @@ Next we define game N1-switch-1 in Figure \ref{fig: N1-switch-1 game}. The only 
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} N1-switch-1$_{\adversary,\users}$ }]{
         L \result \emptyset\\
-        tag \sample \mathit{Func}(\keyspace_{mac}\times \lockspace \times \messagespace)\\
+        tag \sample \mathit{Func}(\keyspace_{mac}\times \lockspace \times \messagespace, \tagspace)\\
         \pcfor \user \in [1..N]:\\
         \t \keyinstance_\user \sample \keyspace\\
         \t C_\user \result \invalid\\
@@ -751,7 +755,7 @@ Using this game, we expand the probability:
     \text{Pr}[\text{lAE-N1}_{\text{\adversary,\users}}^0 =0]
     -
     \text{Pr}[\text{N1-switch-1}_{\text{\adversary,\users}} =0]
-    \\& \hspace{0,3cm}  + \text{Pr}[\text{N1-switch-1}_{\text{\adversary,\users}} =0]
+    \\&   + \text{Pr}[\text{N1-switch-1}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{lAE-N1}_{\text{\adversary,\users}}^1 =0].
 \end{align*}
@@ -799,14 +803,14 @@ The runtime of $B$ is that of $A$. For every Oenc query \adversary{} makes, $B$ 
     \text{Pr}[\text{lAE-N1}_{\text{\adversary,\users}}^0 =0]
     -
     \text{Pr}[\text{N1-switch-1}_{\text{\adversary,\users}} =0]
-    \\& \hspace{0,3cm} + \text{Pr}[\text{N1-switch-1}_{\text{\adversary,\users}} =0]
+    \\&  + \text{Pr}[\text{N1-switch-1}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{lAE-N1}_{\text{\adversary,\users}}^1 =0]
     \\& =
     \text{Pr}[\text{lMAC-PRF}_{\text{$B$,\users}}^0 =0]
     -
     \text{Pr}[\text{lMAC-PRF}_{\text{$B$,\users}}^1 =0]
-    \\& \hspace{0,3cm} + \text{Pr}[\text{N1-switch-1}_{\text{\adversary,\users}} =0]
+    \\&  + \text{Pr}[\text{N1-switch-1}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{lAE-N1}_{\text{\adversary,\users}}^1 =0]
     \\& = \text{\advantage{$B$,\users}{lMAC}}
@@ -823,7 +827,7 @@ To expand our advantage again, we define game N1-switch-2 in Figure \ref{fig: N1
     \text{Pr}[\text{N1-switch-1}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{N1-switch-2}_{\text{\adversary,\users}} =0]
-    \\& \hspace{0,3cm}+
+    \\& +
     \text{Pr}[\text{N1-switch-2}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{lAE-N1}_{\text{\adversary,\users}}^1 =0].
@@ -832,7 +836,7 @@ To expand our advantage again, we define game N1-switch-2 in Figure \ref{fig: N1
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} N1-switch-2$_{\adversary,\users}$ }]{
         L \result \emptyset\\
-        tag \sample \mathit{Func}(\keyspace_{mac}\times \lockspace \times \messagespace)\\
+        tag \sample \mathit{Func}(\keyspace_{mac}\times \lockspace \times \messagespace,\tagspace)\\
         \pcfor \user \in [1..N]:\\
         \t \keyinstance_\user \sample \keyspace\\
         \t C_\user \result \invalid\\
@@ -873,33 +877,33 @@ As N1-switch-1 and N1-switch-2 are so called identical-until-$bad$ \cite{EC:BelR
 \begin{align*}
     \text{Pr}[\text{N1-switch-1}_{\text{\adversary,\users}} =0]-\text{Pr}[\text{N1-switch-2}_{\text{\adversary,\users}} =0] \leq \text{Pr}[bad=\codetrue].
 \end{align*}
-As $bad$ is set to \codetrue{} if, and only if, \taginstance=\taginstance', we can state $\text{Pr}[bad=\codetrue] = \text{Pr}[\taginstance=\taginstance']$. The adversary needs to provide tag \taginstance{} and ciphertext \ciphertextinstance{}', where ciphertext \ciphertextinstance' leads to a message \messageinstance{} that is used as input to the $tag$ function. The provided tag-ciphertext pair may not be the result of the encryption query corresponding to the provided user. Combined with the tidiness of the encryption, it is ensured that, for any sensible adversarial query, the message \messageinstance{} cannot be the message which is encrypted for the provided user. This is because if \messageinstance{} would be the encrypted message, the correct tag cannot be provided and thus no information can be gained with the query. Consequently, \taginstance{} and \taginstance' are only equal when the adversary is able to guess the output of $tag$ for a message that is not encrypted for the provided user. The function $tag$ is uniformly random so, with every fresh ciphertext, the probability that \taginstance{} and \taginstance' are equal is $\frac{1}{2^{\text{n}}}$. Combined with at most $Q_d$ Odec queries we get $\text{Pr}[\taginstance=\taginstance'] = \text{Pr}[bad=\codetrue] \leq \frac{Q_d}{2^{\text{n}}}$ and thus, we can fill in $\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]-\text{Pr}[\text{N1-switch-2}_{\text{\adversary,\users}} =0] \leq \text{Pr}[bad=\codetrue] \leq \frac{Q_d}{2^{\text{n}}}$ to obtain:
+As $bad$ is set to \codetrue{} if, and only if, \taginstance=\taginstance$'$, we can state $\text{Pr}[bad=\codetrue] = \text{Pr}[\taginstance=\taginstance']$. The adversary needs to provide tag \taginstance{} and ciphertext \ciphertextinstance$'$, where ciphertext \ciphertextinstance$'$ leads to a message \messageinstance{} that is used as input to the $tag$ function. The provided tag-ciphertext pair may not be the result of the encryption query corresponding to the provided user. Combined with the tidiness of the encryption, it is ensured that, for any sensible adversarial query, the message \messageinstance{} cannot be the message which is encrypted for the provided user. This is because if \messageinstance{} would be the encrypted message, the correct tag cannot be provided and thus no information can be gained with the query. Consequently, \taginstance{} and \taginstance$'$ are only equal when the adversary is able to guess the output of $tag$ for a message that is not encrypted for the provided user. The function $tag$ is uniformly random so, with every fresh ciphertext, the probability that \taginstance{} and \taginstance$'$ are equal is $\frac{1}{2^{\text{n}}}$. Combined with at most $Q_d$ Odec queries we get $\text{Pr}[\taginstance=\taginstance'] = \text{Pr}[bad=\codetrue] \leq \frac{Q_d}{2^{\text{n}}}$ and thus, we can fill in $\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]-\text{Pr}[\text{N1-switch-2}_{\text{\adversary,\users}} =0] \leq \text{Pr}[bad=\codetrue] \leq \frac{Q_d}{2^{\text{n}}}$ to obtain:
 \begin{align*}
     \text{\advantage{$A$,\users}{lAE}}
     &\leq
     \text{\advantage{$B$,\users}{lMAC}} 
-    +
-    \frac{Q_d}{2^{\text{n}}}
     +
     \text{Pr}[\text{N1-switch-2}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{lAE-N2}_{\text{\adversary,\users}}^1 =0].
+    +
+    \frac{Q_d}{2^{\text{n}}}
 \end{align*}
-We define game N1-switch-3 in Figure \ref{fig: N1-switch-3 game} to expand our advantage one last time. Switch game 3 is equivalent to switch game 2 but always returns lazily sampled random bits when the outcome of E.enc is valid. It might seem like there is a difference as t can no longer become \invalid. This is not the case as, due to the chosen input spaces of tag, tag can never return \invalid when the input to E.enc is valid. In other words, tag can only return \invalid{} when \ciphertextinstance' is already \invalid, and thus tag returning \invalid{} will never influence \ciphertextinstance{} on line 12. We also simplify Odec as we no longer need the event $bad$. We use this game to expand our advantage to:
+We define game N1-switch-3 in Figure \ref{fig: N1-switch-3 game} to expand our advantage one last time. Switch game 3 is equivalent to switch game 2 but always returns lazily sampled random bits when the outcome of E.enc is valid. It might seem like there is a difference as \taginstance can no longer become \invalid. This is not the case as, due to the chosen input spaces of tag, tag can never return \invalid when the input to E.enc is valid. In other words, tag can only return \invalid{} when \ciphertextinstance$'$ is already \invalid, and thus tag returning \invalid{} will never influence \ciphertextinstance{} on line 12. We also simplify Odec as we no longer need the event $bad$. We use this game to expand our advantage to:
 \begin{align*}
     \text{\advantage{$A$,\users}{lAE}}
     &\leq
     \text{\advantage{$B$,\users}{lMAC}} 
     +
-    \frac{Q_d}{2^{\text{n}}}
-    +
     \text{Pr}[\text{N1-switch-2}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{N1-switch-3}_{\text{\adversary,\users}} =0]
-    \\& \hspace{0,3cm}+
+    \\& +
     \text{Pr}[\text{N1-switch-3}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{lAE-N1}_{\text{\adversary,\users}}^1 =0].
+    +
+    \frac{Q_d}{2^{\text{n}}}
 \end{align*}
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
@@ -961,40 +965,40 @@ Now we can rewrite $\text{Pr}[\text{N1-switch-2}_{\text{\adversary,\users}} =0] 
     \label{fig: adversary c N1}
 \end{figure}
 \noindent
-The runtime of $C$ is that of $A$. For every Oenc query $A$ makes, $C$ makes one Oenc query. We can see that $\text{Pr}[\text{N1-switch-2}_{\text{\adversary,\users}} =0] = \text{Pr}[\text{lE-IND-\$-CPA}_{\text{$C$,\users}}^0 =0]$ as $C$ perfectly simulates N1-switch-2 when its own $b$ is 0. In addition, $\text{Pr}[\text{N1-switch-3}_{\text{\adversary,\users}} =0] = \text{Pr}[\text{lE-IND-\$-CPA}_{\text{$C$,\users}}^1 =0]$ as $C$ perfectly simulates N1-switch-3 when its own $b$ is 1. This gives us:
+The runtime of $C$ is that of $A$. For every Oenc query $A$ makes, $C$ makes one Oenc query. We can see that $\text{Pr}[\text{N1-switch-2}_{\text{\adversary,\users}} =0] = \text{Pr}[\text{lE-IND-\$-CPA}_{\text{$C$,\users}}^0 =0]$ as $C$ perfectly simulates N1-switch-2 when its own $b$ is 0. When its own $b$ is 1, $C$ perfectly simulates N1-switch-3 giving $\text{Pr}[\text{N1-switch-3}_{\text{\adversary,\users}} =0] = \text{Pr}[\text{lE-IND-\$-CPA}_{\text{$C$,\users}}^1 =0]$. This leads tt us:
 \begin{align*}
     \text{\advantage{$A$,\users}{lAE}}
     &\leq
     \text{\advantage{$B$,\users}{lMAC}} 
     +
-    \frac{Q_d}{2^{\text{n}}}
-    +
     \text{Pr}[\text{N1-switch-2}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{N1-switch-3}_{\text{\adversary,\users}} =0]
-    \\& \hspace{0,3cm}+
+    \\& +
     \text{Pr}[\text{N1-switch-3}_{\text{\adversary,\users}} =0]
     -
-    \text{Pr}[\text{lAE-N1}_{\text{\adversary,\users}}^1 =0].
+    \text{Pr}[\text{lAE-N1}_{\text{\adversary,\users}}^1 =0]
+    +
+    \frac{Q_d}{2^{\text{n}}}.
     \\& \leq
     \text{\advantage{$B$,\users}{lMAC}} 
-    +
-    \frac{Q_d}{2^{\text{n}}}
     +
     \text{Pr}[\text{lE-IND-\$-CPA}_{\text{$C$,\users}}^0 =0]
     -
     \text{Pr}[\text{lE-IND-\$-CPA}_{\text{$C$,\users}}^1 =0]
-    \\& \hspace{0,3cm}+
+    \\& +
     \text{Pr}[\text{N1-switch-3}_{\text{\adversary,\users}} =0]
     -
-    \text{Pr}[\text{lAE-N1}_{\text{\adversary,\users}}^1 =0].
+    \text{Pr}[\text{lAE-N1}_{\text{\adversary,\users}}^1 =0]
+    +
+    \frac{Q_d}{2^{\text{n}}}.
     \\& \leq
     \text{\advantage{$B$,\users}{lMAC}} 
     +
     \frac{Q_d}{2^{\text{n}}}
     +
     \text{\advantage{$C$,\users}{lE}}
-    \\& \hspace{0,3cm}+
+    \\& +
     \text{Pr}[\text{N1-switch-3}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{lAE-N1}_{\text{\adversary,\users}}^1 =0].
@@ -1004,18 +1008,21 @@ Lastly, $\text{Pr}[\text{N1-switch-3}_{\text{\adversary,\users}} =0]$ and $\text
     \text{\advantage{$A$,\users}{lAE}}
     &\leq
     \text{\advantage{$B$,\users}{lMAC}} 
-    + \frac{Q_d}{2^{\text{n}}} +
-    \text{\advantage{$C$,\users}{lE}}.
+    +
+    \text{\advantage{$C$,\users}{lE}}
+    +
+    \frac{Q_d}{2^{\text{n}}}.
 \end{align*}
 \end{proof}
 
 \section{N2}
-First, we define our theorem:
+First, we repeat theorem 1 with N2 filled in:
 \begin{theorem}
 Let lAE be constructed from lMAC and lE as described in Figure \ref{fig: N2 calls}. Let ciphertext space \ciphertextspace{} from the lE be a subset of message space \messagespace{} from the lMAC and let lMAC and lE have a shared lock space. Then, for any number of users \users{} and any lAE adversary \adversary{} that poses at most $Q_e$ many Oenc queries, and at most $Q_d$ many Odec queries, there exist a lMAC adversary $B$ and a lE adversary $C$ such that:
+\textnormal{
 \begin{align*}
-    \text{\advantage{$A$,\users}{lAE}} \leq \text{\advantage{$B$,\users}{lMAC}} + \frac{Q_d}{2^{\textnormal{n}}} + \text{\advantage{$C$,\users}{lE}},
-\end{align*}
+    \text{\advantage{$A$,\users}{lAE}} \leq \text{\advantage{$B$,\users}{lMAC}} + \text{\advantage{$C$,\users}{lE}} + \frac{Q_d}{2^{\text{n}}},
+\end{align*}}
 where \textnormal{n} is the output length of the lMAC in bits. The running time of $B$ is at most that of A plus the time required to run $Q_e$ many \textnormal{E.enc} encapsulations and $Q_d$ many \textnormal{E.dec} decapsulations. The running time of $C$ is at most that of \adversary. Additionally, $B$ makes at most $Q_e$ many Omac queries and at most $Q_d$ many Ovrf queries and $C$ makes at most $Q_e$ many Oenc queries.
 \end{theorem}
 \noindent
@@ -1070,13 +1077,13 @@ To prove this theorem, we start by defining game lAE-N2 in Figure \ref{fig: lAE-
     -
     \text{Pr}[\text{lAE-N2}_{\text{\adversary,\users}}^1 =0].
 \end{align*}
-Next we define game N2-switch-1 in Figure \ref{fig: N2-switch-1 game}. The only difference between this game and game lAE-N2$^0$ is the fact that N2-switch-1 uses the uniformly random function $tag$, instead of the lMAC. To define this function we write $\mathit{Func}(\keyspace_{mac} \times \lockspace \times \ciphertextspace,\tagspace)$ to denote the set of all functions from the key space of the MAC \keyspace, the shared lock space \lockspace{} and ciphertext space from E.enc \ciphertextspace{} to the tag space \tagspace. We define this function specifically as we want the tags resulting from computations in oracle Oenc to match with those in oracle Odec. When the input of $tag$ is outside its domain, it will return \invalid.
+Next we define game N2-switch-1 in Figure \ref{fig: N2-switch-1 game}. The only difference between this game and game lAE-N2$^0$ is the fact that N2-switch-1 uses the uniformly random function $tag$, instead of the lMAC. To define this function we write $\mathit{Func}(\keyspace \times \lockspace \times \ciphertextspace,\tagspace)$ to denote the set of all functions from the key space of the MAC \keyspace, the shared lock space \lockspace{} and ciphertext space from E.enc \ciphertextspace{} to the tag space \tagspace. We define this function specifically as we want the tags resulting from computations in oracle Oenc to match with those in oracle Odec. When the input of $tag$ is outside its domain, it will return \invalid.
 
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} N2-switch-1$_{\adversary,\users}$ }]{
         L \result \emptyset\\
-        tag \sample \mathit{Func}(\keyspace_{mac}\times \lockspace \times \ciphertextspace)\\
+        tag \sample \mathit{Func}(\keyspace_{mac}\times \lockspace \times \ciphertextspace,\tagspace)\\
         \pcfor \user \in [1..N]:\\
         \t \keyinstance_\user \sample \keyspace\\
         \t C_\user \result \invalid\\
@@ -1119,7 +1126,7 @@ Using this game, we expand the probability:
     \text{Pr}[\text{lAE-N2}_{\text{\adversary,\users}}^0 =0]
     -
     \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]
-    \\& \hspace{0,3cm}  + \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]
+    \\&   + \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{lAE-N2}_{\text{\adversary,\users}}^1 =0].
 \end{align*}
@@ -1167,14 +1174,14 @@ The runtime of $B$ is that of $A$. For every Oenc query \adversary{} makes, $B$ 
     \text{Pr}[\text{lAE-N2}_{\text{\adversary,\users}}^0 =0]
     -
     \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]
-    \\& \hspace{0,3cm} + \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]
+    \\&  + \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{lAE-N2}_{\text{\adversary,\users}}^1 =0]
     \\& =
     \text{Pr}[\text{lMAC-PRF}_{\text{$B$,\users}}^0 =0]
     -
     \text{Pr}[\text{lMAC-PRF}_{\text{$B$,\users}}^1 =0]
-    \\& \hspace{0,3cm} + \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]
+    \\&          + \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{lAE-N2}_{\text{\adversary,\users}}^1 =0]
     \\& = \text{\advantage{$B$,\users}{lMAC}}
@@ -1191,7 +1198,7 @@ To expand our advantage again, we define game N2-switch-2 in Figure \ref{fig: N2
     \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0]
-    \\& \hspace{0,3cm}+
+    \\& +
     \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{lAE-N2}_{\text{\adversary,\users}}^1 =0].
@@ -1200,7 +1207,7 @@ To expand our advantage again, we define game N2-switch-2 in Figure \ref{fig: N2
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} N2-switch-2$_{\adversary,\users}$ }]{
         L \result \emptyset\\
-        tag \sample \mathit{Func}(\keyspace_{mac}\times \lockspace \times \ciphertextspace)\\
+        tag \sample \mathit{Func}(\keyspace_{mac}\times \lockspace \times \ciphertextspace,\tagspace)\\
         \pcfor \user \in [1..N]:\\
         \t \keyinstance_\user \sample \keyspace\\
         \t C_\user \result \invalid\\
@@ -1241,33 +1248,33 @@ As N2-switch-1 and N2-switch-2 are so called identical-until-$bad$ \cite{EC:BelR
 \begin{align*}
     \text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]-\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0] \leq \text{Pr}[bad=\codetrue].
 \end{align*}
-As $bad$ is set to \codetrue{} if, and only if, \taginstance=\taginstance', we can state $\text{Pr}[bad=\codetrue] = \text{Pr}[\taginstance=\taginstance']$. The adversary needs to provide tag \taginstance{} and ciphertext \ciphertextinstance{}' for the $tag$ function, where the provided tag-ciphertext pair may not be the result of the encryption query corresponding to the provided user. Consequently, \taginstance{} and \taginstance' are only equal when the adversary is able to guess the output of $tag$ for a ciphertext that is not encrypted for the provided user. The function $tag$ is uniformly random so, with every fresh ciphertext, the probability that \taginstance{} and \taginstance' are equal is $\frac{1}{2^{\text{n}}}$. Combined with at most $Q_d$ Odec queries we get $\text{Pr}[\taginstance=\taginstance'] = \text{Pr}[bad=\codetrue] \leq \frac{Q_d}{2^{\text{n}}}$ and thus, we can fill in $\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]-\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0] \leq \text{Pr}[bad=\codetrue] \leq \frac{Q_d}{2^{\text{n}}}$ to obtain:
+As $bad$ is set to \codetrue{} if, and only if, \taginstance=\taginstance$'$, we can state $\text{Pr}[bad=\codetrue] = \text{Pr}[\taginstance=\taginstance']$. The adversary needs to provide tag \taginstance{} and ciphertext \ciphertextinstance$'$ for the $tag$ function, where the provided tag-ciphertext pair may not be the result of the encryption query corresponding to the provided user. Consequently, \taginstance{} and \taginstance$'$ are only equal when the adversary is able to guess the output of $tag$ for a ciphertext that is not encrypted for the provided user. The function $tag$ is uniformly random so, with every fresh ciphertext, the probability that \taginstance{} and \taginstance$'$ are equal is $\frac{1}{2^{\text{n}}}$. Combined with at most $Q_d$ Odec queries we get $\text{Pr}[\taginstance=\taginstance'] = \text{Pr}[bad=\codetrue] \leq \frac{Q_d}{2^{\text{n}}}$ and thus, we can fill in $\text{Pr}[\text{N2-switch-1}_{\text{\adversary,\users}} =0]-\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0] \leq \text{Pr}[bad=\codetrue] \leq \frac{Q_d}{2^{\text{n}}}$ to obtain:
 \begin{align*}
     \text{\advantage{$A$,\users}{lAE}}
     &\leq
     \text{\advantage{$B$,\users}{lMAC}} 
     +
-    \frac{Q_d}{2^{\text{n}}}
-    +
     \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0]
     -
-    \text{Pr}[\text{lAE-N2}_{\text{\adversary,\users}}^1 =0].
+    \text{Pr}[\text{lAE-N2}_{\text{\adversary,\users}}^1 =0]
+    +
+    \frac{Q_d}{2^{\text{n}}}.
 \end{align*}
-We define game N2-switch-3 in Figure \ref{fig: N2-switch-3 game} to expand our advantage one last time. Switch game 3 is equivalent to switch game 2 but always returns lazily sampled random bits when the outcome of E.enc is valid. It might seem like there is a difference as t can no longer become \invalid. This is not the case as, due to the chosen input spaces of tag, tag can never return \invalid when the input to E.enc is valid. In other words, tag can only return \invalid{} when \ciphertextinstance' is already \invalid, and thus tag returning \invalid{} will never influence \ciphertextinstance{} on line 12. We also simplify Odec as we no longer need the event $bad$. We use this game to expand our advantage to:
+We define game N2-switch-3 in Figure \ref{fig: N2-switch-3 game} to expand our advantage one last time. Switch game 3 is equivalent to switch game 2 but always returns lazily sampled random bits when the outcome of E.enc is valid. It might seem like there is a difference as \taginstance can no longer become \invalid. This is not the case as, due to the chosen input spaces of tag, tag can never return \invalid when the input to E.enc is valid. In other words, tag can only return \invalid{} when \ciphertextinstance$'$ is already \invalid, and thus tag returning \invalid{} will never influence \ciphertextinstance{} on line 12. We also simplify Odec as we no longer need the event $bad$. We use this game to expand our advantage to:
 \begin{align*}
     \text{\advantage{$A$,\users}{lAE}}
     &\leq
     \text{\advantage{$B$,\users}{lMAC}} 
     +
-    \frac{Q_d}{2^{\text{n}}}
-    +
     \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{N2-switch-3}_{\text{\adversary,\users}} =0]
-    \\& \hspace{0,3cm}+
+    \\& +
     \text{Pr}[\text{N2-switch-3}_{\text{\adversary,\users}} =0]
     -
-    \text{Pr}[\text{lAE-N2}_{\text{\adversary,\users}}^1 =0].
+    \text{Pr}[\text{lAE-N2}_{\text{\adversary,\users}}^1 =0]
+    +
+    \frac{Q_d}{2^{\text{n}}}.
 \end{align*}
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
@@ -1329,61 +1336,64 @@ Now we can rewrite $\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0] 
     \label{fig: adversary c N2}
 \end{figure}
 \noindent
-The runtime of $C$ is that of $A$. For every Oenc query $A$ makes, $C$ makes one Oenc query. We can see that $\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0] = \text{Pr}[\text{lE-IND-\$-CPA}_{\text{$C$,\users}}^0 =0]$ as $C$ perfectly simulates N2-switch-2 when its own $b$ is 0. In addition, $\text{Pr}[\text{N2-switch-3}_{\text{\adversary,\users}} =0] = \text{Pr}[\text{lE-IND-\$-CPA}_{\text{$C$,\users}}^1 =0]$ as $C$ perfectly simulates N2-switch-3 when its own $b$ is 1. This gives us:
+The runtime of $C$ is that of $A$. For every Oenc query $A$ makes, $C$ makes one Oenc query. We can see that $\text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0] = \text{Pr}[\text{lE-IND-\$-CPA}_{\text{$C$,\users}}^0 =0]$ as $C$ perfectly simulates N2-switch-2 when its own $b$ is 0. When its own $b$ is 1, $C$ perfectly simulates N2-switch-3 giving $\text{Pr}[\text{N2-switch-3}_{\text{\adversary,\users}} =0] = \text{Pr}[\text{lE-IND-\$-CPA}_{\text{$C$,\users}}^1 =0]$. This leads to:
 \begin{align*}
     \text{\advantage{$A$,\users}{lAE}}
     &\leq
     \text{\advantage{$B$,\users}{lMAC}} 
     +
-    \frac{Q_d}{2^{\text{n}}}
-    +
     \text{Pr}[\text{N2-switch-2}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{N2-switch-3}_{\text{\adversary,\users}} =0]
-    \\& \hspace{0,3cm}+
+    \\& +
     \text{Pr}[\text{N2-switch-3}_{\text{\adversary,\users}} =0]
     -
-    \text{Pr}[\text{lAE-N2}_{\text{\adversary,\users}}^1 =0].
+    \text{Pr}[\text{lAE-N2}_{\text{\adversary,\users}}^1 =0]
+    +
+    \frac{Q_d}{2^{\text{n}}}.
     \\& \leq
     \text{\advantage{$B$,\users}{lMAC}} 
-    +
-    \frac{Q_d}{2^{\text{n}}}
     +
     \text{Pr}[\text{lE-IND-\$-CPA}_{\text{$C$,\users}}^0 =0]
     -
     \text{Pr}[\text{lE-IND-\$-CPA}_{\text{$C$,\users}}^1 =0]
-    \\& \hspace{0,3cm}+
+    \\& +
     \text{Pr}[\text{N2-switch-3}_{\text{\adversary,\users}} =0]
     -
-    \text{Pr}[\text{lAE-N2}_{\text{\adversary,\users}}^1 =0].
+    \text{Pr}[\text{lAE-N2}_{\text{\adversary,\users}}^1 =0]
+    +
+    \frac{Q_d}{2^{\text{n}}}.
     \\& \leq
     \text{\advantage{$B$,\users}{lMAC}} 
     +
-    \frac{Q_d}{2^{\text{n}}}
-    +
     \text{\advantage{$C$,\users}{lE}}
-    \\& \hspace{0,3cm}+
+    \\& +
     \text{Pr}[\text{N2-switch-3}_{\text{\adversary,\users}} =0]
     -
-    \text{Pr}[\text{lAE-N2}_{\text{\adversary,\users}}^1 =0].
+    \text{Pr}[\text{lAE-N2}_{\text{\adversary,\users}}^1 =0]
+    +
+    \frac{Q_d}{2^{\text{n}}}.
 \end{align*}
 Lastly, $\text{Pr}[\text{N2-switch-3}_{\text{\adversary,\users}} =0]$ and $\text{Pr}[\text{lAE-N2}_{\text{\adversary,\users}}^1 =0]$ are equivalent by definition, giving the result:
 \begin{align*}
     \text{\advantage{$A$,\users}{lAE}}
     &\leq
     \text{\advantage{$B$,\users}{lMAC}} 
-    + \frac{Q_d}{2^{\text{n}}} +
-    \text{\advantage{$C$,\users}{lE}}.
+    +
+    \text{\advantage{$C$,\users}{lE}}
+    +
+    \frac{Q_d}{2^{\text{n}}}.
 \end{align*}
 \end{proof}
 
 \section{N3}
-First, we define our theorem:
+First, we repeat theorem 1 with N3 filled in:
 \begin{theorem}
 Let lAE be constructed from lMAC and lE as described in Figure \ref{fig: N3 calls}. Let ciphertext space \ciphertextspace{} from the lE be a subset of message space \messagespace{} from the lMAC and let lMAC and lE have a shared lock space. Then, for any number of users \users{} and any lAE adversary \adversary{} that poses at most $Q_e$ many Oenc queries, and at most $Q_d$ many Odec queries, there exist a lMAC adversary $B$ and a lE adversary $C$ such that:
+\textnormal{
 \begin{align*}
-    \text{\advantage{$A$,\users}{lAE}} \leq \text{\advantage{$B$,\users}{lMAC}} + \frac{Q_d}{2^{\textnormal{n}}} + \text{\advantage{$C$,\users}{lE}},
-\end{align*}
+    \text{\advantage{$A$,\users}{lAE}} \leq \text{\advantage{$B$,\users}{lMAC}} + \text{\advantage{$C$,\users}{lE}} + \frac{Q_d}{2^{\text{n}}},
+\end{align*}}
 where \textnormal{n} is the output length of the lMAC in bits. The running time of $B$ is at most that of A plus the time required to run $Q_e$ many \textnormal{E.enc} encapsulations and $Q_d$ many \textnormal{E.dec} decapsulations. The running time of $C$ is at most that of \adversary. Additionally, $B$ makes at most $Q_e$ many Omac queries and at most $Q_d$ many Ovrf queries and $C$ makes at most $Q_e$ many Oenc queries.
 \end{theorem}
 \noindent
@@ -1444,7 +1454,7 @@ Next we define game N3-switch-1 in Figure \ref{fig: N3-switch-1 game}. The only 
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} N3-switch-1$_{\adversary,\users}$ }]{
         L \result \emptyset\\
-        tag \sample \mathit{Func}(\keyspace_{mac}\times \lockspace \times \messagespace)\\
+        tag \sample \mathit{Func}(\keyspace_{mac}\times \lockspace \times \messagespace,\tagspace)\\
         \pcfor \user \in [1..N]:\\
         \t \keyinstance_\user \sample \keyspace\\
         \t C_\user \result \invalid\\
@@ -1487,7 +1497,7 @@ Using this game, we expand the probability:
     \text{Pr}[\text{lAE-N3}_{\text{\adversary,\users}}^0 =0]
     -
     \text{Pr}[\text{N3-switch-1}_{\text{\adversary,\users}} =0]
-    \\& \hspace{0,3cm}  + \text{Pr}[\text{N3-switch-1}_{\text{\adversary,\users}} =0]
+    \\&   + \text{Pr}[\text{N3-switch-1}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{lAE-N3}_{\text{\adversary,\users}}^1 =0].
 \end{align*}
@@ -1535,14 +1545,14 @@ The runtime of $B$ is that of $A$. For every Oenc query \adversary{} makes, $B$ 
     \text{Pr}[\text{lAE-N3}_{\text{\adversary,\users}}^0 =0]
     -
     \text{Pr}[\text{N3-switch-1}_{\text{\adversary,\users}} =0]
-    \\& \hspace{0,3cm} + \text{Pr}[\text{N3-switch-1}_{\text{\adversary,\users}} =0]
+    \\&  + \text{Pr}[\text{N3-switch-1}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{lAE-N3}_{\text{\adversary,\users}}^1 =0]
     \\& =
     \text{Pr}[\text{lMAC-PRF}_{\text{$B$,\users}}^0 =0]
     -
     \text{Pr}[\text{lMAC-PRF}_{\text{$B$,\users}}^1 =0]
-    \\& \hspace{0,3cm} + \text{Pr}[\text{N3-switch-1}_{\text{\adversary,\users}} =0]
+    \\&  + \text{Pr}[\text{N3-switch-1}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{lAE-N3}_{\text{\adversary,\users}}^1 =0]
     \\& = \text{\advantage{$B$,\users}{lMAC}}
@@ -1559,7 +1569,7 @@ To expand our advantage again, we define game N3-switch-2 in Figure \ref{fig: N3
     \text{Pr}[\text{N3-switch-1}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{N3-switch-2}_{\text{\adversary,\users}} =0]
-    \\& \hspace{0,3cm}+
+    \\& +
     \text{Pr}[\text{N3-switch-2}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{lAE-N3}_{\text{\adversary,\users}}^1 =0].
@@ -1568,7 +1578,7 @@ To expand our advantage again, we define game N3-switch-2 in Figure \ref{fig: N3
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} N3-switch-2$_{\adversary,\users}$ }]{
         L \result \emptyset\\
-        tag \sample \mathit{Func}(\keyspace_{mac}\times \lockspace \times \messagespace)\\
+        tag \sample \mathit{Func}(\keyspace_{mac}\times \lockspace \times \messagespace,\tagspace)\\
         \pcfor \user \in [1..N]:\\
         \t \keyinstance_\user \sample \keyspace\\
         \t C_\user \result \invalid\\
@@ -1609,35 +1619,35 @@ As N3-switch-1 and N3-switch-2 are so called identical-until-$bad$ \cite{EC:BelR
 \begin{align*}
     \text{Pr}[\text{N3-switch-1}_{\text{\adversary,\users}} =0]-\text{Pr}[\text{N3-switch-2}_{\text{\adversary,\users}} =0] \leq \text{Pr}[bad=\codetrue].
 \end{align*}
-As $bad$ is set to \codetrue{} if, and only if, \taginstance=\taginstance', we can state $\text{Pr}[bad=\codetrue] = \text{Pr}[\taginstance=\taginstance']$. 
+As $bad$ is set to \codetrue{} if, and only if, \taginstance=\taginstance$'$, we can state $\text{Pr}[bad=\codetrue] = \text{Pr}[\taginstance=\taginstance']$. 
 
-The adversary needs to provide a ciphertext \ciphertextinstance{}' that leads to a message \messageinstance{} that is used as input to the $tag$ function and a tag \taginstance. The provided ciphertext may not be the result of the encryption query corresponding to the provided user, which also ensures the message-tag pair derived from this ciphertext cannot be the message-tag pair which is encrypted for the provided user. Because the function $tag$ is uniformly random and the output need to match with the newly obtained message-tag pair, the probability that \taginstance{} and \taginstance' are equal is $\frac{1}{2^{\text{n}}}$ with every fresh Odec query. Combined with at most $Q_d$ Odec queries we get $\text{Pr}[\taginstance=\taginstance'] = \text{Pr}[bad=\codetrue] \leq \frac{Q_d}{2^{\text{n}}}$ and thus, we can fill in $\text{Pr}[\text{N3-switch-1}_{\text{\adversary,\users}} =0]-\text{Pr}[\text{N3-switch-2}_{\text{\adversary,\users}} =0] \leq \text{Pr}[bad=\codetrue] \leq \frac{Q_d}{2^{\text{n}}}$ to obtain:
+The adversary needs to provide a ciphertext \ciphertextinstance$'$ that leads to a message \messageinstance{} that is used as input to the $tag$ function and a tag \taginstance. The provided ciphertext may not be the result of the encryption query corresponding to the provided user, which also ensures the message-tag pair derived from this ciphertext cannot be the message-tag pair which is encrypted for the provided user. Because the function $tag$ is uniformly random and the output need to match with the newly obtained message-tag pair, the probability that \taginstance{} and \taginstance$'$ are equal is $\frac{1}{2^{\text{n}}}$ with every fresh Odec query. Combined with at most $Q_d$ Odec queries we get $\text{Pr}[\taginstance=\taginstance'] = \text{Pr}[bad=\codetrue] \leq \frac{Q_d}{2^{\text{n}}}$ and thus, we can fill in $\text{Pr}[\text{N3-switch-1}_{\text{\adversary,\users}} =0]-\text{Pr}[\text{N3-switch-2}_{\text{\adversary,\users}} =0] \leq \text{Pr}[bad=\codetrue] \leq \frac{Q_d}{2^{\text{n}}}$ to obtain:
 \begin{align*}
     \text{\advantage{$A$,\users}{lAE}}
     &\leq
     \text{\advantage{$B$,\users}{lMAC}} 
     +
-    \frac{Q_d}{2^{\text{n}}}
-    +
     \text{Pr}[\text{N3-switch-2}_{\text{\adversary,\users}} =0]
     -
-    \text{Pr}[\text{lAE-N3}_{\text{\adversary,\users}}^1 =0].
+    \text{Pr}[\text{lAE-N3}_{\text{\adversary,\users}}^1 =0]
+    +
+    \frac{Q_d}{2^{\text{n}}}.
 \end{align*}
-We define game N3-switch-3 in Figure \ref{fig: N3-switch-3 game} to expand our advantage one last time. Switch game 3 is equivalent to switch game 2 but always returns lazily sampled random bits when the outcome of E.enc is valid. It might seem like there is a difference as t can no longer become \invalid. This is not the case as, due to the chosen input spaces of tag, tag can never return \invalid when the input to E.enc is valid. In other words, tag can only return \invalid{} when \ciphertextinstance' is already \invalid, and thus tag returning \invalid{} will never influence \ciphertextinstance on line 13. We also simplify Odec as we no longer need the event $bad$. We use this game to expand our advantage to:
+We define game N3-switch-3 in Figure \ref{fig: N3-switch-3 game} to expand our advantage one last time. Switch game 3 is equivalent to switch game 2 but always returns lazily sampled random bits when the outcome of E.enc is valid. It might seem like there is a difference as \taginstance can no longer become \invalid. This is not the case as, due to the chosen input spaces of tag, tag can never return \invalid when the input to E.enc is valid. In other words, tag can only return \invalid{} when \ciphertextinstance$'$ is already \invalid, and thus tag returning \invalid{} will never influence \ciphertextinstance on line 13. We also simplify Odec as we no longer need the event $bad$. We use this game to expand our advantage to:
 \begin{align*}
     \text{\advantage{$A$,\users}{lAE}}
     &\leq
     \text{\advantage{$B$,\users}{lMAC}} 
     +
-    \frac{Q_d}{2^{\text{n}}}
-    +
     \text{Pr}[\text{N3-switch-2}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{N3-switch-3}_{\text{\adversary,\users}} =0]
-    \\& \hspace{0,3cm}+
+    \\& +
     \text{Pr}[\text{N3-switch-3}_{\text{\adversary,\users}} =0]
     -
-    \text{Pr}[\text{lAE-N3}_{\text{\adversary,\users}}^1 =0].
+    \text{Pr}[\text{lAE-N3}_{\text{\adversary,\users}}^1 =0]
+    +
+    \frac{Q_d}{2^{\text{n}}}.
 \end{align*}
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
@@ -1699,51 +1709,53 @@ Now we can rewrite $\text{Pr}[\text{N3-switch-2}_{\text{\adversary,\users}} =0] 
     \label{fig: adversary c N3}
 \end{figure}
 \noindent
-The runtime of $C$ is that of $A$. For every Oenc query $A$ makes, $C$ makes one Oenc query. We can see that $\text{Pr}[\text{N3-switch-2}_{\text{\adversary,\users}} =0] = \text{Pr}[\text{lE-IND-\$-CPA}_{\text{$C$,\users}}^0 =0]$ as $C$ perfectly simulates N3-switch-2 when its own $b$ is 0. In addition, $\text{Pr}[\text{N3-switch-3}_{\text{\adversary,\users}} =0] = \text{Pr}[\text{lE-IND-\$-CPA}_{\text{$C$,\users}}^1 =0]$ as $C$ perfectly simulates N3-switch-3 when its own $b$ is 1. This gives us:
+The runtime of $C$ is that of $A$. For every Oenc query $A$ makes, $C$ makes one Oenc query. We can see that $\text{Pr}[\text{N3-switch-2}_{\text{\adversary,\users}} =0] = \text{Pr}[\text{lE-IND-\$-CPA}_{\text{$C$,\users}}^0 =0]$ as $C$ perfectly simulates N3-switch-2 when its own $b$ is 0. When its own $b$ is 1, $C$ perfectly simulates N3-switch-3 giving  $\text{Pr}[\text{N3-switch-3}_{\text{\adversary,\users}} =0] = \text{Pr}[\text{lE-IND-\$-CPA}_{\text{$C$,\users}}^1 =0]$. This leads to:
 \begin{align*}
     \text{\advantage{$A$,\users}{lAE}}
     &\leq
     \text{\advantage{$B$,\users}{lMAC}} 
     +
-    \frac{Q_d}{2^{\text{n}}}
-    +
     \text{Pr}[\text{N3-switch-2}_{\text{\adversary,\users}} =0]
     -
     \text{Pr}[\text{N3-switch-3}_{\text{\adversary,\users}} =0]
-    \\& \hspace{0,3cm}+
+    \\& +
     \text{Pr}[\text{N3-switch-3}_{\text{\adversary,\users}} =0]
     -
-    \text{Pr}[\text{lAE-N3}_{\text{\adversary,\users}}^1 =0].
+    \text{Pr}[\text{lAE-N3}_{\text{\adversary,\users}}^1 =0]
+    +
+    \frac{Q_d}{2^{\text{n}}}.
     \\& \leq
     \text{\advantage{$B$,\users}{lMAC}} 
-    +
-    \frac{Q_d}{2^{\text{n}}}
     +
     \text{Pr}[\text{lE-IND-\$-CPA}_{\text{$C$,\users}}^0 =0]
     -
     \text{Pr}[\text{lE-IND-\$-CPA}_{\text{$C$,\users}}^1 =0]
-    \\& \hspace{0,3cm}+
+    \\& +
     \text{Pr}[\text{N3-switch-3}_{\text{\adversary,\users}} =0]
     -
-    \text{Pr}[\text{lAE-N3}_{\text{\adversary,\users}}^1 =0].
+    \text{Pr}[\text{lAE-N3}_{\text{\adversary,\users}}^1 =0]
+    +
+    \frac{Q_d}{2^{\text{n}}}.
     \\& \leq
     \text{\advantage{$B$,\users}{lMAC}} 
     +
-    \frac{Q_d}{2^{\text{n}}}
-    +
     \text{\advantage{$C$,\users}{lE}}
-    \\& \hspace{0,3cm}+
+    \\& +
     \text{Pr}[\text{N3-switch-3}_{\text{\adversary,\users}} =0]
     -
-    \text{Pr}[\text{lAE-N3}_{\text{\adversary,\users}}^1 =0].
+    \text{Pr}[\text{lAE-N3}_{\text{\adversary,\users}}^1 =0]
+    +
+    \frac{Q_d}{2^{\text{n}}}.
 \end{align*}
 Lastly, $\text{Pr}[\text{N3-switch-3}_{\text{\adversary,\users}} =0]$ and $\text{Pr}[\text{lAE-N3}_{\text{\adversary,\users}}^1 =0]$ are equivalent by definition, giving the result:
 \begin{align*}
     \text{\advantage{$A$,\users}{lAE}}
     &\leq
-    \text{\advantage{$B$,\users}{lMAC}} 
-    + \frac{Q_d}{2^{\text{n}}} +
-    \text{\advantage{$C$,\users}{lE}}.
+    \text{\advantage{$B$,\users}{lMAC}}
+    +
+    \text{\advantage{$C$,\users}{lE}}
+    +
+    \frac{Q_d}{2^{\text{n}}}.
 \end{align*}
 \end{proof}
 
