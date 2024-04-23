@@ -1,7 +1,6 @@
 Feedback meeting:
 
 current todo's:
-proofs geen sections meer
 
 lowprio todo:
 - to-scan scannen
@@ -16,8 +15,6 @@ lowprio todo:
 
 (\textbf{Question: })
 vragen martijn:
-raar ding met citation
-nieuwe meetings
 
 toread martijn:
 section 1
@@ -26,7 +23,9 @@ section 2
 vragen bart:
 
 toread bart:
-
+1
+8
+9
 
 (\textbf{todo: })
 \paragraph{title}
@@ -57,3 +56,42 @@ schrijven progress:
 7: niets, niet sure of ik deze uberhaud wil houden
 8: niets, kan crude versie maken
 appendix A: crude, kan afmaken
+
+
+
+
+
+
+
+
+
+
+
+
+\newpage\noindent
+\section*{Appendix B}
+\addcontentsline{toc}{section}{\protect\numberline{}\hspace{-0,527 cm}Appendix B}
+Below is a short version of the story I wanna tell in this thesis, and some todos. These may both be ignored for now as they will be removed later on anyway.
+
+\paragraph{Story}
+The story I would like to tell starts with locks as a augmentation in a multi-user setting. GKP introduces locks as a augmentation to a AE scheme in a hybrid encryption context as an alternative to longer keys. Locks might be prefered in due to tecnical contraints (lack in computing power or fixed key size), longer keys are not feasable. The AE composition that is considered in GKP follows the generic Encrypt-then-MAC composition that originated in a symmetric crypto setting. This generic Encrypt-then-MAC composition has been reconsidered in a symmetric crypto setting by NRS. In my thesis, I reconsider the lock-based AE in a symmetric crypto setting using the knowledge from NRS. NRS gives me a good example of how a generic AE composition should be considered in a symmetric setting. The result will be lock-based, one time use AE primitive, considered in a symmetric setting. This primitive will be useful for hybrid encryption, possibly it has some more use cases.
+
+\paragraph{Todo}
+I put the todos in a list and explain them shortly when needed
+\begin{itemize}
+    \item security proofs of N1 and N3 (only after N2 is done)
+    \item learning more about hybrid encryption
+    \item looking for possible other use cases
+    \item compare the lAE with existing alternatives
+    \item look one time pad + information theoretical mac component (I think you made a note about this a few meetings back)
+\end{itemize}
+
+\paragraph{papers}
+I put the potential papers in a list and explain them shortly when needed. I am not sure which of these I need or which actually exist, it is just a list I wrote down as a starting point.
+\begin{itemize}
+    \item paper on why ind\$ implies ind lor
+    \item paper with other lock implementations (will prob cite gkp)
+    \item papers for other use cases (if I want to include that)
+    \item papers for other alternatives (if I want to include that)
+    \item paper on the information theoretical mac component (if I want to include that)
+\end{itemize}
