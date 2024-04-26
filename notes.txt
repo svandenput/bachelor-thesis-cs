@@ -19,11 +19,13 @@ vragen martijn:
 toread martijn:
 section 1
 section 2
+section 7
 
 vragen bart:
 
 toread bart:
 1
+7
 8
 9
 
