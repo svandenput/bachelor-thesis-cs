@@ -1,4 +1,5 @@
 Feedback meeting:
+8 laatste paragraaf, multi-sec aspect toevoegen (binden)
 
 current todo's:
 
@@ -19,7 +20,9 @@ vragen martijn:
 toread martijn:
 section 1
 section 2
-section 7
+7
+8
+9
 
 vragen bart:
 
