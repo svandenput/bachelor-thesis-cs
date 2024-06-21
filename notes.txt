@@ -1,28 +1,31 @@
-Feedback meeting:
-
-current todo's:
-
-lowprio todo:
-- 8 laatste paragraaf, multi-sec aspect toevoegen (binden)
-- 8 sponges toevoegen
-- to-scan scannen
-- N1 en N2 switch 2 uitwerken
-- ideal vs attainable uitwerken 4.3
-
-(\textbf{Question: })
-vragen martijn:
-
-toread martijn:
-abstract, 9
-
-vragen bart:
-
-toread bart:
-abstract, 9
+spelcheck:
 
 
-(\textbf{todo: })
-\paragraph{title}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
