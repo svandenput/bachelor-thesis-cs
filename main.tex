@@ -36,7 +36,7 @@
     \textit{internal supervisor:}\\
     Bart Mennink\\\vspace*{0,3cm}
     \textit{second reader:}\\
-    Joan Deamen},
+    Joan Daemen},
     course={Bachelor Thesis},
     title={Lock-based Authenticated Encryption in a Multi-user Setting}]
 
@@ -51,19 +51,19 @@
 \pagenumbering{arabic}
 
 \section{Introduction}
-To be able to safely send a message between two parties, this message needs to be encrypted. For this encryption, a secret shared key is needed. Whenever multiple messages are sent, a new key should be used for every message to ensure forward secrecy of messages. As establishing a new key can be expensive, public-key encryption uses a long-term key that is established only once. From this long-term key, a short-term key, also called an ephemeral key, is drawn for every separate message that is sent. Public-key encryption is typically implemented using a hybrid paradigm: To encrypt a message, an ephemeral key is generated from the long-term key using a randomized key encapsulation mechanism (KEM). This key is then used to encrypt the message using a deterministic data encapsulation mechanism (DEM). Both the KEM and DEM output their respective ciphertexts, which are then concatenated to form the public-key encryption ciphertext.
+To be able to safely send a message between two parties, this message needs to be encrypted. For this encryption, a secret shared key is needed. Whenever multiple messages are sent, a new key should be used for every message to ensure forward secrecy of messages. As establishing a new key can be expensive, public-key encryption uses a long-term key to generate ephemeral keys. Public-key encryption is typically implemented using a hybrid paradigm: To encrypt a message, an ephemeral key is generated from the long-term key using a randomized key encapsulation mechanism (KEM). This key is then used to encrypt the message using a deterministic data encapsulation mechanism (DEM). Both the KEM and DEM output their respective ciphertexts, which are then concatenated to form the public-key encryption ciphertext.
 \\\\
-Classical analysis of DEMs considers a single user. Because of this, the security bounds of these analyses do not always transfer to the real world where one can have millions of users. To make sure the security bounds are also good when there are many users, one can use larger ephemeral keys. Although using these larger keys for DEMs is generally safer, expanding the size of the key might not always be a viable option. This can be due to limitations in computing power or memory, as well as security primitives having fixed key sizes. As an alternative solution to key expansion in a multi-user setting, Giacon, Kiltz and Poettering, henceforth \gkp{}, propose augmentation using locks \cite{PKC:GiaKilPoe18} (originally called tags, but renamed to locks here to avoid overloaded terms). This augmentation gives the security primitive a lock as an additional input field to distinguish multiple users using the same key. The augmentation can improve security in a multi-user setting, without the need to expand the key. After defining this augmentation, GKP apply the augmentation to a DEM and a MAC function, to create an augmented DEM (ADEM) and an augmented MAC (AMAC). These two primitives are combined afterwards to construct an authenticated encryption primitive which is proven secure whenever the ADEM and AMAC are secure. When constructing this authenticated encryption primitive, the generic encrypt-then-MAC composition from Bellare and Namprempre \cite{AC:BelNam00} is used.
+Classical analysis of DEMs considers a single user. Therefore, the security bounds of these analyses do not always transfer to the real world where one can have millions of users. To make sure the security bounds are also good when there are many users, one can use larger ephemeral keys. Although using these larger keys for DEMs is generally safer, expanding the size of the key might not always be a viable option. This can be due to limitations in computing power or memory, as well as security primitives having fixed key sizes. As an alternative solution to key expansion in a multi-user setting, Giacon, Kiltz and Poettering, henceforth \gkp{}, propose augmentation using locks \cite{PKC:GiaKilPoe18} (originally called tags, but renamed to locks here to avoid overloaded terms). This augmentation gives the security primitive a lock as an additional input field to distinguish multiple users using the same key. The augmentation can improve security in a multi-user setting, without the need to expand the key. After defining this augmentation, GKP apply the augmentation to a DEM and a MAC function, to create an augmented DEM (ADEM) and an augmented MAC (AMAC). These two primitives are combined afterwards to construct an authenticated encryption primitive which is proven secure whenever the ADEM and AMAC are secure. When constructing this authenticated encryption primitive, the generic encrypt-then-MAC composition from Bellare and Namprempre \cite{AC:BelNam00} is used.
 \\\\
-Although the ADEM+AMAC composition given by GKP is secure, it is not clearly defined as an authenticated encryption primitive. As a result, its security is evaluated as a DEM, instead of as an authenticated encryption primitive. Additionally, we should note that the generic composition of authenticated encryption has, since the original study of Bellare and Namprempre, been revised by Namprempre, Rogaway and Shrimpton \cite{EC:NamRogShr14}, which we henceforth call \nrs{}. In this revision, the generic composition using a MAC function and a deterministic encryption primitive is more thoroughly investigated. The original study found only the encrypt-then-MAC composition to be secure. NRS shine light on the fact the security of the generic compositions depends on the kind of encryption primitives used, as well as the desired end result. because of this, the composition should be re-evaluated if the context changes. To continue, they evaluate all possible generic compositions using a nonce-based encryption primitive and a MAC function. When using these to construct nonce-based authentication, three composition methods called encrypt-and-MAC, encrypt-then-MAC and MAC-then-encrypt are proven to be secure whenever the underlying primitives are secure.
+Although the ADEM+AMAC composition given by GKP is secure, it is not clearly defined as an authenticated encryption primitive. As a result, its security is evaluated as a DEM, instead of as an authenticated encryption primitive. Additionally, we should note that the generic composition of authenticated encryption has, since the original study of Bellare and Namprempre, been revised by Namprempre, Rogaway and Shrimpton \cite{EC:NamRogShr14}, which we henceforth call \nrs{}. In this revision, the generic composition using a MAC function and a deterministic encryption primitive is more thoroughly investigated. The original study found only the encrypt-then-MAC composition to be secure. NRS shine light on the fact that the security of the generic compositions depends on the kind of encryption primitives used, as well as the desired end result. Hence, the composition should be re-evaluated if the context changes. To continue, they evaluate all possible generic compositions using a nonce-based encryption primitive and a MAC function. When using these to construct nonce-based authentication, three composition methods called encrypt-and-MAC, encrypt-then-MAC and MAC-then-encrypt are proven to be secure whenever the underlying primitives are secure.
 \\\\
-In this thesis, the generic composition of authenticated encryption using locks is more thoroughly investigated. This investigation will lead to a better understanding of the security of locks, and in which context it is a viable solution to security degradation in a multi-user setting. Additionally, we will define a more precise specification of the used lock-based primitives. This specification, combined with three different generic compositions that we prove secure, will be a first step towards using the locks outside the context of hybrid encryption. We formally compare the constructions and the notation from NRS and GKP (Chapter 3). To evaluate generic composition using locks, we define a new cryptographic primitive which we analyze in a multi-user setting (Chapter 4). Using the knowledge from NRS, three generic compositions (encrypt-and-MAC, encrypt-then-MAC and MAC-then-encrypt) of this primitive are considered, all using a lock-based encryption primitive and a lock-based MAC function (Chapter 5). We prove these three compositions to be secure, whenever the underlying primitives are secure (Chapter 6). Afterwards, some use cases of the new primitive are discussed (Chapter 7). 
+In this thesis, the generic composition of authenticated encryption using locks is more thoroughly investigated. This investigation will lead to a better understanding of the security of locks, and in which context it is a viable solution to security degradation in a multi-user setting. Additionally, we will define a specification of the lock-based authenticated encryption primitives, which. This specification, combined with three different generic compositions that we prove secure, will be a first step towards using the locks outside the context of hybrid encryption. We formally compare the constructions and the notation from NRS and GKP (Section 3). To evaluate generic composition using locks, we define a new cryptographic primitive which we analyze in a multi-user setting (Section 4). Using the knowledge from NRS, three generic compositions (encrypt-and-MAC, encrypt-then-MAC and MAC-then-encrypt) of this primitive are considered, all using a lock-based encryption primitive and a lock-based MAC function (Section 5). We prove these three compositions to be secure, whenever the underlying primitives are secure (Section 6). Afterwards, some use cases of the new primitive are discussed (Section 7). 
 
 \section{Preliminaries}
 In this section, we will explain several concepts important to the rest of our work, as well as some general notation.
 
 \subsection{General Notation}
-Strings are binary and bit-wise, the set of all strings is $\{0,1\}^\ast$. The length of $x$ is written as $\abs{x}$, the concatenation of $x$ and $y$ as $x$ \concatinate{} $y$, $a$ being the result of $b$ as $a$ \result{} $b$, and taking a uniform random sampling from set $z$ and assigning it to $x$ as $x$ \sample{} $z$. We write \users{} for the number of users and allow a single type of error message written as \invalid. Any tuple containing \invalid{} will be \invalid{} as well. We define the following spaces, all of them being subsets of the set of all strings: nonempty key space \keyspace{}, lock space \lockspace{}, nonce space \noncespace{}, message space \messagespace{}, ciphertext space \ciphertextspace, tag space \tagspace{}, and associated data space \associateddataspace{}. Unless stated otherwise, \messagespace{} contains at least two strings, and if \messagespace{} or \associateddataspace{} contains a string of length $x$, it must contain all strings of length $x$. There are no further constraints on these spaces.
+Unless otherwise stated, strings are assumed to be binary and the set of all strings is $\{0,1\}^\ast$. The length of $x$ is written as $\abs{x}$, the concatenation of $x$ and $y$ as $x$ \concatinate{} $y$, $a$ being the result of $b$ as $a$ \result{} $b$, and taking a uniform random sampling from set $z$ and assigning it to $x$ as $x$ \sample{} $z$. We write \users{} for the number of users and allow a single type of error message written as \invalid. Any tuple containing \invalid{} will be \invalid{} as well. We define the following spaces, all of them being subsets of the set of all strings: nonempty key space \keyspace{}, lock space \lockspace{}, nonce space \noncespace{}, message space \messagespace{}, ciphertext space \ciphertextspace, tag space \tagspace{}, and associated data space \associateddataspace{}. Unless stated otherwise, \messagespace{} contains at least two strings, and if \messagespace{} or \associateddataspace{} contains a string of length $x$, it must contain all strings of length $x$. There are no further constraints on these spaces.
 
 \subsection{Authenticated Encryption}
 Two different security requirements are data privacy, the insurance that data cannot be viewed by an unauthorized party, and data integrity, the insurance that data has not been modified by an unauthorized party. Authenticated encryption combines both of these security requirements into one and ensures both data privacy and integrity. A basic authenticated encryption scheme consists of an encryption call and a decryption call. The encryption call takes a message and a key to a self-authenticating ciphertext while the decryption call takes a self-authenticating ciphertext and a key to a message. Some authenticated encryption schemes allow an additional input AD, short for associated data. The associated data is specifically required to not have data privacy but does require data integrity. When an authenticated encryption scheme supports AD, it is called an AEAD scheme.
@@ -72,7 +72,7 @@ Two different security requirements are data privacy, the insurance that data ca
 Message authentication can be done using a message authentication code, MAC for short. A basic MAC function takes a message and key and outputs a tag that authenticates the message. Some MAC functions also have a verification call that takes in a message, key and tag and outputs either \codetrue{} or \codefalse. A MAC function can have different security requirements. It is said to be PRF secure when it is infeasible to distinguish the output tag from the result of a pseudo-random function that takes all possible message-key pairs to the tag space. A MAC is said to be unforgeable when it is infeasible to create a valid message-tag pair without knowledge of the secret key. A PRF secure MAC is also unforgeable, given the tag space is big enough, while an unforgeable MAC is not necessarily PRF secure.
 
 \subsection{Nonces and Locks}
-A basic deterministic encryption scheme takes a message and key as input and outputs a ciphertext. Using this encryption scheme, a message encrypted under the same key leads to the same ciphertext. Both GPK (Giacon, Kiltz and Poettering) and NRS (Namprempre, Rogaway and Shrimpton) resolve this by giving the encryption scheme an additional argument. GKP uses locks while NRS uses nonces. Although nonces and locks look similar, their purpose and exact working differ leading to different use cases. Most notably, nonces are only useful when one user is allowed to encrypt multiple messages while locks are only useful when there are multiple users.
+A basic deterministic encryption scheme takes a message and key as input and outputs a ciphertext. Using this encryption scheme, a message encrypted under the same key leads to the same ciphertext. Both GKP (Giacon, Kiltz and Poettering) and NRS (Namprempre, Rogaway and Shrimpton) resolve this by giving the encryption scheme an additional argument. GKP use locks while NRS use nonces. Although nonces and locks look similar, their purpose and exact working differ leading to different use cases. Most notably, nonces are only useful when one user is allowed to encrypt multiple messages while locks are only useful when there are multiple users.
 
 \paragraph{Nonces}
 Using a basic deterministic encryption scheme, a message encrypted twice by the same user using the same key results in the same ciphertext. This can leak information about the message, which can be prevented by using a nonce. A nonce is a number that is assumed to only be used once per user to encrypt a message. Whenever a message is encrypted twice with the same key, but with two different nonces, the resulting ciphertexts should be indistinguishable from two ciphertexts corresponding to two different messages. As a result, it is infeasible for an adversary to guess if a message has been sent multiple times. When evaluating the security, the adversary is usually allowed to let a user decrypt multiple messages with a single nonce. Nonces are only used when a user uses its key multiple times, as otherwise a message will never be encrypted by the same user twice.
@@ -83,29 +83,29 @@ Using a basic deterministic encryption scheme, a message encrypted by two users 
 \subsection{Security Notions}
 The security of a cryptographic construction can be modeled as a distinguishing advantage. When doing this, different security notions are formed based on what one distinguishes on. To understand NRS and GKP as well as how they differ, it is important to understand which security notions they use. All the relevant notions are written below.
 
-\paragraph{Active of Passive}
-Security can be modeled against a passive or an active attacker. A passive attacker can only read the messages while an active attacker can also alter the messages. A passive attacker can be modeled using a chosen plaintext attack, CPA for short. In this model, the adversary can choose the plaintext that is encrypted, but not the ciphertext that is decrypted. An active attacker can be modeled using a chosen ciphertext attack, CCA for short. In this model, the adversary can choose the plaintext that is encrypted, as well as the ciphertext that is decrypted. Shorthand notations for the two are IND-CPA and IND-CCA, respectively. IND-CCA implies IND-CPA, but not the other way around. Both GKP and NRS model the authenticated encryption primitive using IND-CPA and the underlying encryption primitive using IND-CCA.
+\paragraph{Active, Passive or Authenticated Encryption}
+Security can be modeled against a passive or an active attacker. A passive attacker can only read the messages while an active attacker can also alter the messages. A passive attacker can be modeled using a chosen plaintext attack, CPA for short. In this model, the adversary can choose the plaintext that is encrypted, but not the ciphertext that is decrypted. An active attacker can be modeled using a chosen ciphertext attack, CCA for short. In this model, the adversary can choose the plaintext that is encrypted, as well as the ciphertext that is decrypted. A Stricter version of the CCA model is the Authenticated Encryption model, AE for short. This model combines CCA with the requirement that the adversary can not forge a valid ciphertext. Shorthand notations for the three are IND-CPA, IND-CCA, and IND-AE respectively. IND-CCA implies IND-CPA, but not the other way around. Similarly, IND-AE implies IND-CCA, but not the other way around. Both GKP and NRS model the underlying encryption primitive using IND-CPA. They differ in how they model the authenticated encryption primitive, GKP uses IND-CCA for this while NRS uses IND-AE.
 
 \paragraph{\$ or Left-or-right}
-Left-or-right-indistinguishablility refers to a situation where the adversary gives two messages and in return receives a ciphertext. To break the security, the adversary has to guess which of the two messages corresponds to the ciphertext. \$-indistinguishability refers to a situation where the adversary is given access to either the real construction or to a lazily sampled random function \$. This random function returns a random string with the same length as the ciphertext would have. To break the security, the adversary has to guess which of the two it has access to. As long as the length of the ciphertext only depends on the length of the message, not its content, IND-\$ implies IND-LOR, but not the other way around. IND-\$ is used by GPK and IND-LOR is used by NRS.
+Left-or-right-indistinguishablility refers to a situation where the adversary gives two messages and in return receives a ciphertext. To break the security, the adversary has to guess which of the two messages corresponds to the ciphertext. \$-indistinguishability refers to a situation where the adversary is given access to either the real construction or to a lazily sampled random function \$. This random function returns a random string with the same length as the ciphertext would have. To break the security, the adversary has to guess which of the two it has access to. As long as the length of the ciphertext only depends on the length of the message, not its content, IND-\$ implies IND-LOR, but not the other way around. IND-\$ is used by GKP and IND-LOR is used by NRS.
 \\\\
-Both the power of the adversary and the indistinguishability are separate dimensions that can be combined into four different notions. For example, IND-\$-CCA refers to a situation where the adversary has to distinguish between the real construction, or a random function while being able to choose both the plaintext that is encrypted and the ciphertext that is decrypted.
+Both the power of the adversary and the indistinguishability are separate dimensions that can be combined into six different notions. For example, IND-\$-CCA refers to a situation where the adversary has to distinguish between the real construction, or a random function while being able to choose both the plaintext that is encrypted and the ciphertext that is decrypted.
 
 \paragraph{Game Based Security Notions}
 These security notions can be written in a game-based format, using pseudocode instead of text. As an example, the IND-\$-CPA game of a nonce-based encryption scheme can be found in Figure \ref{fig: nE-IND game}. A challenge bit $b$ is given to the game, in this case, $b$ signals whether we are in the real or the ideal world. The adversary guesses this bit and returns $b'$, signaling its guess for $b$. In addition, the adversary can have access to oracles which represent queries to users. In our example, there is only the encryption oracle that takes a nonce and a message. Using game-based notation, one can write out all the limitations clearly. For example, the limitation that nonces cannot be reused is modeled by lines 0, 5 and 6. Lines 8 and 9 model how the random function \$ behaves. Although these limitations could be written out in text-based format as well, writing it out in a game-based format can make the security notion, as well as the security proofs, more comprehensible and precise.
 
 \subsection{Security Proofs of Generic Composition}
-To prove the security of a generic composition we can use a security reduction. To define a reduction we bind the advantage on the generic composition in terms of the advantages on the underlying primitives. This can be done by proving that, if we can break the security of the generic composition, then we can use this to break the security of one of the underlying primitives as well. After proving this, we can conclude that the composition is secure, as long as the underlying primitives are secure. A security reduction is said to be lose when its security depends on the adversary’s attack and tight when it does not. 
+To prove the security of a generic composition we can use a security reduction. To define a reduction we bind the advantage on the generic composition in terms of the advantages on the underlying primitives. This can be done by proving that, if we can break the security of the generic composition, then we can use this to break the security of one of the underlying primitives as well. After proving this, we can conclude that the composition is secure, as long as the underlying primitives are secure. A security reduction is said to be loose when it is linear in the amount of users and tight when it is constant. 
 
 \section{\nrs{} and \gkp{} in Detail}
-In this section, we explain the parts of the papers from \gkp{} and \nrs{} that are important to our work. Afterwards, a comparison is made between the two. Some notations will be different from the original papers for improved consistency. What are called tags by \gkp, we will call locks instead to avoid confusion with the output of MAC functions. Similarly, we call the output of the AMAC the tag, instead of the ciphertext. The security notions from \nrs{} are converted to a game-based format using insights from Cremers et al. \cite{USENIX:CrAlJaZh23} to better match the notation from \gkp{} and be more adaptable to a multi-user setting. These security games are only explained briefly in this section, a more in-depth explanation of the relevant constructions can be found in section \ref{sec: lAE security model}.
+In this section, we explain the parts of the papers from \gkp{} and \nrs{} that are important to our work. Afterwards, a comparison is made between the two. Some notations will be different from the original papers for improved consistency. What are called tags by \gkp, we will call locks instead to avoid confusion with the output of MAC functions. Similarly, we call the output of the AMAC the tag, instead of the ciphertext. The security notions from \nrs{} are converted to a game-based format using insights from Cremers et al. \cite{USENIX:CrAlJaZh23} to better match the notation from \gkp{} and be more adaptable to a multi-user setting. These security games are only explained briefly in this section, a more in-depth explanation of the relevant constructions can be found in Section \ref{sec: lAE security model}.
 
 \subsection{\nrs}
-Three generic ways to compose an authenticated encryption scheme are discussed in a paper written by Bellare and Namprempre \cite{AC:BelNam00}: encrypt-then-MAC, encrypt-and-MAC and MAC-then-encrypt. In that paper, encrypt-then-MAC is considered the only secure composition when using probabilistic encryption as a building block. \nrs{} note that the type of encryption scheme used, as well as the desired end result influences which compositions are secure. Consequently, the result from Bellare en Namprempre is only applicable when using probabilistic encryption. Afterward, all generic compositions are defined using a nonce-based encryption scheme, nA for short, and a PRF secure MAC function to create a nonce-based authenticated encryption scheme, nAE for short. With these primitives, they find all three earlier named compositions to be secure. Note that NRS includes Associated Data (AD) in the authenticated encryption primitive. Below we describe the primitives, their security, and the compositions more in depth.
+Three generic ways to compose an authenticated encryption scheme are discussed in a paper written by Bellare and Namprempre \cite{AC:BelNam00}: encrypt-then-MAC, encrypt-and-MAC and MAC-then-encrypt. In that paper, encrypt-then-MAC is considered the only secure composition when using probabilistic encryption as a building block. \nrs{} note that the type of encryption scheme used, as well as the desired end result influences which compositions are secure. Consequently, the result from Bellare en Namprempre is only applicable when using probabilistic encryption. Afterward, all generic compositions are defined using a nonce-based encryption scheme, nA for short, and a PRF secure MAC function to create a nonce-based authenticated encryption scheme, nAE for short. With these primitives, they find all three earlier named compositions to be secure. Note that NRS include Associated Data (AD) in the authenticated encryption primitive. Below we describe the primitives, their security, and the compositions more in depth.
 
 \subsubsection{Primitives}
 \paragraph{nE}
-A nonce-based encryption scheme is defined by a triple $\mathit{\Pi}$ = $(\keyspace{},\text{E},\text{D})$. Deterministic encryption algorithm E takes three inputs $(\keyinstance,\nonceinstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \nonceinstance{} and \messageinstance. If, and only if, $(\keyinstance,\nonceinstance,\messageinstance)$ is not in $\keyspace \times \noncespace \times \messagespace$, \ciphertextinstance{} will be \invalid. Decryption algorithm D takes three inputs $(\keyinstance,\nonceinstance,\ciphertextinstance)$ and outputs a value \messageinstance. Both E and D are required to satisfy correctness (if E$(\keyinstance,\nonceinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then D$(\keyinstance,\nonceinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if D$(\keyinstance,\nonceinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then E$(\keyinstance,\nonceinstance, \messageinstance)$ = \ciphertextinstance).
+A nonce-based encryption scheme is defined by a triple $\mathit{\Pi}$ = $(\keyspace{},\text{E},\text{D})$. Deterministic encryption algorithm E takes three inputs $(\keyinstance,\nonceinstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the lengths of \keyinstance, \nonceinstance{} and \messageinstance. If, and only if, $(\keyinstance,\nonceinstance,\messageinstance)$ is not in $\keyspace \times \noncespace \times \messagespace$, \ciphertextinstance{} will be \invalid. Decryption algorithm D takes three inputs $(\keyinstance,\nonceinstance,\ciphertextinstance)$ and outputs a value \messageinstance. Both E and D are required to satisfy correctness (if E$(\keyinstance,\nonceinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then D$(\keyinstance,\nonceinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if D$(\keyinstance,\nonceinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then E$(\keyinstance,\nonceinstance, \messageinstance)$ = \ciphertextinstance).
 
 \paragraph{nE security}
 The security of a nE is defined as 
@@ -167,18 +167,18 @@ where MAC-PRF is in Figure \ref{fig: MAC-PRF}. In this game, the set $U$ keeps t
     \end{figure}
 
 \paragraph{nAE}
-A nonce-based authenticated encryption scheme is defined by a triple $\mathit{\Pi}$ = $(\keyspace{},\text{E},\text{D})$. Deterministic encryption algorithm E takes four inputs $(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \nonceinstance, \associateddatainstance{} and \messageinstance. If, and only if, $(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ is not in $\keyspace \times \noncespace \times \associateddataspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Decryption algorithm D takes four inputs $(\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance)$ and outputs a value \messageinstance. both E and D are required to satisfy correctness (if E$(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then D$(\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if D$(\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then E$(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ = \ciphertextinstance).
+A nonce-based authenticated encryption scheme is defined by a triple $\mathit{\Pi}$ = $(\keyspace{},\text{E},\text{D})$. Deterministic encryption algorithm E takes four inputs $(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ and outputs a value \ciphertextinstance, the length of \ciphertextinstance{} only depends on the lengths of \keyinstance, \nonceinstance, \associateddatainstance{} and \messageinstance. If, and only if, $(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ is not in $\keyspace \times \noncespace \times \associateddataspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Decryption algorithm D takes four inputs $(\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance)$ and outputs a value \messageinstance. Both E and D are required to satisfy correctness (if E$(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then D$(\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if D$(\keyinstance,\nonceinstance,\associateddatainstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then E$(\keyinstance,\nonceinstance,\associateddatainstance,\messageinstance)$ = \ciphertextinstance).
 
 \paragraph{nAE security}
 The security of a nAE is defined as 
 \begin{align*} 
- \text{\advantage{$\mathit{\Pi}$,\adversary}{nAE} = \probabilityblock{nAE-IND-\$-CCA}{\adversary}{0}{1}}
+ \text{\advantage{$\mathit{\Pi}$,\adversary}{nAE} = \probabilityblock{nAE-IND-\$-AE}{\adversary}{0}{1}}
 \end{align*}
-where nAE-IND-\$-CCA is in Figure \ref{fig: nAE-IND game}. The adversary is not allowed to repeat nonces on encryption. Set $U$ keeps track of all used nonces. Following the translation of IND-\$-CCA to a security game for AE from Cremers et al. \cite{USENIX:CrAlJaZh23}, \_ denotes a variable that is irrelevant and set $Q$ keeps track of all query results to prevent trivial wins.
+where nAE-IND-\$-AE is in Figure \ref{fig: nAE-IND game}. The adversary is not allowed to repeat nonces on encryption. Set $U$ keeps track of all used nonces. Following the translation of IND-\$-AE to a security game for AE from Cremers et al. \cite{USENIX:CrAlJaZh23}, \_ denotes a variable that is irrelevant and set $Q$ keeps track of all query results to prevent trivial wins.
     \begin{figure}
         \centering
         \begin{pchstack}[boxed,center,space=0.5cm]
-            \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} nAE-IND-\$-CCA$^{b}_{\adversary}$ }]{
+            \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} nAE-IND-\$-AE$^{b}_{\adversary}$ }]{
                 U \result \emptyset\\
                 Q \result \emptyset\\
                 \keyinstance \sample \keyspace\\
@@ -203,7 +203,7 @@ where nAE-IND-\$-CCA is in Figure \ref{fig: nAE-IND game}. The adversary is not 
                 \pcreturn \messageinstance
             }
         \end{pchstack}
-        \caption{nAE-IND-\$-CCA game, \adversary{} has access to oracles Oenc and Odec.}
+        \caption{nAE-IND-\$-AE game, \adversary{} has access to oracles Oenc and Odec.}
         \label{fig: nAE-IND game}
     \end{figure}
 
@@ -211,53 +211,23 @@ where nAE-IND-\$-CCA is in Figure \ref{fig: nAE-IND game}. The adversary is not 
 NRS define 20 different schemes that compose an nAE from an nE and a MAC function. They define a composition to be secure if there is a tight reduction from breaking the nAE-security of the scheme to breaking the nE-security and the PRF security of the underlying primitives. Three different schemes, named N1, N2 and N3, were proven to be secure. Noteworthy is that these relate to encrypt-and-MAC, encrypt-then-MAC and MAC-then-encrypt, respectively. Additionally, they propose a scheme N4, for which they can not prove it secure, nor find a counterexample to prove it is insecure. However, this case has since been proven to be insecure as well \cite{INDOCRYPT:BerPerPet18} so is not considered here. All four schemes can be viewed in Figure 6 of the original paper by \nrs{}.
 
 \subsection{\gkp}
-\gkp{} discusses the concept of augmentation using locks to prevent security degradation in a multi-user setting. They start by showing how some data encapsulation mechanisms are vulnerable to both a passive multi-instance distinguishing attack and a key recovery attack. These vulnerabilities lead to the degradation of the security bounds found in analyses considering only a single user. As an alternative solution to expanding the key size, they define augmentation using locks. When augmenting with a lock, you introduce a new input value which is assumed to be unique per user. Unlike the key, the lock is not secret. They show how you can augment both a DEM and a MAC to get an ADEM and AMAC respectively. Afterward, they combine these two to construct an ADEM that is safe against active attackers. Below we describe the primitives, their security, and their composition more in-depth.
+\gkp{} discuss the concept of augmentation using locks to prevent security degradation in a multi-user setting. They start by showing how some data encapsulation mechanisms are vulnerable to both a passive multi-instance distinguishing attack and a key recovery attack. These vulnerabilities lead to the degradation of the security bounds found in analyses considering only a single user. As an alternative solution to expanding the key size, they define augmentation using locks. When augmenting with a lock, you introduce a new input value which is assumed to be unique per user. Unlike the key, the lock is not secret. They show how you can augment both a DEM and a MAC to get an ADEM and AMAC respectively. Afterward, they combine these two to construct an ADEM that is safe against active attackers. Below we describe the primitives, their security, and their composition more in-depth.
 
 \subsubsection{Primitives}
 \paragraph{ADEM}
 An ADEM scheme is defined by a tuple $(\text{A.enc}, \text{A.dec})$. Deterministic algorithm A.enc takes a key \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a message \messageinstance{} in \messagespace{} and outputs a ciphertext \ciphertextinstance{} in \ciphertextspace{}.  Deterministic algorithm A.dec takes a \keyinstance{} in \keyspace{}, a lock \lockinstance{} in \lockspace{} and a ciphertext \ciphertextinstance{} in \ciphertextspace{} and outputs a message \messageinstance{} in \messagespace{} or \invalid{} to indicate rejection. The correctness requirement is that for every combination of \keyinstance{}, \lockinstance{} and \messageinstance{} we have A.dec$(\keyinstance,\lockinstance,\text{A.enc}(\keyinstance,\lockinstance,\messageinstance))$ = \messageinstance. We will consider both CPA and CCA security separately for this scheme.
 
-\paragraph{ADEM-CPA security}
-The security of an ADEM-CPA, just called ADEM by \gkp, is defined as 
+\paragraph{ADEM security}
+The security of an ADEM, is defined as 
 \begin{align*} 
-    \text{\advantage{ADEM,\adversary,\users}{l-ind-lor-cpa} = \probabilityblock{L-IND-LOR-CPA}{\adversary,\users}{0}{1}}
+    \text{\advantage{ADEM,\adversary,\users}{l-ind-lor} = \probabilityblock{L-IND-LOR}{\adversary,\users}{0}{1}}
 \end{align*}
-where L-IND-LOR-CPA is in Figure \ref{fig: L-IND-CPA game}. Every user is only allowed one encryption as enforced by lines 3, 6 and 11. Locks may not repeat between users as enforced by lines 0, 7, 8 and 9. The corresponding game can be found in Figure 9 from \gkp{}. Note that this figure also includes a decryption oracle, but the adversary is not allowed to use this oracle when considering CPA security. 
-\begin{figure}
-    \centering
-    \begin{pchstack}[boxed,center,space=0.5cm]
-        \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} L-IND-LOR-CPA$^{b}_{\adversary,\users}$ }]{
-        L \result \emptyset\\
-        \pcfor \user \in [1..N]:\\
-        \t \keyinstance_\user \sample \keyspace\\
-        \t C_\user \result \emptyset\\
-        b' \result \adversary\\
-        \pcreturn b'
-        }
-        \pseudocode[lnstart=5,linenumbering,head={\textbf{Oracle} Oenc$(\user,\lockinstance,\messageinstance_0,\messageinstance_1)$}]{
-            \pcif C_\user \neq \emptyset: \pcreturn \invalid\\
-            \pcif \lockinstance \in L: \pcreturn \invalid\\
-            L \result L \cup \{\lockinstance\}\\
-            \lockinstance_\user \result \lockinstance\\
-            \ciphertextinstance \result \text{A.enc}(\keyinstance_\user,\lockinstance_\user,\messageinstance_b)\\
-            C_\user \result C_\user \cup \{\ciphertextinstance\}\\
-            \pcreturn \ciphertextinstance
-        }
-    \end{pchstack}
-    \caption{L-IND-LOR-CPA game, \adversary{} has access to oracle Oenc.}
-    \label{fig: L-IND-CPA game}
-\end{figure}
+where L-IND-LOR is in Figure \ref{fig: L-IND game}. Every user is only allowed one encryption query as enforced by lines 3, 6 and 11. Locks may not repeat between users as enforced by lines 0, 7, 8 and 9. Decryption queries are only allowed after the given user made an encryption as enforced by lines 3, 11 and 13. Line 14 prevents trivial distinctions. Note that the figure includes a decryption oracle. When considering the CPA security of an ADEM, the adversary is not allowed to use this oracle. 
 
-\paragraph{ADEM-CCA security}
-The security of an ADEM-CCA, called ADEM' by \gkp, is defined as 
-\begin{align*} 
-    \text{\advantage{ADEM',\adversary,\users}{l-ind-lor-cca} = \probabilityblock{L-IND-LOR-CCA}{\adversary,\users}{0}{1}}
-\end{align*}
-where L-IND-LOR-CCA is in Figure \ref{fig: L-IND-CCA game}. Every user is only allowed one encryption query as enforced by lines 3, 6 and 11. Locks may not repeat between users as enforced by lines 0, 7, 8 and 9. Decryption queries are only allowed after the given user made an encryption as enforced by lines 3, 11 and 13. Line 14 prevents trivial distinctions. The corresponding game can be found in Figure 9 of \gkp{}.
 \begin{figure}
     \centering
     \begin{pchstack}[boxed,center,space=0.5cm]
-        \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} L-IND-LOR-CCA$^{b}_{\adversary,\users}$ }]{
+        \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} L-IND-LOR$^{b}_{\adversary,\users}$ }]{
         L \result \emptyset\\
         \pcfor \user \in [1..N]:\\
         \t \keyinstance_\user \sample \keyspace\\
@@ -281,8 +251,8 @@ where L-IND-LOR-CCA is in Figure \ref{fig: L-IND-CCA game}. Every user is only a
             \pcreturn \messageinstance
         }
     \end{pchstack}
-    \caption{L-IND-LOR-CCA game, \adversary{} has access to oracles Oenc and Odec. The locks in lines 10 and 15 are the same.}
-    \label{fig: L-IND-CCA game}
+    \caption{L-IND-LOR, \adversary{} has access to oracles Oenc and Odec. The locks in lines 10 and 15 are the same. The corresponding game can be found in Figure 9 from \gkp{}}
+    \label{fig: L-IND game}
 \end{figure}
 
 \paragraph{AMAC}
@@ -293,7 +263,7 @@ The security of an AMAC is defined as
 \begin{align*} 
  \text{\advantage{AMAC,\adversary,\users}{L-MIOT-UF} = $\text{Pr}[\text{L-MIOT-UF}_{\adversary,\users} = 1]$}
 \end{align*}
-where L-MIOT-UF is in Figure \ref{fig: L-MIOT-UF game}. Every user is only allowed one MAC query as enforced by lines 4, 7 and 12. Locks may not repeat between users as enforced by lines 1, 8, 9 and 10. Verification queries are only allowed after the user makes a MAC query as enforced by lines 4, 12 and 14. Line 15 prevents trivial distinctions. The corresponding game can be found in Figure 15 of \gkp{}.
+where L-MIOT-UF is in Figure \ref{fig: L-MIOT-UF game}. Every user is only allowed one MAC query as enforced by lines 4, 7 and 12. Locks may not repeat between users as enforced by lines 1, 8, 9 and 10. Verification queries are only allowed after the user makes a MAC query as enforced by lines 4, 12 and 14. Line 15 prevents trivial distinctions.
 \begin{figure}
     \centering
     \begin{pchstack}[boxed,center,space=0.5cm]
@@ -324,7 +294,7 @@ where L-MIOT-UF is in Figure \ref{fig: L-MIOT-UF game}. Every user is only allow
             \pcelse : \pcreturn \codefalse
         }
     \end{pchstack}
-    \caption{L-MIOT-UF game, \adversary{} has access to oracles Omac and Ovrf. The locks in lines 11 and 16 are the same.}
+    \caption{L-MIOT-UF game, \adversary{} has access to oracles Omac and Ovrf. The locks in lines 11 and 16 are the same. The corresponding game can be found in Figure 15 of \gkp{}.}
     \label{fig: L-MIOT-UF game}
 \end{figure}
 
@@ -332,55 +302,55 @@ where L-MIOT-UF is in Figure \ref{fig: L-MIOT-UF game}. Every user is only allow
 \gkp{} do not require \messagespace{} to contain at least two strings, and to contain all strings of length $x$ if it contains a string of length $x$. Additionally, \keyspace{} is required to be finite but not required to be non-empty.
 
 \subsubsection{Composition}
-\gkp{} construct an ADEM scheme that is CCA secure, using an ADEM scheme that is CPA secure and an AMAC scheme. Their composition follows the encrypt-then-MAC method from Bellare and Namprempre \cite{AC:BelNam00} and is thus similar to composition N2 from \nrs. The resulting algorithms A.enc' and A.dec' are in Figure \ref{fig: A.enc' and A.dec' calls}.
+\gkp{} construct an ADEM scheme that is CCA secure, using an ADEM scheme that is CPA secure and an AMAC scheme. Their composition follows the encrypt-then-MAC method from Bellare and Namprempre \cite{AC:BelNam00} and is thus similar to composition N2 from \nrs. The algorithms A.enc and A.dec that form the CCA-secure ADEM are in Figure \ref{fig: A.enc and A.dec calls}. Note that in this figure, A.enc$'$ and A.dec$'$ refer to the A.enc and A.dec from the underlying CPA-secure ADEM.
 \begin{figure}
     \centering
     \begin{pchstack}[boxed,center,space=0.5cm]
-        \pseudocode[lnstart=-1,linenumbering,head={\textbf{Proc} A.enc'$(\keyinstance,\lockinstance,\messageinstance)$}]{
+        \pseudocode[lnstart=-1,linenumbering,head={\textbf{Proc} A.enc$(\keyinstance,\lockinstance,\messageinstance)$}]{
         (\keyinstance_{dem},\keyinstance_{mac}) \result \keyinstance\\
-        \ciphertextinstance' \result \text{A.enc}(\keyinstance_{dem},\lockinstance,\messageinstance)\\
+        \ciphertextinstance' \result \text{A.enc}'(\keyinstance_{dem},\lockinstance,\messageinstance)\\
         \taginstance \result \text{M.mac}(\keyinstance_{mac},\lockinstance,\ciphertextinstance')\\
         \ciphertextinstance \result (\ciphertextinstance',\taginstance)\\
         \pcreturn \ciphertextinstance
         }
-        \pseudocode[lnstart=4,linenumbering,head={\textbf{Proc} A.dec'$(\keyinstance,\lockinstance,\ciphertextinstance)$}]{
+        \pseudocode[lnstart=4,linenumbering,head={\textbf{Proc} A.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$}]{
             (\keyinstance_{dem},\keyinstance_{mac}) \result \keyinstance\\
             (\ciphertextinstance',\taginstance) \result \ciphertextinstance\\
             \pcif \text{M.vrf}(\keyinstance_{mac},\lockinstance,\ciphertextinstance',\taginstance):\\
-            \t \messageinstance \result \text{A.dec}(\keyinstance_{dem},\lockinstance,\ciphertextinstance')\\
+            \t \messageinstance \result \text{A.dec}'(\keyinstance_{dem},\lockinstance,\ciphertextinstance')\\
             \t \pcreturn \messageinstance\\
             \pcelse : \pcreturn \invalid
         }
     \end{pchstack}
-    \caption{A.enc and A.dec calls, The corresponding calls can be found in Figure 16 of \gkp{}.}
-    \label{fig: A.enc' and A.dec' calls}
+    \caption{A.enc and A.dec algorithms, the algorithms calls can be found in Figure 16 of \gkp{}. A.enc$'$ and A.dec$'$ refer to the A.enc and A.dec from the CPA-secure ADEM}
+    \label{fig: A.enc and A.dec calls}
 \end{figure}
-\noindent They define the composition to be secure as there is a tight reduction from breaking the ADEM-CCA of the scheme to breaking the ADEM-CPA or the AMAC security of the underlying primitives.
+\noindent They define the composition to be secure as there is a tight reduction from breaking the CCA security of the ADEM to breaking the CPA security of the underlying ADEM or the AMAC security of the underlying AMAC.
 
 \subsection{Comparison of \gkp{} and \nrs}
 In this section, we will highlight how \gkp{} and \nrs{} differ, as well as why.
 
 \paragraph{Context and Aim}
-Historically, a single user that reuses a single key is considered in a symmetric context, \nrs{} follows this trend as they wrote in this context. In contrast, \gkp{} wrote in the context of hybrid encryption, a context that considers multiple users that use their encryption key once. Apart from this difference in context, there is also a different aim. While \nrs{} aims to generalize the generic nAE composition, \gkp{} aims to find a single composition that can be used for hybrid encryption. Most notably, this results in \nrs{} evaluating 20 possible compositions while \gkp{} evaluates one. Additionally, \nrs{} incorporates AD while \gkp{} does not.
+Historically, a single user that reuses a single key is considered in a symmetric context, \nrs{} follow this trend as they wrote in this context. In contrast, \gkp{} wrote in the context of hybrid encryption, a context that considers multiple users that use their encryption key once. Apart from this difference in context, there is also a different aim. While \nrs{} aim to generalize the generic nAE composition, \gkp{} aim to find a single composition that can be used for hybrid encryption. Most notably, this results in \nrs{} evaluating 20 possible compositions while \gkp{} evaluate one. Additionally, \nrs{} incorporate AD while \gkp{} do not.
 
 \paragraph{Security Notion}
-The security notions from both papers also reflect the differences in contexts. \nrs{} writes the security notions in a IND-\$ fashion, common in symmetric cryptography. Conversely, \gkp{} writes them in an IND-LOR fashion, common in Hybrid encryption. As a result, the MAC primitives of the two papers have different security requirements. \nrs{} requires the tag to be indistinguishable from a random string while \gkp{} requires the tag to be unforgeable. Furthermore, because of the different settings, \nrs{} considers nonces while \gkp{} considers locks.
+The security notions from both papers also reflect the differences in contexts. \nrs{} write the security notions in a IND-\$-AE fashion, common in symmetric cryptography. Conversely, \gkp{} write them in an IND-LOR-CPA fashion, common in Hybrid encryption. As a result, the MAC primitives of the two papers have different security requirements. \nrs{} require the tag to be indistinguishable from a random string while \gkp{} require the tag to be unforgeable. Additionally, NRS models a situation in which the adversary can not forge a valid cythertext while GKP does not. Furthermore, because of the different settings, \nrs{} consider nonces while \gkp{} consider locks.
 
 \section{Lock-based Authenticated Encryption}
 To evaluate the security of generic composition using locks, we define a new security primitive: the lock-based Authenticated Encryption scheme, or lAE scheme for short. This lAE is similar to the nAE from \nrs{}, but it uses locks instead of nonces. Another difference is that it does not use associated data (AD). We will evaluate the security in a multi-user setting where encryption keys are used once.
 
 \subsection{lAE}
-A lAE scheme is defined by a tuple $(\text{AE.enc},\text{AE.dec})$. Deterministic algorithm AE.enc takes three inputs $(\keyinstance,\lockinstance,\messageinstance)$ and outputs a value \ciphertextinstance in \ciphertextinstance, where the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. If, and only if, $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Deterministic algorithm AE.dec takes three inputs $(\keyinstance,\lockinstance,\ciphertextinstance)$ and outputs a value \messageinstance. Both AE.enc and AE.dec are required to satisfy correctness (if AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ = \ciphertextinstance).
+A lAE scheme is defined by a tuple $(\text{AE.enc},\text{AE.dec})$. Deterministic algorithm AE.enc takes three inputs $(\keyinstance,\lockinstance,\messageinstance)$ and outputs a value \ciphertextinstance in \ciphertextinstance, where the length of \ciphertextinstance{} only depends on the lengths of \keyinstance, \lockinstance{} and \messageinstance. If, and only if, $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Deterministic algorithm AE.dec takes three inputs $(\keyinstance,\lockinstance,\ciphertextinstance)$ and outputs a value \messageinstance. Both AE.enc and AE.dec are required to satisfy correctness (if AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if AE.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then AE.enc$(\keyinstance,\lockinstance,\messageinstance)$ = \ciphertextinstance).
 
 \subsection{lAE Security Model} \label{sec: lAE security model}
 The security of the lAE is defined as 
 \begin{align*} 
-    \text{\advantage{\adversary,\users}{lAE} = \probabilityblock{lAE-IND-\$-CCA}{\adversary,\users}{0}{1}}
+    \text{\advantage{\adversary,\users}{lAE} = \probabilityblock{lAE-IND-\$-AE}{\adversary,\users}{0}{1}}
 \end{align*}
-where lAE-IND-\$-CCA is in Figure \ref{fig: lAE-IND game}.
+where lAE-IND-\$-AE is in Figure \ref{fig: lAE-IND game}.
 \begin{figure}
     \begin{pchstack}[boxed,center,space=0.5cm]
-        \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} lAE-IND-\$-CCA$^{b}_{\adversary,\users}$ }]{
+        \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} lAE-IND-\$-AE$^{b}_{\adversary,\users}$ }]{
         L \result \emptyset\\
         \pcfor \user \in [1..N]:\\
         \t \keyinstance_\user \sample \keyspace\\
@@ -407,10 +377,10 @@ where lAE-IND-\$-CCA is in Figure \ref{fig: lAE-IND game}.
             \pcreturn \messageinstance
         }
     \end{pchstack}
-    \caption{lAE-IND-\$-CCA game, adversary{} has access to oracles Oenc and Odec.}
+    \caption{lAE-IND-\$-AE game, adversary{} has access to oracles Oenc and Odec.}
     \label{fig: lAE-IND game}
 \end{figure}
-We consider multiple users who use their keys once. Consequently, the user is only allowed one encryption query. We allow decryption queries of a user only after an encryption has been made. On decryption, we use a function that always returns \invalid{}. This is to model that if the lAE is valid, the adversary does not know which strings in \ciphertextspace{} are valid ciphertexts. The idea behind the resulting security game is explained below.
+We consider multiple users who use their keys once. Consequently, the user is only allowed one encryption query. We allow decryption queries of a user only after an encryption has been made. On decryption, we use a function that always returns \invalid{}. This is to model that the adversary can not forge a valid ciphertext. The idea behind the resulting security game is explained below.
 
 \paragraph{Multiple users}
 Line 1 loops over all the users to initialize them with a random key in line 2 and an invalid ciphertext in line 3. Whenever the adversary calls one of the oracles Oenc or Odec, it has to specify user $j$.
@@ -435,7 +405,7 @@ In this section, we discuss how we can construct a safe lAE. Similarly to \gkp{}
 
 \subsection{Used Primitives}
 \paragraph{lE}
-A lock-based encryption scheme, lE for short, is defined by a tuple $(\text{E.enc},\text{E.dec})$. Deterministic algorithm E.enc takes three inputs $(\keyinstance,\lockinstance,\messageinstance)$ and outputs a value \ciphertextinstance in \ciphertextinstance, the length of \ciphertextinstance{} only depends on the length of \keyinstance, \lockinstance{} and \messageinstance. If, and only if, $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Deterministic algorithm E.dec takes three inputs $(\keyinstance,\lockinstance,\ciphertextinstance)$ and outputs a value \messageinstance. Both E.enc and E.dec are required to satisfy correctness (if E.enc$(\keyinstance,\lockinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then E.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if E.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then E.enc$(\keyinstance,\lockinstance,\messageinstance)$ = \ciphertextinstance).
+A lock-based encryption scheme, lE for short, is defined by a tuple $(\text{E.enc},\text{E.dec})$. Deterministic algorithm E.enc takes three inputs $(\keyinstance,\lockinstance,\messageinstance)$ and outputs a value \ciphertextinstance in \ciphertextinstance, the length of \ciphertextinstance{} only depends on the lengths of \keyinstance, \lockinstance{} and \messageinstance. If, and only if, $(\keyinstance,\lockinstance,\messageinstance)$ is not in $\keyspace \times \lockspace \times \messagespace$, \ciphertextinstance{} will be \invalid. Deterministic algorithm E.dec takes three inputs $(\keyinstance,\lockinstance,\ciphertextinstance)$ and outputs a value \messageinstance. Both E.enc and E.dec are required to satisfy correctness (if E.enc$(\keyinstance,\lockinstance,\messageinstance)$ $= \ciphertextinstance \neq \invalid$, then E.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ = \messageinstance) and tidiness (if E.dec$(\keyinstance,\lockinstance,\ciphertextinstance)$ $= \messageinstance \neq \invalid$, then E.enc$(\keyinstance,\lockinstance,\messageinstance)$ = \ciphertextinstance).
 
 \paragraph{lE security}
 The security of a lE is defined as 
@@ -517,7 +487,7 @@ where lMAC-PRF is in Figure \ref{fig: lMAC-PRF game}. Every user is only allowed
     \end{figure}
 
 \subsection{Composition}
-Following \nrs{}, three ways to construct this lAE are of interest, namely, the ones related to schemes N1, N2 and N3. All three schemes, adjusted to our setting, are in Figure \ref{fig: N schemes}. \nrs{} considers 17 more schemes but as none of them has proven to be secure we will not consider those in this work. The AE.enc and AE.dec calls corresponding to N1, N2 and N3 are in Figure \ref{fig: N1 calls}, \ref{fig: N2 calls} and \ref{fig: N3 calls} respectively.
+Following \nrs{}, three ways to construct this lAE are of interest, namely, the ones related to schemes N1, N2 and N3. All three schemes, adjusted to our setting, are in Figure \ref{fig: N schemes}. \nrs{} consider 17 more schemes but as none of them has proven to be secure we will not consider those in this work. The AE.enc and AE.dec calls corresponding to N1, N2 and N3 are in Figure \ref{fig: N1 calls}, \ref{fig: N2 calls} and \ref{fig: N3 calls} respectively.
 \begin{figure}
     \centering
     \includegraphics[scale = 0.4]{images/N-schemes.png}
@@ -622,7 +592,7 @@ Let lAE be constructed from lMAC and lE as described in Figure \ref{fig: N1 call
 \noindent
 Within this theorem, both $Q_e$ and $Q_d$ refer to the total queries the adversary is allowed to make, not the queries per user. As a result, $Q_e$ is limited by \users.
 \begin{proof}
-To prove this theorem, we start by defining game lAE-N1 in Figure \ref{fig: lAE-N1 game}. This game is the game lAE-IND-\$-CCA (Figure \ref{fig: lAE-IND game}), with AE.enc and AE.dec substituted with the N1 algorithms found in Figure \ref{fig: N1 calls}.
+To prove this theorem, we start by defining game lAE-N1 in Figure \ref{fig: lAE-N1 game}. This game is the game lAE-IND-\$-AE (Figure \ref{fig: lAE-IND game}), with AE.enc and AE.dec substituted with the N1 algorithms found in Figure \ref{fig: N1 calls}.
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} lAE-N1$^{b}_{\adversary,\users}$ }]{
@@ -969,7 +939,7 @@ The runtime of $C$ is that of $A$. For every Oenc query $A$ makes, $C$ makes one
     +
     \frac{Q_d}{2^{\text{n}}} .
 \end{align*}
-Thus Proving:
+Thus proving:
 \begin{align*}
     \text{\advantage{$A$,\users}{lAE}}
     \leq
@@ -987,7 +957,7 @@ Structurally, the proofs of all three cases are identical. For each case, the ga
 In this section, we will look at some use cases for the lAE. The most prominent use case is hybrid encryption as the idea of locks originated in this setting. In addition to this, the primitive might be useful whenever a new key is generated often as this will increase the number of ephemeral keys used and hence the chance of ephemeral key collisions. Below, we describe how the lAE can be used as a building block for hybrid encryption. We also give some direction on how it might be used in different settings.
 
 \subsection{Hybrid Encryption}
-To implement public-key encryption, a hybrid paradigm first, formalized by Cramer and Shoup \cite{CraSho03}, is typically followed: To encrypt a message, an ephemeral key is generated using a randomized key encapsulation mechanism (KEM). This key is then used to encrypt the message using a deterministic data encapsulation mechanism (DEM). Both the KEM and DEM output their own ciphertexts, which are concatenated to form the public-key encryption ciphertext. The benefits of hybrid encryption are a separation of both primitives, as well as the possibility of variable-length messages, which can be lacking in other public-key encryption paradigms. GKP shows us how the lAE can be used in hybrid encryption. The KEM, as usual, generates an ephemeral key and encapsulates this key to create the first part of the ciphertext. Afterward, the lAE uses this encapsulation as a lock, together with the ephemeral key and the message, to instantiate the DEM. GKP prove this construction to be secure whenever locks do not repeat. Our lAE does not need to be altered in order to be used in this setting as the ephemeral key is only used once.
+To implement public-key encryption, a hybrid paradigm first, formalized by Cramer and Shoup \cite{CraSho03}, is typically followed: To encrypt a message, an ephemeral key is generated using a randomized key encapsulation mechanism (KEM). This key is then used to encrypt the message using a deterministic data encapsulation mechanism (DEM). Both the KEM and DEM output their own ciphertexts, which are concatenated to form the public-key encryption ciphertext. The benefits of hybrid encryption are a separation of both primitives, as well as the possibility of variable-length messages, which can be lacking in other public-key encryption paradigms. GKP show us how the lAE can be used in hybrid encryption. The KEM, as usual, generates an ephemeral key and encapsulates this key to create the first part of the ciphertext. Afterward, the lAE uses this encapsulation as a lock, together with the ephemeral key and the message, to instantiate the DEM. GKP prove this construction to be secure whenever locks do not repeat. Our lAE does not need to be altered in order to be used in this setting as the ephemeral key is only used once.
 
 \subsection{Other Use Cases}
 Whenever an authenticated encryption primitive has many users that use a key only once, using our lAE may decrease the degradation of security bounds. Even when the primitive uses the same key multiple times, using lAE may still decrease the degradation of security bounds whenever the key is changed often. One example of such a use case is the Messaging Layer Security protocol \cite{rfc9420}. Generating a new key is necessary in this protocol whenever a member enters or leaves the group to ensure only current group members can read messages. In addition to this, new keys may be generated more often, depending on the implementation of the protocol. In cases like this, where the key is used multiple times, the lAE primitive most likely needs to be slightly altered. Section \ref{sec: open problems} describes this alteration further. 
@@ -995,7 +965,7 @@ Whenever an authenticated encryption primitive has many users that use a key onl
 \section{Related Work} \label{sec: related work}
 As mentioned before, the generic composition of authenticated encryption was first studied by Bellare and Namprempre \cite{AC:BelNam00}. The three most common composition modes encrypt-and-MAC, encrypt-then-MAC and MAC-then-encrypt were introduced and evaluated using a probabilistic encryption block. They find generic construction to be secure when using the encrypt-then-MAC method. NRS further investigated these modes of composition and state that the type of encryption primitive used, as well as the required end result, influences which compositions are secure. They investigated ways to compose a nonce-based authenticated encryption scheme. Using IV-based encryption and a PRF secure MAC, 8 schemes are proven secure. Using nonce-based encryption and a PRF secure MAC, 3 schemes, related to encrypt-and-MAC, encrypt-then-MAC and MAC-then-encrypt, are proven secure.
 \\\\
-The study of symmetric cryptographic primitives is usually done in a single-user setting, where one user who uses one key is considered. In reality, most systems have multiple users using their own keys. To account for this, the notion of multi-user security, where one considers multiple users all generating their own keys, was first introduced by Bellare, Boldyreva and Micali \cite{EC:BelBolMic00}. Security bounds found in a single-user setting often degrade in a multi-user setting as noted by Biham \cite{BIHAM2002117}. He finds that, in a multi-user setting, the strength of a cipher can not exceed the square root of the key size. To compensate for this degradation, one can expand the size of the key. This might not always be an option and because of this, GKP introduce locks as an alternative to key expansion. They show how ephemeral key collisions in a multi-user setting can lead to insecurities, as well as how one can augment security primitives with locks to prevent these insecurities. Afterwards, a composition of an augmented MAC and an augmented DEM is shown which is suitable for hybrid encryption.
+The study of symmetric cryptographic primitives is usually done in a single-user setting, where one user who uses one key is considered. In reality, most systems have multiple users using their own keys. To account for this, the notion of multi-user security, where one considers multiple users all generating their own keys, was first introduced by Bellare, Boldyreva and Micali \cite{EC:BelBolMic00}. Security bounds found in a single-user setting often degrade in a multi-user setting as noted by Biham \cite{BIHAM2002117}. He finds that, in a multi-user setting, the strength of a cipher can not exceed the square root of the key size. To compensate for this degradation, one can expand the size of the key. This might not always be an option and therefore, GKP introduce locks as an alternative to key expansion. They show how ephemeral key collisions in a multi-user setting can lead to insecurities, as well as how one can augment security primitives with locks to prevent these insecurities. Afterwards, a composition of an augmented MAC and an augmented DEM is shown which is suitable for hybrid encryption.
 \\\\
 Next, we will discuss some work relating to the generic construction of lAE, open problems relating to this work can be found in Section \ref{sec: open problems}. As an alternative to generic composition, authenticated encryption can also be composed non-generically. In this fashion, Rogaway, Bellare and Black propose OCB as a non-generic authenticated encryption construction \cite{CCS:RBBK01}. OCB is highly parallelizable and is cheaper in computation compared to generic construction. In the basic form, it cannot take in associated data but an extension has been given to allow for this. It is proven secure whenever the underlying block cipher is secure. Likewise, McGrew and Viega propose Galois/Counter Mode, GCM, as a non-generic authenticated encryption construction \cite{mcgrew2004security}. It is a highly efficient mode of operation, also due to its parallelizability. GCM incorporates counter mode using an even-length block cipher and supports the usage of associated data. In addition to authenticated encryption, it can also be used as a standalone MAC function. In a multi-user setting, some attempts to improve bounds were made based on randomization (for example randomized GCM \cite{C:BelTac16}). However, it still suffered from a high key collision probability when the number of users grew large. Many more non-generic authenticated encryption schemes exist, but OCB and GCM are the most widely used ones.
 \\\\
@@ -1008,7 +978,7 @@ A similar construction to locks, called ``id", is used to construct a sponge-bas
 In this thesis, we studied the security of generic composition of authenticated encryption using locks. To do this, we first defined a new security primitive, named lock-based authenticated encryption. Three different ways in which we can compose this new primitive using a lock-based encryption primitive and a lock-based MAC function were considered, namely encrypt-and-MAC, encrypt-then-MAC and MAC-then-encrypt. All three of these compositions were proven secure, whenever the underlying primitives are secure. Additionally, we explored some use cases of our new primitive. Most specifically, we explained how lock-based authenticated encryption can be used to instantiate a DEM in hybrid encryption. The results of this work have some open problems we will discuss below. Wherever possible we will also give directions on what needs to be done in order to investigate these problems further.
 
 \paragraph*{Other N schemes}
-NRS finds 20 possible N-schemes, of which 3 are proven secure. In this thesis, only the N-schemes that are alterations of the ones proven secure by NRS were evaluated. To more thoroughly investigate the security of generic lAE compositions, the other N-schemes should also be proven secure or insecure. Without incorporating AD, only 10 out of 20 possible N-schemes remain. This is because the amount of possible generic compositions gets bigger if the authenticated encryption scheme has more inputs. Three of these 10 schemes were proven secure in this work, leaving 7 schemes to be evaluated.
+NRS find 20 possible N-schemes, of which 3 are proven secure. In this thesis, only the N-schemes that are alterations of the ones proven secure by NRS were evaluated. To more thoroughly investigate the security of generic lAE compositions, the other N-schemes should also be proven secure or insecure. Without incorporating AD, only 10 out of 20 possible N-schemes remain. This is because the amount of possible generic compositions gets bigger if the authenticated encryption scheme has more inputs. Three of these 10 schemes were proven secure in this work, leaving 7 schemes to be evaluated.
 
 \paragraph*{Adding associated Data}
 In this work, the lAE construction was only evaluated without associated data (AD). To incorporate AD, a slight modification should be made to the definition of the lAE. With AD added, there will be 20 possible N-schemes, three of which will relate to the secure schemes from NRS. When evaluating the security, these three schemes should be prioritized as they have the highest likelihood of being secure. For a more rigorous analysis, all 20 schemes should be considered.
@@ -1041,7 +1011,7 @@ Let lAE be constructed from lMAC and lE as described in Figure \ref{fig: N2 call
 \noindent
 Within this theorem, both $Q_e$ and $Q_d$ refer to the total queries the adversary is allowed to make, not the queries per user. As a result, $Q_e$ is limited by \users.
 \begin{proof}
-To prove this theorem, we start by defining game lAE-N2 in Figure \ref{fig: lAE-N2 game}. This game is the game lAE-IND-\$-CCA (Figure \ref{fig: lAE-IND game}), with AE.enc and AE.dec substituted with the N2 algorithms found in Figure \ref{fig: N2 calls}.
+To prove this theorem, we start by defining game lAE-N2 in Figure \ref{fig: lAE-N2 game}. This game is the game lAE-IND-\$-AE (Figure \ref{fig: lAE-IND game}), with AE.enc and AE.dec substituted with the N2 algorithms found in Figure \ref{fig: N2 calls}.
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} lAE-N2$^{b}_{\adversary,\users}$ }]{
@@ -1390,7 +1360,7 @@ The runtime of $C$ is that of $A$. For every Oenc query $A$ makes, $C$ makes one
     +
     \frac{Q_d}{2^{\text{n}}}.
 \end{align*}
-Thus Proving:
+Thus proving:
 \begin{align*}
     \text{\advantage{$A$,\users}{lAE}}
     &\leq
@@ -1415,7 +1385,7 @@ Let lAE be constructed from lMAC and lE as described in Figure \ref{fig: N3 call
 \noindent
 Within this theorem, both $Q_e$ and $Q_d$ refer to the total queries the adversary is allowed to make, not the queries per user. As a result, $Q_e$ is limited by \users.
 \begin{proof}
-To prove this theorem, we start by defining game lAE-N3 in Figure \ref{fig: lAE-N3 game}. This game is the game lAE-IND-\$-CCA (Figure \ref{fig: lAE-IND game}), with AE.enc and AE.dec substituted with the N3 algorithms found in Figure \ref{fig: N3 calls}.
+To prove this theorem, we start by defining game lAE-N3 in Figure \ref{fig: lAE-N3 game}. This game is the game lAE-IND-\$-AE (Figure \ref{fig: lAE-IND game}), with AE.enc and AE.dec substituted with the N3 algorithms found in Figure \ref{fig: N3 calls}.
 \begin{figure}[H]
     \begin{pchstack}[boxed,center,space=0.5cm]
         \pseudocode[lnstart=-1,linenumbering,head={\textbf{Game} lAE-N3$^{b}_{\adversary,\users}$ }]{
@@ -1765,7 +1735,7 @@ The runtime of $C$ is that of $A$. For every Oenc query $A$ makes, $C$ makes one
     +
     \frac{Q_d}{2^{\text{n}}}.
 \end{align*}
-Thus Proving:
+Thus proving:
 \begin{align*}
     \text{\advantage{$A$,\users}{lAE}}
     &\leq
